@@ -3,6 +3,7 @@ package ru.practicum.shareit.user;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import ru.practicum.shareit.exception.EmailConflictException;
 import ru.practicum.shareit.exception.ExceptionConstants;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.user.dto.PatchUserRequest;
@@ -21,6 +22,10 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDto add(PostUserRequest request) {
+        if (userRepository.findByEmail(request.getEmail()).isPresent()) {
+            throw new EmailConflictException(ExceptionConstants.EMAIL_CONFLICT);
+        }
+
         User user = UserMapper.toUser(request);
         user = userRepository.save(user);
 
@@ -44,6 +49,10 @@ public class UserServiceImpl implements UserService {
 
         if (maybeUser.isEmpty()) {
             throw new NotFoundException(String.format(ExceptionConstants.USER_NOT_FOUND_BY_ID, userId));
+        }
+
+        if (userRepository.findByEmail(request.getEmail()).isPresent()) {
+            throw new EmailConflictException(ExceptionConstants.EMAIL_CONFLICT);
         }
 
         User user = maybeUser.get();
