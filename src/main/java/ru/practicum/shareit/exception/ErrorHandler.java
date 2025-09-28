@@ -19,6 +19,12 @@ public class ErrorHandler {
         return new ErrorMessage(ex.getMessage());
     }
 
+    @ExceptionHandler(EmailConflictException.class)
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public ErrorMessage handleEmailConflictException(final EmailConflictException ex) {
+        return new ErrorMessage(ex.getMessage());
+    }
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorMessage handleMethodArgumentNotValidException(final MethodArgumentNotValidException ex) {
