@@ -8,6 +8,6 @@ public class ItemDto {
     private Integer ownerId;
     private String name;
     private String description;
-    private boolean availableForRent;
+    private boolean available;
     private Integer requestId;
 }
