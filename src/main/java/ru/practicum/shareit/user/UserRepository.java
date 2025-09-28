@@ -9,6 +9,8 @@ public interface UserRepository {
 
     Optional<User> findById(int userId);
 
+    Optional<User> findByEmail(String email);
+
     void update(User user);
 
     void delete(int userId);
