@@ -21,28 +21,28 @@ public class UserController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public UserDto create(@Valid @RequestBody PostUserRequest request) {
+    public UserDto createUser(@Valid @RequestBody PostUserRequest request) {
         log.debug("POST /users");
-        return userService.add(request);
+        return userService.createUser(request);
     }
 
     @GetMapping("/{userId}")
-    public UserDto getById(@PathVariable @Positive int userId) {
+    public UserDto getUser(@PathVariable @Positive int userId) {
         log.debug("GET /users/userId");
-        return userService.getById(userId);
+        return userService.findById(userId);
     }
 
     @PatchMapping("/{userId}")
-    public UserDto patch(@PathVariable @Positive int userId,
-                         @Valid @RequestBody PatchUserRequest request) {
+    public UserDto updateUser(@PathVariable @Positive int userId,
+                              @Valid @RequestBody PatchUserRequest request) {
         log.debug("PATCH /users/userId");
         return userService.update(userId, request);
     }
 
     @DeleteMapping("/{userId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void delete(@PathVariable @Positive int userId) {
+    public void deleteUser(@PathVariable @Positive int userId) {
         log.debug("DELETE /users/userId");
-        userService.delete(userId);
+        userService.deleteById(userId);
     }
 }

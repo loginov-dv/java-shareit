@@ -23,22 +23,22 @@ public class ItemController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public ItemDto create(@RequestHeader("X-Sharer-User-Id") @NotNull @Positive Integer userId,
-                          @Valid @RequestBody ItemDto itemDto) {
+    public ItemDto createItem(@RequestHeader("X-Sharer-User-Id") @NotNull @Positive Integer userId,
+                              @Valid @RequestBody ItemDto itemDto) {
         log.debug("POST /items");
-        return itemService.add(userId, itemDto);
+        return itemService.createItem(userId, itemDto);
     }
 
     @GetMapping("/{itemId}")
-    public ItemDto getById(@PathVariable @Positive int itemId) {
+    public ItemDto getItem(@PathVariable @Positive int itemId) {
         log.debug("GET /items/{}", itemId);
         return itemService.findById(itemId);
     }
 
     @GetMapping
-    public List<ItemDto> getByUser(@RequestHeader("X-Sharer-User-Id") @NotNull @Positive Integer userId) {
+    public List<ItemDto> getUserItems(@RequestHeader("X-Sharer-User-Id") @NotNull @Positive Integer userId) {
         log.debug("GET /items");
-        return itemService.findByUser(userId);
+        return itemService.findByUserId(userId);
     }
 
     @GetMapping("/search")

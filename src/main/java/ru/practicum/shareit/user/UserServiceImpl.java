@@ -21,7 +21,7 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
 
     @Override
-    public UserDto add(PostUserRequest request) {
+    public UserDto createUser(PostUserRequest request) {
         if (userRepository.findByEmail(request.getEmail()).isPresent()) {
             throw new EmailConflictException(ExceptionConstants.EMAIL_CONFLICT);
         }
@@ -33,7 +33,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserDto getById(int userId) {
+    public UserDto findById(int userId) {
         Optional<User> maybeUser = userRepository.findById(userId);
 
         if (maybeUser.isEmpty()) {
@@ -64,7 +64,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void delete(int userId) {
-        userRepository.delete(userId);
+    public void deleteById(int userId) {
+        userRepository.deleteById(userId);
     }
 }
