@@ -25,6 +25,12 @@ public class ErrorHandler {
         return new ErrorMessage(ex.getMessage());
     }
 
+    @ExceptionHandler(NoAccessException.class)
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    public ErrorMessage handleNoAccessException(final NoAccessException ex) {
+        return new ErrorMessage(ex.getMessage());
+    }
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorMessage handleMethodArgumentNotValidException(final MethodArgumentNotValidException ex) {
