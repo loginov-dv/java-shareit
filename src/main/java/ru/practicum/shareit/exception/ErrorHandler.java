@@ -4,6 +4,7 @@ import jakarta.validation.ConstraintViolationException;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingRequestHeaderException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -28,6 +29,12 @@ public class ErrorHandler {
     @ExceptionHandler(NoAccessException.class)
     @ResponseStatus(HttpStatus.FORBIDDEN)
     public ErrorMessage handleNoAccessException(final NoAccessException ex) {
+        return new ErrorMessage(ex.getMessage());
+    }
+
+    @ExceptionHandler(MissingRequestHeaderException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorMessage handleMissingRequestHeaderException(final MissingRequestHeaderException ex) {
         return new ErrorMessage(ex.getMessage());
     }
 
