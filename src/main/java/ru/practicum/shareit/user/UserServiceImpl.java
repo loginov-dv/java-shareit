@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.exception.EmailConflictException;
 import ru.practicum.shareit.exception.ExceptionConstants;
+import ru.practicum.shareit.exception.LogConstants;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.user.dto.PatchUserRequest;
 import ru.practicum.shareit.user.dto.PostUserRequest;
@@ -23,11 +24,14 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserDto createUser(PostUserRequest request) {
         if (userRepository.findByEmail(request.getEmail()).isPresent()) {
+            log.warn(LogConstants.EMAIL_CONFLICT, request.getEmail());
             throw new EmailConflictException(ExceptionConstants.EMAIL_CONFLICT);
         }
 
         User user = UserMapper.toUser(request);
         user = userRepository.save(user);
+
+        log.debug("Добавлен пользователь: {}", user);
 
         return UserMapper.toUserDto(user);
     }
@@ -37,8 +41,11 @@ public class UserServiceImpl implements UserService {
         Optional<User> maybeUser = userRepository.findById(userId);
 
         if (maybeUser.isEmpty()) {
+            log.warn(LogConstants.USER_NOT_FOUND_BY_ID, userId);
             throw new NotFoundException(String.format(ExceptionConstants.USER_NOT_FOUND_BY_ID, userId));
         }
+
+        log.debug("Найден пользователь по id = {}: {}", userId, maybeUser.get());
 
         return UserMapper.toUserDto(maybeUser.get());
     }
@@ -48,17 +55,22 @@ public class UserServiceImpl implements UserService {
         Optional<User> maybeUser = userRepository.findById(userId);
 
         if (maybeUser.isEmpty()) {
+            log.warn(LogConstants.USER_NOT_FOUND_BY_ID, userId);
             throw new NotFoundException(String.format(ExceptionConstants.USER_NOT_FOUND_BY_ID, userId));
         }
 
-        if (userRepository.findByEmail(request.getEmail()).isPresent()) {
+        if (request.getEmail() != null && userRepository.findByEmail(request.getEmail()).isPresent()) {
+            log.warn(LogConstants.EMAIL_CONFLICT, request.getEmail());
             throw new EmailConflictException(ExceptionConstants.EMAIL_CONFLICT);
         }
 
         User user = maybeUser.get();
-        UserMapper.updateUserFields(user, request);
+        log.debug("Исходное состояние пользователя: {}", user);
 
+        UserMapper.updateUserFields(user, request);
         userRepository.update(user);
+
+        log.debug("Изменён пользователь: {}", user);
 
         return UserMapper.toUserDto(user);
     }
@@ -66,5 +78,6 @@ public class UserServiceImpl implements UserService {
     @Override
     public void deleteById(int userId) {
         userRepository.deleteById(userId);
+        log.debug("Удалён пользователь с id = {}", userId);
     }
 }

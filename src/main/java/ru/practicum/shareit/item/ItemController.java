@@ -26,6 +26,7 @@ public class ItemController {
     public ItemDto createItem(@RequestHeader("X-Sharer-User-Id") @NotNull @Positive Integer userId,
                               @Valid @RequestBody ItemDto itemDto) {
         log.debug("POST /items");
+        log.debug("X-Sharer-User-Id = {}", userId);
         return itemService.createItem(userId, itemDto);
     }
 
@@ -38,6 +39,7 @@ public class ItemController {
     @GetMapping
     public List<ItemDto> getUserItems(@RequestHeader("X-Sharer-User-Id") @NotNull @Positive Integer userId) {
         log.debug("GET /items");
+        log.debug("X-Sharer-User-Id = {}", userId);
         return itemService.findByUserId(userId);
     }
 
@@ -52,6 +54,7 @@ public class ItemController {
                        @PathVariable @Positive int itemId,
                        @Valid @RequestBody PatchItemRequest request) {
         log.debug("PATCH /items/{}", itemId);
+        log.debug("X-Sharer-User-Id = {}", userId);
         return itemService.update(userId, itemId, request);
     }
 }

@@ -17,6 +17,7 @@ public class InMemoryItemRepository implements ItemRepository {
 
     @Override
     public Item save(Item item) {
+        log.debug("Запрос на создание предмета");
         item.setId(getId());
         items.put(item.getId(), item);
 
@@ -25,11 +26,13 @@ public class InMemoryItemRepository implements ItemRepository {
 
     @Override
     public Optional<Item> findById(int itemId) {
+        log.debug("Запрос на получение предмета с id = {}", itemId);
         return Optional.ofNullable(items.get(itemId));
     }
 
     @Override
     public List<Item> findByUserId(int userId) {
+        log.debug("Запрос на получение предметов пользователя с id = {}", userId);
         return items.values().stream()
                 .filter(item -> item.getOwnerId().equals(userId))
                 .toList();
@@ -37,7 +40,7 @@ public class InMemoryItemRepository implements ItemRepository {
 
     @Override
     public List<Item> search(String text) {
-        log.debug("text = {}", text);
+        log.debug("Запрос на поиск предметов с text = {}", text);
         Pattern pattern = Pattern.compile(Pattern.quote(text), Pattern.CASE_INSENSITIVE);
 
         return items.values().stream()
@@ -48,6 +51,7 @@ public class InMemoryItemRepository implements ItemRepository {
 
     @Override
     public void update(Item item) {
+        log.debug("Запрос на изменение предмета с id = {}", item.getId());
         items.put(item.getId(), item);
     }
 
@@ -55,6 +59,8 @@ public class InMemoryItemRepository implements ItemRepository {
         int lastId = items.keySet().stream()
                 .max(Integer::compareTo)
                 .orElse(0);
+
+        log.debug("Сегенерирован новый id = {}", lastId + 1);
 
         return lastId + 1;
     }

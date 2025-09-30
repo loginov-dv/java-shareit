@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.exception.ExceptionConstants;
+import ru.practicum.shareit.exception.LogConstants;
 import ru.practicum.shareit.exception.NoAccessException;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.item.dto.ItemDto;
@@ -29,11 +30,14 @@ public class ItemServiceImpl implements ItemService {
         Optional<User> maybeUser = userRepository.findById(userId);
 
         if (maybeUser.isEmpty()) {
+            log.warn(LogConstants.USER_NOT_FOUND_BY_ID, userId);
             throw new NotFoundException(String.format(ExceptionConstants.USER_NOT_FOUND_BY_ID, userId));
         }
 
         Item item = ItemMapper.toItem(userId, itemDto);
         item = itemRepository.save(item);
+
+        log.debug("Добавлен предмет: {}", item);
 
         return ItemMapper.toItemDto(item);
     }
@@ -43,8 +47,11 @@ public class ItemServiceImpl implements ItemService {
         Optional<Item> maybeItem = itemRepository.findById(itemId);
 
         if (maybeItem.isEmpty()) {
+            log.warn(LogConstants.ITEM_NOT_FOUND_BY_ID, itemId);
             throw new NotFoundException(String.format(ExceptionConstants.ITEM_NOT_FOUND_BY_ID, itemId));
         }
+
+        log.debug("Найден предмет по id = {}: {}", itemId, maybeItem.get());
 
         return ItemMapper.toItemDto(maybeItem.get());
     }
@@ -54,10 +61,13 @@ public class ItemServiceImpl implements ItemService {
         Optional<User> maybeUser = userRepository.findById(userId);
 
         if (maybeUser.isEmpty()) {
+            log.warn(LogConstants.USER_NOT_FOUND_BY_ID, userId);
             throw new NotFoundException(String.format(ExceptionConstants.USER_NOT_FOUND_BY_ID, userId));
         }
 
         List<Item> items = itemRepository.findByUserId(userId);
+
+        log.debug("Найдены предметы по userId = {}: {}", userId, items);
 
         return items.stream()
                 .map(ItemMapper::toItemDto)
@@ -70,7 +80,11 @@ public class ItemServiceImpl implements ItemService {
             return Collections.emptyList();
         }
 
-        return itemRepository.search(text).stream()
+        List<Item> items = itemRepository.search(text);
+
+        log.debug("Предметы, найденные по строке {}: {}", text, items);
+
+        return items.stream()
                 .map(ItemMapper::toItemDto)
                 .toList();
     }
@@ -80,24 +94,34 @@ public class ItemServiceImpl implements ItemService {
         Optional<User> maybeUser = userRepository.findById(userId);
 
         if (maybeUser.isEmpty()) {
+            log.warn(LogConstants.USER_NOT_FOUND_BY_ID, userId);
             throw new NotFoundException(String.format(ExceptionConstants.USER_NOT_FOUND_BY_ID, userId));
         }
 
         Optional<Item> maybeItem = itemRepository.findById(itemId);
 
         if (maybeItem.isEmpty()) {
+            log.warn(LogConstants.ITEM_NOT_FOUND_BY_ID, itemId);
             throw new NotFoundException(String.format(ExceptionConstants.ITEM_NOT_FOUND_BY_ID, itemId));
         }
 
         User user = maybeUser.get();
         Item item = maybeItem.get();
 
+        log.debug("Запрос на изменение предмета с id = {} (id владельца = {}) пользователем с id = {}",
+                item.getId(), item.getOwnerId(), user.getId());
+
         if (!item.getOwnerId().equals(user.getId())) {
+            log.warn("Нет доступа на изменение предмета");
             throw new NoAccessException(ExceptionConstants.NO_ACCESS_FOR_EDIT);
         }
 
+        log.debug("Исходное состояние предмета: {}", item);
+
         ItemMapper.updateItemFields(item, request);
         itemRepository.update(item);
+
+        log.debug("Изменён предмет: {}", item);
 
         return ItemMapper.toItemDto(item);
     }
