@@ -31,8 +31,10 @@ public class ItemController {
     }
 
     @GetMapping("/{itemId}")
-    public ItemDto getItem(@PathVariable @Positive int itemId) {
+    public ItemDto getItem(@RequestHeader("X-Sharer-User-Id") @NotNull @Positive Integer userId,
+                           @PathVariable @Positive int itemId) {
         log.debug("GET /items/{}", itemId);
+        log.debug("X-Sharer-User-Id = {}", userId);
         return itemService.findById(itemId);
     }
 
@@ -44,15 +46,17 @@ public class ItemController {
     }
 
     @GetMapping("/search")
-    public List<ItemDto> search(@RequestParam String text) {
+    public List<ItemDto> search(@RequestHeader("X-Sharer-User-Id") @NotNull @Positive Integer userId,
+                                @RequestParam String text) {
         log.debug("GET /items/search?text={}", text);
+        log.debug("X-Sharer-User-Id = {}", userId);
         return itemService.search(text);
     }
 
     @PatchMapping("/{itemId}")
     public ItemDto update(@RequestHeader("X-Sharer-User-Id") @NotNull @Positive Integer userId,
-                       @PathVariable @Positive int itemId,
-                       @Valid @RequestBody PatchItemRequest request) {
+                          @PathVariable @Positive int itemId,
+                          @Valid @RequestBody PatchItemRequest request) {
         log.debug("PATCH /items/{}", itemId);
         log.debug("X-Sharer-User-Id = {}", userId);
         return itemService.update(userId, itemId, request);
