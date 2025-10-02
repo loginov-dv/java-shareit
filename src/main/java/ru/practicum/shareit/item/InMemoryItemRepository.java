@@ -8,17 +8,19 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Pattern;
 
 @Slf4j
 @Repository
 public class InMemoryItemRepository implements ItemRepository {
     private final Map<Integer, Item> items = new HashMap<>();
+    private final AtomicInteger counter = new AtomicInteger(0);
 
     @Override
     public Item save(Item item) {
         log.debug("Запрос на создание предмета");
-        item.setId(getId());
+        item.setId(counter.incrementAndGet());
         items.put(item.getId(), item);
 
         return item;
@@ -53,15 +55,5 @@ public class InMemoryItemRepository implements ItemRepository {
     public void update(Item item) {
         log.debug("Запрос на изменение предмета с id = {}", item.getId());
         items.put(item.getId(), item);
-    }
-
-    private int getId() {
-        int lastId = items.keySet().stream()
-                .max(Integer::compareTo)
-                .orElse(0);
-
-        log.debug("Сегенерирован новый id = {}", lastId + 1);
-
-        return lastId + 1;
     }
 }

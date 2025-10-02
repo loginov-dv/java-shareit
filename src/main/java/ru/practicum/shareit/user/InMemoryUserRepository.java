@@ -7,16 +7,18 @@ import ru.practicum.shareit.user.model.User;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @Slf4j
 @Repository
 public class InMemoryUserRepository implements UserRepository {
     private final Map<Integer, User> users = new HashMap<>();
+    private final AtomicInteger counter = new AtomicInteger(0);
 
     @Override
     public User save(User user) {
         log.debug("Запрос на создание пользователя");
-        user.setId(getId());
+        user.setId(counter.incrementAndGet());
         users.put(user.getId(), user);
 
         return user;
@@ -46,15 +48,5 @@ public class InMemoryUserRepository implements UserRepository {
     public void deleteById(int userId) {
         log.debug("Запрос на удаление пользователя с id = {}", userId);
         users.remove(userId);
-    }
-
-    private int getId() {
-        int lastId = users.keySet().stream()
-                .max(Integer::compareTo)
-                .orElse(0);
-
-        log.debug("Сегенерирован новый id = {}", lastId + 1);
-
-        return lastId + 1;
     }
 }
