@@ -134,6 +134,7 @@ class ItemControllerTest {
         ItemDto itemDto = objectMapper.readValue(json, ItemDto.class);
 
         mockMvc.perform(get("/items/" + itemDto.getId())
+                        .header("X-Sharer-User-Id", ownerId)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(itemDto.getId()))
@@ -194,6 +195,7 @@ class ItemControllerTest {
                 .andExpect(status().isOk());
 
         mockMvc.perform(get("/items/" + itemDto.getId())
+                        .header("X-Sharer-User-Id", ownerId)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(itemDto.getId()))
@@ -313,7 +315,10 @@ class ItemControllerTest {
 
     @Test
     void shouldNotGetItemsIfSearchStringIsEmpty() throws Exception {
+        int userId = createUserAndGetId();
+
         mockMvc.perform(get("/items/search")
+                        .header("X-Sharer-User-Id", userId)
                         .param("text", ""))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(0));
@@ -333,6 +338,7 @@ class ItemControllerTest {
                 .andExpect(status().isCreated());
 
         mockMvc.perform(get("/items/search")
+                        .header("X-Sharer-User-Id", ownerId)
                         .param("text", "unavailable"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(0));
