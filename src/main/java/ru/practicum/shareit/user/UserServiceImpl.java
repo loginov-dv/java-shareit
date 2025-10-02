@@ -59,9 +59,13 @@ public class UserServiceImpl implements UserService {
             throw new NotFoundException(String.format(ExceptionConstants.USER_NOT_FOUND_BY_ID, userId));
         }
 
-        if (request.getEmail() != null && userRepository.findByEmail(request.getEmail()).isPresent()) {
-            log.warn(LogConstants.EMAIL_CONFLICT, request.getEmail());
-            throw new EmailConflictException(ExceptionConstants.EMAIL_CONFLICT);
+        if (request.hasEmail()) {
+            Optional<User> found = userRepository.findByEmail(request.getEmail());
+
+            if (found.isPresent() && found.get().getId() != userId) {
+                log.warn(LogConstants.EMAIL_CONFLICT, request.getEmail());
+                throw new EmailConflictException(ExceptionConstants.EMAIL_CONFLICT);
+            }
         }
 
         User user = maybeUser.get();
