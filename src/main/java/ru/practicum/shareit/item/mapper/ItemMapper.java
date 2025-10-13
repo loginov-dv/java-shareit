@@ -5,6 +5,7 @@ import lombok.NoArgsConstructor;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.PatchItemRequest;
 import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.user.model.User;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class ItemMapper {
@@ -12,7 +13,7 @@ public final class ItemMapper {
         ItemDto itemDto = new ItemDto();
 
         itemDto.setId(item.getId());
-        itemDto.setOwnerId(item.getOwnerId());
+        itemDto.setOwnerId(item.getOwner().getId());
         itemDto.setName(item.getName());
         itemDto.setDescription(item.getDescription());
         itemDto.setAvailable(item.isAvailable());
@@ -21,7 +22,7 @@ public final class ItemMapper {
         return itemDto;
     }
 
-    public static Item toItem(int userId, ItemDto itemDto) {
+    /*public static Item toItem(int userId, ItemDto itemDto) {
         Item item = new Item();
 
         if (itemDto.getId() != null) {
@@ -31,6 +32,21 @@ public final class ItemMapper {
         item.setName(itemDto.getName());
         item.setDescription(itemDto.getDescription());
         item.setOwnerId(userId);
+        item.setAvailable(itemDto.getAvailable());
+
+        return item;
+    }*/
+
+    public static Item toItem(User user, ItemDto itemDto) {
+        Item item = new Item();
+
+        if (itemDto.getId() != null) {
+            item.setId(itemDto.getId());
+        }
+
+        item.setName(itemDto.getName());
+        item.setDescription(itemDto.getDescription());
+        item.setOwner(user);
         item.setAvailable(itemDto.getAvailable());
 
         return item;
