@@ -72,7 +72,7 @@ public class UserServiceImpl implements UserService {
         log.debug("Исходное состояние пользователя: {}", user);
 
         UserMapper.updateUserFields(user, request);
-        userRepository.update(user);
+        userRepository.save(user);
 
         log.debug("Изменён пользователь: {}", user);
 
