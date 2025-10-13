@@ -34,7 +34,7 @@ public class ItemServiceImpl implements ItemService {
             throw new NotFoundException(String.format(ExceptionConstants.USER_NOT_FOUND_BY_ID, userId));
         }
 
-        Item item = ItemMapper.toItem(userId, itemDto);
+        Item item = ItemMapper.toItem(maybeUser.get(), itemDto);
         item = itemRepository.save(item);
 
         log.debug("Добавлен предмет: {}", item);
@@ -65,7 +65,7 @@ public class ItemServiceImpl implements ItemService {
             throw new NotFoundException(String.format(ExceptionConstants.USER_NOT_FOUND_BY_ID, userId));
         }
 
-        List<Item> items = itemRepository.findByUserId(userId);
+        List<Item> items = itemRepository.findByOwnerId(userId);
 
         log.debug("Найдены предметы по userId = {}: {}", userId, items);
 
@@ -109,9 +109,9 @@ public class ItemServiceImpl implements ItemService {
         Item item = maybeItem.get();
 
         log.debug("Запрос на изменение предмета с id = {} (id владельца = {}) пользователем с id = {}",
-                item.getId(), item.getOwnerId(), user.getId());
+                item.getId(), item.getOwner().getId(), user.getId());
 
-        if (!item.getOwnerId().equals(user.getId())) {
+        if (!item.getOwner().getId().equals(user.getId())) {
             log.warn("Нет доступа на изменение предмета");
             throw new NoAccessException(ExceptionConstants.NO_ACCESS_FOR_EDIT);
         }
@@ -119,7 +119,7 @@ public class ItemServiceImpl implements ItemService {
         log.debug("Исходное состояние предмета: {}", item);
 
         ItemMapper.updateItemFields(item, request);
-        itemRepository.update(item);
+        itemRepository.save(item);
 
         log.debug("Изменён предмет: {}", item);
 
