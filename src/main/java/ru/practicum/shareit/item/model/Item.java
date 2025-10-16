@@ -12,9 +12,10 @@ public class Item {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
-    // TODO: fetch type
+
     @ManyToOne
     @JoinColumn(name = "owner_id")
+    @ToString.Exclude
     private User owner;
 
     @Column(name = "name")
