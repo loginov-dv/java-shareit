@@ -32,6 +32,18 @@ public class ErrorHandler {
         return new ErrorMessage(ex.getMessage());
     }
 
+    @ExceptionHandler(BookingDateException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorMessage handleBookingDateException(final BookingDateException ex) {
+        return new ErrorMessage(ex.getMessage());
+    }
+
+    @ExceptionHandler(NotAvailableException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorMessage handleNotAvailableException(final NotAvailableException ex) {
+        return new ErrorMessage(ex.getMessage());
+    }
+
     @ExceptionHandler(MissingRequestHeaderException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorMessage handleMissingRequestHeaderException(final MissingRequestHeaderException ex) {
@@ -62,6 +74,6 @@ public class ErrorHandler {
     @ExceptionHandler
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ErrorMessage handleUnpredictedException(final Throwable ex) {
-        return new ErrorMessage("Произошла непредвиденная ошибка: " + ex.getMessage());
+        return new ErrorMessage("Произошла непредвиденная ошибка (" + ex.getClass().getName() + "): " + ex.getMessage());
     }
 }
