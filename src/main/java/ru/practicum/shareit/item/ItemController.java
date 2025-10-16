@@ -8,6 +8,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import ru.practicum.shareit.item.dto.ItemOwnerDto;
+import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.PatchItemRequest;
 
@@ -39,7 +41,7 @@ public class ItemController {
     }
 
     @GetMapping
-    public List<ItemDto> getUserItems(@RequestHeader("X-Sharer-User-Id") @NotNull @Positive Integer userId) {
+    public List<ItemOwnerDto> getUserItems(@RequestHeader("X-Sharer-User-Id") @NotNull @Positive Integer userId) {
         log.debug("GET /items");
         log.debug("X-Sharer-User-Id = {}", userId);
         return itemService.findByUserId(userId);
@@ -60,5 +62,14 @@ public class ItemController {
         log.debug("PATCH /items/{}", itemId);
         log.debug("X-Sharer-User-Id = {}", userId);
         return itemService.update(userId, itemId, request);
+    }
+
+    @PostMapping("/{itemId}/comment")
+    public CommentDto createComment(@RequestHeader("X-Sharer-User-Id") @NotNull @Positive Integer userId,
+                                    @PathVariable @Positive int itemId,
+                                    @Valid @RequestBody CommentDto commentDto) {
+        log.debug("POST /items/{}/comment", itemId);
+        log.debug("X-Sharer-User-Id = {}", userId);
+        return itemService.createComment(userId, itemId, commentDto);
     }
 }
