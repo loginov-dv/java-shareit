@@ -12,7 +12,6 @@ import ru.practicum.shareit.user.mapper.UserMapper;
 import ru.practicum.shareit.user.model.User;
 
 import java.time.LocalDateTime;
-import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 
 @Slf4j
@@ -24,13 +23,8 @@ public final class BookingMapper {
 
         booking.setBooker(booker);
         booking.setItem(item);
-        // TODO:
-        booking.setStart(LocalDateTime.parse(request.getStart(),
-                DateTimeFormatter.ISO_LOCAL_DATE_TIME).toInstant(ZoneOffset.UTC));
-        booking.setEnd(LocalDateTime.parse(request.getEnd(),
-                DateTimeFormatter.ISO_LOCAL_DATE_TIME).toInstant(ZoneOffset.UTC));
-
-        log.debug("after mapping to instant (start): {}", booking.getStart());
+        booking.setStart(LocalDateTime.parse(request.getStart(), DateTimeFormatter.ISO_LOCAL_DATE_TIME));
+        booking.setEnd(LocalDateTime.parse(request.getEnd(), DateTimeFormatter.ISO_LOCAL_DATE_TIME));
 
         return booking;
     }
@@ -42,9 +36,8 @@ public final class BookingMapper {
         dto.setItem(ItemMapper.toItemDto(booking.getItem()));
         dto.setBooker(UserMapper.toUserDto(booking.getBooker()));
         dto.setStatus(booking.getStatus().name());
-        // TODO: разобраться с форматами
-        dto.setStart(DateTimeFormatter.ISO_INSTANT.format(booking.getStart()).replace("Z", ""));
-        dto.setEnd(DateTimeFormatter.ISO_INSTANT.format(booking.getEnd()).replace("Z", ""));
+        dto.setStart(DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(booking.getStart()));
+        dto.setEnd(DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(booking.getEnd()));
 
         return dto;
     }
