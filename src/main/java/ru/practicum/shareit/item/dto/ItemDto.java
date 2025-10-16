@@ -4,6 +4,8 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
+import java.util.List;
+
 @Data
 public class ItemDto {
     private Integer id;
@@ -15,4 +17,7 @@ public class ItemDto {
     @NotNull(message = "Статус должен быть задан")
     private Boolean available;
     private Integer requestId;
+    private String lastBooking = null;
+    private String nextBooking = null;
+    private List<CommentDto> comments;
 }
