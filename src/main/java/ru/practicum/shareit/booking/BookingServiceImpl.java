@@ -16,7 +16,7 @@ import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.UserRepository;
 import ru.practicum.shareit.user.model.User;
 
-import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -157,15 +157,15 @@ public class BookingServiceImpl implements BookingService {
                 break;
             }
             case PAST: {
-                bookings = bookingRepository.findPastByBookerId(bookerId);
+                bookings = bookingRepository.findPastByBookerIdAndEndIsBefore(bookerId, LocalDateTime.now());
                 break;
             }
             case FUTURE: {
-                bookings = bookingRepository.findFutureByBookerId(bookerId);
+                bookings = bookingRepository.findFutureByBookerIdAndStartIsAfter(bookerId, LocalDateTime.now());
                 break;
             }
             case CURRENT: {
-                bookings = bookingRepository.findCurrentByBookedId(bookerId);
+                bookings = bookingRepository.findCurrentByBookedId(bookerId, LocalDateTime.now());
                 break;
             }
             case WAITING, REJECTED: {
@@ -210,15 +210,15 @@ public class BookingServiceImpl implements BookingService {
                 break;
             }
             case PAST: {
-                bookings = bookingRepository.findPastByOwnerId(ownerId);
+                bookings = bookingRepository.findPastByOwnerIdAndEndIsBefore(ownerId, LocalDateTime.now());
                 break;
             }
             case FUTURE: {
-                bookings = bookingRepository.findFutureByOwnerId(ownerId);
+                bookings = bookingRepository.findFutureByOwnerIdAndStartIsAfter(ownerId, LocalDateTime.now());
                 break;
             }
             case CURRENT: {
-                bookings = bookingRepository.findCurrentByOwnerId(ownerId);
+                bookings = bookingRepository.findCurrentByOwnerId(ownerId, LocalDateTime.now());
                 break;
             }
             case WAITING, REJECTED: {
@@ -245,12 +245,12 @@ public class BookingServiceImpl implements BookingService {
             throw new BookingDateException(ExceptionConstants.START_DATE_EQUALS_TO_END_DATE);
         }
 
-        if (booking.getStart().isBefore(Instant.now())) {
+        if (booking.getStart().isBefore(LocalDateTime.now())) {
             log.warn(LogConstants.START_DATE_IN_THE_PAST);
             throw new BookingDateException(ExceptionConstants.START_DATE_IN_THE_PAST);
         }
 
-        if (booking.getEnd().isBefore(Instant.now())) {
+        if (booking.getEnd().isBefore(LocalDateTime.now())) {
             log.warn(LogConstants.END_DATE_IN_THE_PAST);
             throw new BookingDateException(ExceptionConstants.END_DATE_IN_THE_PAST);
         }
