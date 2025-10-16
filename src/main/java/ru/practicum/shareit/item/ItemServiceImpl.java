@@ -3,30 +3,40 @@ package ru.practicum.shareit.item;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import ru.practicum.shareit.exception.ExceptionConstants;
-import ru.practicum.shareit.exception.LogConstants;
-import ru.practicum.shareit.exception.NoAccessException;
-import ru.practicum.shareit.exception.NotFoundException;
+import org.springframework.transaction.annotation.Transactional;
+import ru.practicum.shareit.booking.BookingRepository;
+import ru.practicum.shareit.booking.model.Booking;
+import ru.practicum.shareit.exception.*;
+import ru.practicum.shareit.item.dto.ItemOwnerDto;
+import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.PatchItemRequest;
+import ru.practicum.shareit.item.mapper.CommentMapper;
 import ru.practicum.shareit.item.mapper.ItemMapper;
+import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.UserRepository;
 import ru.practicum.shareit.user.model.User;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.time.Instant;
+import java.util.*;
+import java.util.stream.Collectors;
 
+// TODO: logs
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class ItemServiceImpl implements ItemService {
     private final ItemRepository itemRepository;
     private final UserRepository userRepository;
+    private final BookingRepository bookingRepository;
+    private final CommentRepository commentRepository;
 
     @Override
+    @Transactional
     public ItemDto createItem(int userId, ItemDto itemDto) {
+        log.debug("Запрос на создание предмета от пользователя с id = {}: {}", userId, itemDto);
+
         Optional<User> maybeUser = userRepository.findById(userId);
 
         if (maybeUser.isEmpty()) {
@@ -34,16 +44,19 @@ public class ItemServiceImpl implements ItemService {
             throw new NotFoundException(String.format(ExceptionConstants.USER_NOT_FOUND_BY_ID, userId));
         }
 
-        Item item = ItemMapper.toItem(maybeUser.get(), itemDto);
-        item = itemRepository.save(item);
+        Item item = ItemMapper.toNewItem(maybeUser.get(), itemDto);
 
+        item = itemRepository.save(item);
         log.debug("Добавлен предмет: {}", item);
 
         return ItemMapper.toItemDto(item);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public ItemDto findById(int itemId) {
+        log.debug("Запрос на получение предмета с id = {}", itemId);
+
         Optional<Item> maybeItem = itemRepository.findById(itemId);
 
         if (maybeItem.isEmpty()) {
@@ -51,13 +64,18 @@ public class ItemServiceImpl implements ItemService {
             throw new NotFoundException(String.format(ExceptionConstants.ITEM_NOT_FOUND_BY_ID, itemId));
         }
 
-        log.debug("Найден предмет по id = {}: {}", itemId, maybeItem.get());
+        log.debug("Предмет: {}", maybeItem.get());
 
-        return ItemMapper.toItemDto(maybeItem.get());
+        List<Comment> comments = commentRepository.findByItemId(itemId);
+
+        return ItemMapper.toItemDto(maybeItem.get(), comments);
     }
 
     @Override
-    public List<ItemDto> findByUserId(int userId) {
+    @Transactional(readOnly = true)
+    public List<ItemOwnerDto> findByUserId(int userId) {
+        log.debug("Запрос на получение предметов пользователя с id = {}", userId);
+
         Optional<User> maybeUser = userRepository.findById(userId);
 
         if (maybeUser.isEmpty()) {
@@ -67,22 +85,70 @@ public class ItemServiceImpl implements ItemService {
 
         List<Item> items = itemRepository.findByOwnerId(userId);
 
-        log.debug("Найдены предметы по userId = {}: {}", userId, items);
+        Map<Integer, List<Booking>> bookingMap = bookingRepository.findByItemIdInOrderByStartDesc(items.stream()
+                .map(Item::getId)
+                .toList()).stream()
+                    .collect(Collectors.groupingBy(booking -> booking.getItem().getId()));
 
-        return items.stream()
+        log.debug("bookingMap.size() = {}", bookingMap.size());
+
+        Map<Integer, List<Comment>> commentMap = commentRepository.findByItemIdIn(items.stream()
+                .map(Item::getId)
+                .toList()).stream()
+                    .collect(Collectors.groupingBy(comment -> comment.getItem().getId()));
+
+        log.debug("commentMap.size() = {}", commentMap.size());
+
+        List<ItemOwnerDto> dtos = new ArrayList<>();
+
+        for (Item item : items) {
+            List<Booking> bookings = bookingMap.get(item.getId());
+
+            Booking lastBooking = null;
+            Booking nextBooking = null;
+            Instant now = Instant.now();
+
+            if (bookings != null) {
+                // текущее бронирование не учитываем
+                try {
+                    lastBooking = bookings.stream()
+                            .filter(booking -> booking.getEnd().isBefore(now))
+                            .toList().getLast();
+
+                    nextBooking = bookings.stream()
+                            .filter(booking -> booking.getStart().isAfter(now))
+                            .toList().getFirst();
+                } catch (NoSuchElementException ignored) {
+                    log.debug("no such element");
+                }
+            }
+
+            // TODO: null
+            List<Comment> comments = commentMap.get(item.getId());
+
+            dtos.add(ItemMapper.toItemOwnerDto(item, lastBooking, nextBooking, comments));
+        }
+
+        log.debug("Количество предметов: {}", dtos.size());
+
+        /*return items.stream()
                 .map(ItemMapper::toItemDto)
-                .toList();
+                .toList();*/
+        return dtos;
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<ItemDto> search(String text) {
         if (text == null || text.isBlank()) {
+            log.warn("Строка для поиска была пустой");
             return Collections.emptyList();
         }
 
-        List<Item> items = itemRepository.search(text);
+        log.debug("Запрос на поиск предметов, содержащих: {}", text);
 
-        log.debug("Предметы, найденные по строке {}: {}", text, items);
+        List<Item> items = itemRepository.search(text);
+        log.debug("Количество предметов: {}", items.size());
 
         return items.stream()
                 .map(ItemMapper::toItemDto)
@@ -90,7 +156,10 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
+    @Transactional
     public ItemDto update(int userId, int itemId, PatchItemRequest request) {
+        log.debug("Запрос на обновление предмета с id = {} от пользователя с id = {}", itemId, userId);
+
         Optional<User> maybeUser = userRepository.findById(userId);
 
         if (maybeUser.isEmpty()) {
@@ -108,12 +177,11 @@ public class ItemServiceImpl implements ItemService {
         User user = maybeUser.get();
         Item item = maybeItem.get();
 
-        log.debug("Запрос на изменение предмета с id = {} (id владельца = {}) пользователем с id = {}",
-                item.getId(), item.getOwner().getId(), user.getId());
+        log.debug("id владельца предмета = {}", item.getOwner().getId());
 
         if (!item.getOwner().getId().equals(user.getId())) {
             log.warn("Нет доступа на изменение предмета");
-            throw new NoAccessException(ExceptionConstants.NO_ACCESS_FOR_EDIT);
+            throw new NoAccessException(ExceptionConstants.NO_ACCESS);
         }
 
         log.debug("Исходное состояние предмета: {}", item);
@@ -124,5 +192,42 @@ public class ItemServiceImpl implements ItemService {
         log.debug("Изменён предмет: {}", item);
 
         return ItemMapper.toItemDto(item);
+    }
+
+    @Override
+    @Transactional
+    public CommentDto createComment(int userId, int itemId, CommentDto commentDto) {
+        // TODO: получение с проверкой и выбрасыванием исключения повторяется многократно, мб вынести в метод
+        log.debug("Запрос на создание комментария от пользователя с id = {} на предмет с id = {}: {}",
+                userId, itemId, commentDto);
+
+        Optional<User> maybeUser = userRepository.findById(userId);
+
+        if (maybeUser.isEmpty()) {
+            log.warn(LogConstants.USER_NOT_FOUND_BY_ID, userId);
+            throw new NotFoundException(String.format(ExceptionConstants.USER_NOT_FOUND_BY_ID, userId));
+        }
+
+        Optional<Item> maybeItem = itemRepository.findById(itemId);
+
+        if (maybeItem.isEmpty()) {
+            log.warn(LogConstants.ITEM_NOT_FOUND_BY_ID, itemId);
+            throw new NotFoundException(String.format(ExceptionConstants.ITEM_NOT_FOUND_BY_ID, itemId));
+        }
+
+        List<Booking> userBookings = bookingRepository.findPastByBookerId(maybeUser.get().getId());
+
+        // TODO: ex
+        if (userBookings.stream().noneMatch(booking -> booking.getItem().getId().equals(maybeItem.get().getId()))) {
+            log.warn("Невозможно оставить комментарий (нет завершённой аренды)");
+            throw new NotAvailableException(ExceptionConstants.HAS_NO_COMPLETED_BOOKINGS);
+        }
+
+        Comment comment = CommentMapper.toComment(maybeUser.get(), maybeItem.get(), commentDto);
+        comment = commentRepository.save(comment);
+
+        log.debug("Добавлен комментарий: {}", comment);
+
+        return CommentMapper.toCommentDto(comment);
     }
 }
