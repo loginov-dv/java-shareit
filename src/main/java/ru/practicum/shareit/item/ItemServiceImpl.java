@@ -18,7 +18,7 @@ import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.UserRepository;
 import ru.practicum.shareit.user.model.User;
 
-import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -106,7 +106,8 @@ public class ItemServiceImpl implements ItemService {
 
             Booking lastBooking = null;
             Booking nextBooking = null;
-            Instant now = Instant.now();
+            //Instant now = Instant.now();
+            LocalDateTime now = LocalDateTime.now();
 
             if (bookings != null) {
                 // текущее бронирование не учитываем
@@ -215,7 +216,8 @@ public class ItemServiceImpl implements ItemService {
             throw new NotFoundException(String.format(ExceptionConstants.ITEM_NOT_FOUND_BY_ID, itemId));
         }
 
-        List<Booking> userBookings = bookingRepository.findPastByBookerId(maybeUser.get().getId());
+        List<Booking> userBookings = bookingRepository.findPastByBookerIdAndEndIsBefore(maybeUser.get().getId(),
+                LocalDateTime.now());
 
         // TODO: ex
         if (userBookings.stream().noneMatch(booking -> booking.getItem().getId().equals(maybeItem.get().getId()))) {
