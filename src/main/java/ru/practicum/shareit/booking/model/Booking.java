@@ -5,7 +5,7 @@ import lombok.*;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.model.User;
 
-import java.time.Instant;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "bookings")
@@ -27,10 +27,10 @@ public class Booking {
     private User booker;
 
     @Column(name = "start_date")
-    private Instant start;
+    private LocalDateTime start;
 
     @Column(name = "end_date")
-    private Instant end;
+    private LocalDateTime end;
 
     @Column(name = "status")
     @Enumerated(EnumType.STRING)
