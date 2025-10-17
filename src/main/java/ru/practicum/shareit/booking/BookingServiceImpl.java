@@ -138,8 +138,7 @@ public class BookingServiceImpl implements BookingService {
 
         try {
             bookingState = BookingState.valueOf(state);
-        }
-        catch (IllegalArgumentException ex) {
+        } catch (IllegalArgumentException ex) {
             log.warn(LogConstants.INVALID_BOOKING_STATE);
             throw new ArgumentException(ExceptionConstants.INVALID_BOOKING_STATE);
         }
@@ -192,8 +191,7 @@ public class BookingServiceImpl implements BookingService {
 
         try {
             bookingState = BookingState.valueOf(state);
-        }
-        catch (IllegalArgumentException ex) {
+        } catch (IllegalArgumentException ex) {
             log.warn(LogConstants.INVALID_BOOKING_STATE);
             throw new ArgumentException(ExceptionConstants.INVALID_BOOKING_STATE);
         }
