@@ -9,6 +9,7 @@ import org.springframework.test.context.jdbc.Sql;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.UserRepository;
 import ru.practicum.shareit.user.model.User;
+import ru.practicum.shareit.utils.RandomUtils;
 
 import java.util.List;
 import java.util.Optional;
@@ -19,7 +20,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @DataJpaTest
 // используем настройки из application-test.properties
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-@Sql(scripts = {"/schema.sql"})
+@Sql(scripts = {"/schema.sql", "/clear.sql"})
 class ItemRepositoryTest {
     @Autowired
     private ItemRepository itemRepository;
@@ -29,18 +30,15 @@ class ItemRepositoryTest {
     @Test
     void shouldSaveItem() {
         Item item = createItem();
-
         item = itemRepository.save(item);
 
         assertNotNull(item.getId());
     }
 
     @Test
-    void shouldFindItem() {
+    void shouldFindItemById() {
         Item item = createItem();
-
         item = itemRepository.save(item);
-
         Optional<Item> maybeFoundItem = itemRepository.findById(item.getId());
 
         if (maybeFoundItem.isEmpty()) {
@@ -68,9 +66,7 @@ class ItemRepositoryTest {
     @Test
     void shouldFindItemByUserId() {
         Item item = createItem();
-
         item = itemRepository.save(item);
-
         List<Item> items = itemRepository.findByOwnerId(item.getOwner().getId());
 
         assertEquals(1, items.size());
@@ -79,7 +75,6 @@ class ItemRepositoryTest {
     @Test
     void shouldUpdateItem() {
         Item item = createItem();
-
         item = itemRepository.save(item);
 
         item.setName("new name");
@@ -107,56 +102,40 @@ class ItemRepositoryTest {
     void shouldFindItemsBySearchString() {
         Item item1 = createItem();
         Item item2 = createItem();
+
         item1.setName("rieugeiruge search ewwgw");
         item2.setDescription("search rgeerg eer");
-
-        item1 = itemRepository.save(item1);
-        item2 = itemRepository.save(item2);
+        itemRepository.save(item1);
+        itemRepository.save(item2);
 
         List<Item> items = itemRepository.search("search");
 
         assertEquals(2, items.size());
     }
 
+    // для предмета сначала создаётся владелец
     private Item createItem() {
         User user = createUser();
-        user = userRepository.save(user);
-
         Item item = new Item();
 
-        item.setName(createName());
-        item.setDescription(createName(50));
+        item.setName(RandomUtils.createName());
+        item.setDescription(RandomUtils.createName(50));
         item.setAvailable(true);
         item.setOwner(user);
 
         return item;
     }
 
+    // с сохранением в таблицу users
     private User createUser() {
         User user = new User();
-        String name = createName();
+        String name = RandomUtils.createName();
 
         user.setName(name);
         user.setEmail(name + "@mail.ru");
 
+        user = userRepository.save(user);
+
         return user;
-    }
-
-    private String createName() {
-        return createName(10);
-    }
-
-    private String createName(int length) {
-        String chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
-        int charsLength = chars.length();
-        int counter = 0;
-        String result = "";
-
-        while (counter < length) {
-            result += chars.charAt((int)Math.round(Math.random() * (charsLength - 1)));
-            counter++;
-        }
-
-        return result;
     }
 }
