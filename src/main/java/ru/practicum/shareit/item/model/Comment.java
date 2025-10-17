@@ -7,7 +7,7 @@ import lombok.Setter;
 import lombok.ToString;
 import ru.practicum.shareit.user.model.User;
 
-import java.time.Instant;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "comments")
@@ -32,5 +32,5 @@ public class Comment {
     private User author;
 
     @Column(name = "date_created")
-    private Instant created = Instant.now();
+    private LocalDateTime created = LocalDateTime.now();
 }
