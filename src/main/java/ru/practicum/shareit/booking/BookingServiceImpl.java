@@ -46,8 +46,8 @@ public class BookingServiceImpl implements BookingService {
         Item item = maybeItem.get();
 
         if (!item.isAvailable()) {
-            log.warn(LogConstants.ITEM_NOT_AVAILABLE);
-            throw new NotAvailableException(ExceptionConstants.ITEM_NOT_AVAILABLE);
+            log.warn("Предмет недоступен для бронирования");
+            throw new NotAvailableException("Предмет недоступен для бронирования");
         }
 
         Booking booking = BookingMapper.toNewBooking(booker, item, request);
@@ -75,8 +75,8 @@ public class BookingServiceImpl implements BookingService {
         Booking booking = maybeBooking.get();
 
         if (!booking.getItem().getOwner().getId().equals(userId)) {
-            log.warn(LogConstants.NO_ACCESS_FOR_BOOKING_APPROVAL);
-            throw new NoAccessException(ExceptionConstants.NO_ACCESS_FOR_BOOKING_APPROVAL);
+            log.warn("Нет доступа на изменение статуса бронирования");
+            throw new NoAccessException("Нет доступа на изменение статуса бронирования");
         }
 
         Optional<User> maybeUser = userRepository.findById(userId);
@@ -113,8 +113,8 @@ public class BookingServiceImpl implements BookingService {
 
         if (!user.getId().equals(booking.getItem().getOwner().getId())
             && !user.getId().equals(booking.getBooker().getId())) {
-            log.warn(LogConstants.NO_ACCESS_TO_VIEW_BOOKING);
-            throw new NoAccessException(ExceptionConstants.NO_ACCESS_TO_VIEW_BOOKING);
+            log.warn("Нет доступа на просмотр бронирования");
+            throw new NoAccessException("Нет доступа на просмотр бронирования");
         }
 
         log.debug("Бронирование: {}", booking);
@@ -232,23 +232,25 @@ public class BookingServiceImpl implements BookingService {
 
     private void validateBookingDates(Booking booking) {
         if (booking.getStart().isAfter(booking.getEnd())) {
-            log.warn(LogConstants.INCORRECT_BOOKING_DATES_ORDER);
-            throw new BookingDateException(ExceptionConstants.INCORRECT_BOOKING_DATES_ORDER);
+            log.warn("Дата окончания бронирования должна быть после даты начала бронирования");
+            throw new BookingDateException("Дата окончания бронирования должна быть " +
+                    "после даты начала бронирования");
         }
 
         if (booking.getStart().equals(booking.getEnd())) {
-            log.warn(LogConstants.START_DATE_EQUALS_TO_END_DATE);
-            throw new BookingDateException(ExceptionConstants.START_DATE_EQUALS_TO_END_DATE);
+            log.warn("Дата окончания бронирования не может совпадать с датой начала бронирования");
+            throw new BookingDateException("Дата окончания бронирования не может " +
+                    "совпадать с датой начала бронирования");
         }
 
         if (booking.getStart().isBefore(LocalDateTime.now())) {
-            log.warn(LogConstants.START_DATE_IN_THE_PAST);
-            throw new BookingDateException(ExceptionConstants.START_DATE_IN_THE_PAST);
+            log.warn("Дата начала бронирования не может быть в прошлом");
+            throw new BookingDateException("Дата начала бронирования не может быть в прошлом");
         }
 
         if (booking.getEnd().isBefore(LocalDateTime.now())) {
-            log.warn(LogConstants.END_DATE_IN_THE_PAST);
-            throw new BookingDateException(ExceptionConstants.END_DATE_IN_THE_PAST);
+            log.warn("Дата окончания бронирования не может быть в прошлом");
+            throw new BookingDateException("Дата окончания бронирования не может быть в прошлом");
         }
 
         log.debug("Валидация дат бронирования завершена успешно");

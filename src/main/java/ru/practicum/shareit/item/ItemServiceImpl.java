@@ -143,8 +143,8 @@ public class ItemServiceImpl implements ItemService {
         log.debug("id владельца предмета = {}", item.getOwner().getId());
 
         if (!item.getOwner().getId().equals(user.getId())) {
-            log.warn(LogConstants.NO_ACCESS_FOR_ITEM_UPDATE);
-            throw new NoAccessException(ExceptionConstants.NO_ACCESS_FOR_ITEM_UPDATE);
+            log.warn("Нет доступа на изменение предмета");
+            throw new NoAccessException("Нет доступа на изменение предмета");
         }
 
         log.debug("Исходное состояние предмета: {}", item);
@@ -170,7 +170,7 @@ public class ItemServiceImpl implements ItemService {
 
         if (userBookings.stream().noneMatch(booking -> booking.getItem().getId().equals(item.getId()))) {
             log.warn("Невозможно оставить комментарий (нет завершённой аренды)");
-            throw new NotAvailableException(ExceptionConstants.HAS_NO_COMPLETED_BOOKINGS);
+            throw new NotAvailableException("Невозможно оставить комментарий (нет завершённой аренды)");
         }
 
         Comment comment = CommentMapper.toComment(user, item, commentDto);
