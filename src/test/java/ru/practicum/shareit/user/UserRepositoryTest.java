@@ -1,18 +1,25 @@
 package ru.practicum.shareit.user;
 
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.jdbc.Sql;
 import ru.practicum.shareit.user.model.User;
 
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class InMemoryUserRepositoryTest {
-    private final InMemoryUserRepository userRepository;
-
-    private InMemoryUserRepositoryTest() {
-        userRepository = new InMemoryUserRepository();
-    }
+@ActiveProfiles("test")
+@DataJpaTest
+// используем настройки из application-test.properties
+@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
+@Sql(scripts = {"/schema.sql"})
+class UserRepositoryTest {
+    @Autowired
+    private UserRepository userRepository;
 
     @Test
     void shouldSaveUser() {
@@ -21,7 +28,6 @@ class InMemoryUserRepositoryTest {
         user = userRepository.save(user);
 
         assertNotNull(user.getId());
-        assertNotEquals(0, user.getId());
     }
 
     @Test
@@ -95,7 +101,7 @@ class InMemoryUserRepositoryTest {
         user.setName("new name");
         user.setEmail("new@mail.ru");
 
-        userRepository.update(user);
+        userRepository.save(user);
 
         Optional<User> maybeFoundUser = userRepository.findById(user.getId());
 
