@@ -7,6 +7,7 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
 import ru.practicum.shareit.user.model.User;
+import ru.practicum.shareit.utils.RandomUtils;
 
 import java.util.Optional;
 
@@ -16,7 +17,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @DataJpaTest
 // используем настройки из application-test.properties
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-@Sql(scripts = {"/schema.sql"})
+@Sql(scripts = {"/schema.sql", "/clear.sql"})
 class UserRepositoryTest {
     @Autowired
     private UserRepository userRepository;
@@ -24,18 +25,15 @@ class UserRepositoryTest {
     @Test
     void shouldSaveUser() {
         User user = createUser();
-
         user = userRepository.save(user);
 
         assertNotNull(user.getId());
     }
 
     @Test
-    void shouldFindUser() {
+    void shouldFindUserById() {
         User user = createUser();
-
         user = userRepository.save(user);
-
         Optional<User> maybeFoundUser = userRepository.findById(user.getId());
 
         if (maybeFoundUser.isEmpty()) {
@@ -61,7 +59,6 @@ class UserRepositoryTest {
     @Test
     void shouldDeleteUser() {
         User user = createUser();
-
         user = userRepository.save(user);
 
         userRepository.deleteById(user.getId());
@@ -74,11 +71,9 @@ class UserRepositoryTest {
     }
 
     @Test
-    void shouldFindByEmail() {
+    void shouldFindUserByEmail() {
         User user = createUser();
-
         user = userRepository.save(user);
-
         Optional<User> maybeFoundUser = userRepository.findByEmail(user.getEmail());
 
         if (maybeFoundUser.isEmpty()) {
@@ -95,12 +90,10 @@ class UserRepositoryTest {
     @Test
     void shouldUpdateUser() {
         User user = createUser();
-
         user = userRepository.save(user);
 
         user.setName("new name");
         user.setEmail("new@mail.ru");
-
         userRepository.save(user);
 
         Optional<User> maybeFoundUser = userRepository.findById(user.getId());
@@ -118,27 +111,12 @@ class UserRepositoryTest {
 
     private User createUser() {
         User user = new User();
-        String name = createName();
+        String name = RandomUtils.createName();
 
         user.setName(name);
         user.setEmail(name + "@mail.ru");
 
         return user;
-    }
-
-    private String createName() {
-        String chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
-        int charsLength = chars.length();
-        int counter = 0;
-        int length = 10;
-        String result = "";
-
-        while (counter < length) {
-            result += chars.charAt((int)Math.round(Math.random() * (charsLength - 1)));
-            counter++;
-        }
-
-        return result;
     }
 }
 
