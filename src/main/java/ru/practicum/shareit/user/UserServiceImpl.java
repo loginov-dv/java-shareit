@@ -15,7 +15,7 @@ import ru.practicum.shareit.user.mapper.UserMapper;
 import ru.practicum.shareit.user.model.User;
 
 import java.util.Optional;
-// TODO: logs
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -32,8 +32,7 @@ public class UserServiceImpl implements UserService {
             throw new EmailConflictException(ExceptionConstants.EMAIL_CONFLICT);
         }
 
-        User user = UserMapper.toUser(request);
-        user = userRepository.save(user);
+        User user = userRepository.save(UserMapper.toUser(request));
 
         log.debug("Добавлен пользователь: {}", user);
 
@@ -82,8 +81,8 @@ public class UserServiceImpl implements UserService {
         log.debug("Исходное состояние пользователя: {}", user);
 
         UserMapper.updateUserFields(user, request);
-        userRepository.save(user);
 
+        user = userRepository.save(user);
         log.debug("Изменён пользователь: {}", user);
 
         return UserMapper.toUserDto(user);
