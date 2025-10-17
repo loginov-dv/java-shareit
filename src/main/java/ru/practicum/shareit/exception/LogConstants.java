@@ -12,6 +12,7 @@ public final class LogConstants {
 
     public static final String NO_ACCESS_FOR_BOOKING_APPROVAL = "Нет доступа на изменение статуса бронирования";
     public static final String NO_ACCESS_TO_VIEW_BOOKING = "Нет доступа на просмотр бронирования";
+    public static final String NO_ACCESS_FOR_ITEM_UPDATE = "Нет доступа на изменение предмета";
 
     public static final String INCORRECT_BOOKING_DATES_ORDER = "Дата окончания бронирования должна быть " +
             "после даты начала бронирования";
