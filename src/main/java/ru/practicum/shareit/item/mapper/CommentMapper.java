@@ -7,14 +7,10 @@ import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.model.User;
 
-import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class CommentMapper {
-    private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy.MM.dd hh:mm:ss")
-            .withZone(ZoneOffset.UTC);
-
     public static CommentDto toCommentDto(Comment comment) {
         CommentDto dto = new CommentDto();
 
@@ -22,7 +18,7 @@ public final class CommentMapper {
         dto.setText(comment.getText());
         dto.setItemId(comment.getItem().getId());
         dto.setAuthorName(comment.getAuthor().getName());
-        dto.setCreated(formatter.format(comment.getCreated()));
+        dto.setCreated(DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(comment.getCreated()));
 
         return dto;
     }
