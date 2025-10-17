@@ -3,22 +3,29 @@ package ru.practicum.shareit.item;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import ru.practicum.shareit.item.dto.ItemShortDto;
 import ru.practicum.shareit.item.dto.PatchItemRequest;
 import ru.practicum.shareit.user.dto.PostUserRequest;
 import ru.practicum.shareit.user.dto.UserDto;
+import ru.practicum.shareit.utils.RandomUtils;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+@ActiveProfiles("test")
 @SpringBootTest
 @AutoConfigureMockMvc
+@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
+@Sql(scripts = {"/schema.sql", "/clear.sql"})
 class ItemControllerTest {
     @Autowired
     private MockMvc mockMvc;
@@ -361,7 +368,7 @@ class ItemControllerTest {
 
     private PostUserRequest createUser() {
         PostUserRequest user = new PostUserRequest();
-        String name = createName();
+        String name = RandomUtils.createName();
 
         user.setName(name);
         user.setEmail(name + "@mail.ru");
@@ -372,28 +379,10 @@ class ItemControllerTest {
     private ItemShortDto createItem() {
         ItemShortDto item = new ItemShortDto();
 
-        item.setName(createName());
-        item.setDescription(createName(50));
+        item.setName(RandomUtils.createName());
+        item.setDescription(RandomUtils.createName(50));
         item.setAvailable(true);
 
         return item;
-    }
-
-    private String createName() {
-        return createName(10);
-    }
-
-    private String createName(int length) {
-        String chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
-        int charsLength = chars.length();
-        int counter = 0;
-        String result = "";
-
-        while (counter < length) {
-            result += chars.charAt((int)Math.round(Math.random() * (charsLength - 1)));
-            counter++;
-        }
-
-        return result;
     }
 }
