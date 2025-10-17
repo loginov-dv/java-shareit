@@ -8,8 +8,7 @@ services:
       - POSTGRES_DB=shareit
       - POSTGRES_USER=dbuser
       - POSTGRES_PASSWORD=12345
-      - TZ: 'GMT+3'
-      - PGTZ: 'GMT+3'
+      - TZ=GMT+3
     healthcheck:
       test: pg_isready -q -d $$POSTGRES_DB -U $$POSTGRES_USER
       timeout: 5s
