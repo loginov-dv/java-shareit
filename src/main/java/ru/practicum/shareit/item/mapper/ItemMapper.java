@@ -3,24 +3,20 @@ package ru.practicum.shareit.item.mapper;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import ru.practicum.shareit.booking.model.Booking;
-import ru.practicum.shareit.item.dto.ItemOwnerDto;
 import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.item.dto.ItemShortDto;
 import ru.practicum.shareit.item.dto.PatchItemRequest;
 import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.model.User;
 
-import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class ItemMapper {
-    private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy.MM.dd hh:mm:ss")
-            .withZone(ZoneOffset.UTC);
-
-    public static ItemDto toItemDto(Item item) {
-        ItemDto dto = new ItemDto();
+    public static ItemShortDto toItemShortDto(Item item) {
+        ItemShortDto dto = new ItemShortDto();
 
         dto.setId(item.getId());
         dto.setOwnerId(item.getOwner().getId());
@@ -32,34 +28,17 @@ public final class ItemMapper {
         return dto;
     }
 
-    public static ItemDto toItemDto(Item item, List<Comment> comments) {
-        ItemDto dto = toItemDto(item);
+    public static ItemShortDto toItemShortDto(Item item, List<Comment> comments) {
+        ItemShortDto dto = toItemShortDto(item);
 
-        if (!comments.isEmpty()) {
+        if (comments != null && !comments.isEmpty()) {
             dto.setComments(comments.stream().map(CommentMapper::toCommentDto).toList());
         }
-
-
 
         return dto;
     }
 
-    /*public static Item toItem(int userId, ItemDto itemDto) {
-        Item item = new Item();
-
-        if (itemDto.getId() != null) {
-            item.setId(itemDto.getId());
-        }
-
-        item.setName(itemDto.getName());
-        item.setDescription(itemDto.getDescription());
-        item.setOwnerId(userId);
-        item.setAvailable(itemDto.getAvailable());
-
-        return item;
-    }*/
-
-    public static Item toNewItem(User user, ItemDto dto) {
+    public static Item toNewItem(User user, ItemShortDto dto) {
         Item item = new Item();
 
         item.setName(dto.getName());
@@ -70,7 +49,7 @@ public final class ItemMapper {
         return item;
     }
 
-    public static Item toItem(User user, ItemDto dto) {
+    public static Item toItem(User user, ItemShortDto dto) {
         Item item = toNewItem(user, dto);
 
         if (dto.getId() != null) {
@@ -94,9 +73,9 @@ public final class ItemMapper {
         }
     }
 
-    public static ItemOwnerDto toItemOwnerDto(Item item, Booking lastBooking, Booking nextBooking,
-                                              List<Comment> comments) {
-        ItemOwnerDto dto = new ItemOwnerDto();
+    public static ItemDto toItemDto(Item item, Booking lastBooking, Booking nextBooking,
+                                    List<Comment> comments) {
+        ItemDto dto = new ItemDto();
 
         dto.setId(item.getId());
         dto.setOwnerId(item.getOwner().getId());
@@ -106,14 +85,13 @@ public final class ItemMapper {
         //dto.setRequestId(item.getRequestId());
 
         if (lastBooking != null) {
-            dto.setLastBooking(formatter.format(lastBooking.getStart()));
+            dto.setLastBooking(DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(lastBooking.getStart()));
         }
 
         if (nextBooking != null) {
-            dto.setNextBooking(formatter.format(nextBooking.getEnd()));
+            dto.setNextBooking(DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(nextBooking.getEnd()));
         }
 
-        // TODO: null и empty не записываются
         if (comments != null && !comments.isEmpty()) {
             dto.setComments(comments.stream().map(CommentMapper::toCommentDto).toList());
         }
