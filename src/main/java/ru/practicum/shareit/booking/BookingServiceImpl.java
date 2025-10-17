@@ -9,7 +9,7 @@ import ru.practicum.shareit.booking.dto.PostBookingRequest;
 import ru.practicum.shareit.booking.mapper.BookingMapper;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.model.BookingStatus;
-import ru.practicum.shareit.booking.model.BookingRequestState;
+import ru.practicum.shareit.booking.model.BookingState;
 import ru.practicum.shareit.exception.*;
 import ru.practicum.shareit.item.ItemRepository;
 import ru.practicum.shareit.item.model.Item;
@@ -20,7 +20,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-// TODO: logs
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -32,16 +32,10 @@ public class BookingServiceImpl implements BookingService {
     @Override
     @Transactional
     public BookingDto createBooking(int bookerId, PostBookingRequest request) {
-        log.debug("Запрос на создание бронирования от пользователя с id = {} на предмет с id = {}: {}",
+        log.debug("Запрос на бронирование предмета с id = {} от пользователя с id = {}: {}",
                 bookerId, request.getItemId(), request);
 
-        Optional<User> maybeUser = userRepository.findById(bookerId);
-
-        if (maybeUser.isEmpty()) {
-            log.warn(LogConstants.USER_NOT_FOUND_BY_ID, bookerId);
-            throw new NotFoundException(String.format(ExceptionConstants.USER_NOT_FOUND_BY_ID, bookerId));
-        }
-
+        User booker = findAndGetUser(bookerId);
         Optional<Item> maybeItem = itemRepository.findById(request.getItemId());
 
         if (maybeItem.isEmpty()) {
@@ -49,12 +43,14 @@ public class BookingServiceImpl implements BookingService {
             throw new NotFoundException(String.format(ExceptionConstants.ITEM_NOT_FOUND_BY_ID, request.getItemId()));
         }
 
-        if (!maybeItem.get().isAvailable()) {
-            log.warn("Предмет недоступен для бронирования");
-            throw new NotAvailableException("Предмет недоступен для бронирования");
+        Item item = maybeItem.get();
+
+        if (!item.isAvailable()) {
+            log.warn(LogConstants.ITEM_NOT_AVAILABLE);
+            throw new NotAvailableException(ExceptionConstants.ITEM_NOT_AVAILABLE);
         }
 
-        Booking booking = BookingMapper.toNewBooking(maybeUser.get(), maybeItem.get(), request);
+        Booking booking = BookingMapper.toNewBooking(booker, item, request);
 
         validateBookingDates(booking);
 
@@ -76,9 +72,11 @@ public class BookingServiceImpl implements BookingService {
             throw new NotFoundException(String.format(ExceptionConstants.BOOKING_NOT_FOUND_BY_ID, bookingId));
         }
 
-        if (!maybeBooking.get().getItem().getOwner().getId().equals(userId)) {
-            log.warn("Нет доступа на изменение бронирования");
-            throw new NoAccessException(ExceptionConstants.NO_ACCESS);
+        Booking booking = maybeBooking.get();
+
+        if (!booking.getItem().getOwner().getId().equals(userId)) {
+            log.warn(LogConstants.NO_ACCESS_FOR_BOOKING_APPROVAL);
+            throw new NoAccessException(ExceptionConstants.NO_ACCESS_FOR_BOOKING_APPROVAL);
         }
 
         Optional<User> maybeUser = userRepository.findById(userId);
@@ -88,12 +86,11 @@ public class BookingServiceImpl implements BookingService {
             throw new NotFoundException(String.format(ExceptionConstants.USER_NOT_FOUND_BY_ID, userId));
         }
 
-        Booking booking = maybeBooking.get();
-
-        booking.setStatus(approved ? BookingStatus.APPROVED : BookingStatus.REJECTED);
+        BookingStatus newStatus = approved ? BookingStatus.APPROVED : BookingStatus.REJECTED;
+        booking.setStatus(newStatus);
         booking = bookingRepository.save(booking);
 
-        log.debug("Изменён статус бронирования с id = {} на {}", bookingId, booking.getStatus().name());
+        log.debug("Изменён статус бронирования на {}", newStatus);
 
         return BookingMapper.toBookingDto(booking);
     }
@@ -103,12 +100,7 @@ public class BookingServiceImpl implements BookingService {
     public BookingDto findById(int userId, int bookingId) {
         log.debug("Запрос на получение бронирования с id = {} от пользователя с id = {}", bookingId, userId);
 
-        Optional<User> maybeUser = userRepository.findById(userId);
-
-        if (maybeUser.isEmpty()) {
-            log.warn(LogConstants.USER_NOT_FOUND_BY_ID, userId);
-            throw new NotFoundException(String.format(ExceptionConstants.USER_NOT_FOUND_BY_ID, userId));
-        }
+        User user = findAndGetUser(userId);
 
         Optional<Booking> maybeBooking = bookingRepository.findById(bookingId);
 
@@ -117,15 +109,17 @@ public class BookingServiceImpl implements BookingService {
             throw new NotFoundException(String.format(ExceptionConstants.BOOKING_NOT_FOUND_BY_ID, bookingId));
         }
 
-        if (!maybeUser.get().getId().equals(maybeBooking.get().getItem().getOwner().getId())
-            && !maybeUser.get().getId().equals(maybeBooking.get().getBooker().getId())) {
-            log.warn("Нет доступа на просмотр бронирования");
-            throw new NoAccessException(ExceptionConstants.NO_ACCESS);
+        Booking booking = maybeBooking.get();
+
+        if (!user.getId().equals(booking.getItem().getOwner().getId())
+            && !user.getId().equals(booking.getBooker().getId())) {
+            log.warn(LogConstants.NO_ACCESS_TO_VIEW_BOOKING);
+            throw new NoAccessException(ExceptionConstants.NO_ACCESS_TO_VIEW_BOOKING);
         }
 
-        log.debug("Бронирование: {}", maybeBooking.get());
+        log.debug("Бронирование: {}", booking);
 
-        return BookingMapper.toBookingDto(maybeBooking.get());
+        return BookingMapper.toBookingDto(booking);
     }
 
     @Override
@@ -140,9 +134,10 @@ public class BookingServiceImpl implements BookingService {
             throw new NotFoundException(String.format(ExceptionConstants.USER_NOT_FOUND_BY_ID, bookerId));
         }
 
-        BookingRequestState status;
+        BookingState bookingState;
+
         try {
-            status = BookingRequestState.valueOf(state);
+            bookingState = BookingState.valueOf(state);
         }
         catch (IllegalArgumentException ex) {
             log.warn(LogConstants.INVALID_BOOKING_STATE);
@@ -151,21 +146,21 @@ public class BookingServiceImpl implements BookingService {
 
         List<Booking> bookings = new ArrayList<>();
 
-        switch (status) {
+        switch (bookingState) {
             case ALL: {
                 bookings = bookingRepository.findByBookerIdOrderByStartDesc(bookerId);
                 break;
             }
             case PAST: {
-                bookings = bookingRepository.findPastByBookerIdAndEndIsBefore(bookerId, LocalDateTime.now());
+                bookings = bookingRepository.findByBookerIdAndEndBeforeOrderByStartDesc(bookerId, LocalDateTime.now());
                 break;
             }
             case FUTURE: {
-                bookings = bookingRepository.findFutureByBookerIdAndStartIsAfter(bookerId, LocalDateTime.now());
+                bookings = bookingRepository.findByBookerIdAndStartAfterOrderByStartDesc(bookerId, LocalDateTime.now());
                 break;
             }
             case CURRENT: {
-                bookings = bookingRepository.findCurrentByBookedId(bookerId, LocalDateTime.now());
+                bookings = bookingRepository.findCurrentByBookerId(bookerId, LocalDateTime.now());
                 break;
             }
             case WAITING, REJECTED: {
@@ -184,7 +179,7 @@ public class BookingServiceImpl implements BookingService {
     @Override
     @Transactional(readOnly = true)
     public List<BookingDto> findAllByOwnerId(int ownerId, String state) {
-        log.debug("Запрос всех бронирований предметов владельца с id = {} со статусом {}", ownerId, state);
+        log.debug("Запрос всех бронирований владельца предметов с id = {} со статусом {}", ownerId, state);
 
         Optional<User> maybeUser = userRepository.findById(ownerId);
 
@@ -193,9 +188,10 @@ public class BookingServiceImpl implements BookingService {
             throw new NotFoundException(String.format(ExceptionConstants.USER_NOT_FOUND_BY_ID, ownerId));
         }
 
-        BookingRequestState status;
+        BookingState bookingState;
+
         try {
-            status = BookingRequestState.valueOf(state);
+            bookingState = BookingState.valueOf(state);
         }
         catch (IllegalArgumentException ex) {
             log.warn(LogConstants.INVALID_BOOKING_STATE);
@@ -204,17 +200,17 @@ public class BookingServiceImpl implements BookingService {
 
         List<Booking> bookings = new ArrayList<>();
 
-        switch (status) {
+        switch (bookingState) {
             case ALL: {
                 bookings = bookingRepository.findByItemOwnerIdOrderByStartDesc(ownerId);
                 break;
             }
             case PAST: {
-                bookings = bookingRepository.findPastByOwnerIdAndEndIsBefore(ownerId, LocalDateTime.now());
+                bookings = bookingRepository.findByItemOwnerIdAndEndBeforeOrderByStartDesc(ownerId, LocalDateTime.now());
                 break;
             }
             case FUTURE: {
-                bookings = bookingRepository.findFutureByOwnerIdAndStartIsAfter(ownerId, LocalDateTime.now());
+                bookings = bookingRepository.findByItemOwnerIdAndStartAfterOrderByStartDesc(ownerId, LocalDateTime.now());
                 break;
             }
             case CURRENT: {
@@ -256,5 +252,16 @@ public class BookingServiceImpl implements BookingService {
         }
 
         log.debug("Валидация дат бронирования завершена успешно");
+    }
+
+    private User findAndGetUser(int userId) {
+        Optional<User> maybeUser = userRepository.findById(userId);
+
+        if (maybeUser.isEmpty()) {
+            log.warn(LogConstants.USER_NOT_FOUND_BY_ID, userId);
+            throw new NotFoundException(String.format(ExceptionConstants.USER_NOT_FOUND_BY_ID, userId));
+        }
+
+        return maybeUser.get();
     }
 }
