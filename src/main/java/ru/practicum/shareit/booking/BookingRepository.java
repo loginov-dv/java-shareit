@@ -40,7 +40,7 @@ public interface BookingRepository extends JpaRepository<Booking, Integer> {
             "ORDER BY booking.start DESC")
     List<Booking> findCurrentByOwnerId(int ownerId, LocalDateTime now);
 
-    List<Booking> findByItemIdOrderByStartDesc(int itemId);
+    List<Booking> findByItemIdOrderByStart(int itemId);
 
-    List<Booking> findByItemIdInOrderByStartDesc(Collection<Integer> itemIds);
+    List<Booking> findByItemIdInOrderByStart(Collection<Integer> itemIds);
 }
