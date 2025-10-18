@@ -4,6 +4,7 @@ import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import ru.practicum.shareit.booking.dto.BookingDto;
+import ru.practicum.shareit.booking.dto.BookingShortDto;
 import ru.practicum.shareit.booking.dto.PostBookingRequest;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.item.mapper.ItemMapper;
@@ -35,6 +36,17 @@ public final class BookingMapper {
         dto.setId(booking.getId());
         dto.setItem(ItemMapper.toItemShortDto(booking.getItem()));
         dto.setBooker(UserMapper.toUserDto(booking.getBooker()));
+        dto.setStatus(booking.getStatus().name());
+        dto.setStart(DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(booking.getStart()));
+        dto.setEnd(DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(booking.getEnd()));
+
+        return dto;
+    }
+
+    public static BookingShortDto toBookingShortDto(Booking booking) {
+        BookingShortDto dto = new BookingShortDto();
+
+        dto.setId(booking.getId());
         dto.setStatus(booking.getStatus().name());
         dto.setStart(DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(booking.getStart()));
         dto.setEnd(DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(booking.getEnd()));
