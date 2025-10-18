@@ -1,6 +1,7 @@
 package ru.practicum.shareit.item.dto;
 
 import lombok.Data;
+import ru.practicum.shareit.booking.dto.BookingShortDto;
 
 import java.util.List;
 
@@ -12,7 +13,7 @@ public class ItemDto {
     private String description;
     private Boolean available;
     private Integer requestId;
-    private String lastBooking;
-    private String nextBooking;
+    private BookingShortDto lastBooking;
+    private BookingShortDto nextBooking;
     private List<CommentDto> comments;
 }
