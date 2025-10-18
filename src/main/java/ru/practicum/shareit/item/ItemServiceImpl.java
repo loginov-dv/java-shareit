@@ -58,26 +58,10 @@ public class ItemServiceImpl implements ItemService {
 
         // только для владельца
         if (item.getOwner().getId().equals(userId)) {
-            List<Booking> bookings = bookingRepository.findByItemIdOrderByStartDesc(itemId);
-            LocalDateTime now = LocalDateTime.now();
-
-            if (!bookings.isEmpty()) {
-                // учитываем только завершённые и предстоящие бронирования
-                List<Booking> pastBookings = bookings.stream()
-                        .filter(booking -> booking.getEnd().isBefore(now))
-                        .toList();
-                List<Booking> futureBookings = bookings.stream()
-                        .filter(booking -> booking.getStart().isAfter(now))
-                        .toList();
-
-                if (!pastBookings.isEmpty()) {
-                    lastBooking = pastBookings.getLast();
-                }
-
-                if (!futureBookings.isEmpty()) {
-                    nextBooking = futureBookings.getFirst();
-                }
-            }
+            List<Booking> bookings = bookingRepository.findByItemIdOrderByStart(itemId);
+            Map<String, Booking> lastAndNext = getLastAndNextBooking(bookings);
+            lastBooking = lastAndNext.get("last");
+            nextBooking = lastAndNext.get("next");
         }
 
         List<Comment> comments = commentRepository.findByItemId(itemId);
@@ -87,7 +71,7 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<ItemShortDto> findByUserId(int userId) {
+    public List<ItemDto> findByUserId(int userId) {
         log.debug("Запрос на получение предметов пользователя с id = {}", userId);
 
         Optional<User> maybeUser = userRepository.findById(userId);
@@ -104,13 +88,23 @@ public class ItemServiceImpl implements ItemService {
         Map<Integer, List<Comment>> commentMap = commentRepository.findByItemIdIn(items.stream()
                 .map(Item::getId).toList()).stream()
                     .collect(Collectors.groupingBy(comment -> comment.getItem().getId()));
+        Map<Integer, List<Booking>> bookingMap = bookingRepository.findByItemIdInOrderByStart(items.stream()
+                .map(Item::getId).toList()).stream()
+                    .collect(Collectors.groupingBy(booking ->booking.getItem().getId()));
 
         log.debug("commentMap.size() = {}", commentMap.size());
+        log.debug("bookingMap.size() = {}", bookingMap.size());
 
-        return items.stream()
-                .map(item -> ItemMapper.toItemShortDto(item,
-                        commentMap.getOrDefault(item.getId(), Collections.emptyList())))
-                .toList();
+        List<ItemDto> itemDtoList = new ArrayList<>();
+
+        for (Item item : items) {
+            Map<String, Booking> lastAndNext = getLastAndNextBooking(bookingMap.get(item.getId()));
+
+            itemDtoList.add(ItemMapper.toItemDto(item, lastAndNext.get("last"), lastAndNext.get("next"),
+                    commentMap.getOrDefault(item.getId(), Collections.emptyList())));
+        }
+
+        return itemDtoList;
     }
 
     @Override
@@ -201,5 +195,36 @@ public class ItemServiceImpl implements ItemService {
         }
 
         return maybeItem.get();
+    }
+
+    // Вспомогательный метод для определения last и next бронирований
+    private Map<String, Booking> getLastAndNextBooking(List<Booking> bookings) {
+        Map<String, Booking> map = new HashMap<>();
+        Booking lastBooking = null;
+        Booking nextBooking = null;
+        LocalDateTime now = LocalDateTime.now();
+
+        if (bookings != null && !bookings.isEmpty()) {
+            // учитываем только завершённые и предстоящие бронирования
+            List<Booking> pastBookings = bookings.stream()
+                    .filter(booking -> booking.getEnd().isBefore(now))
+                    .toList();
+            List<Booking> futureBookings = bookings.stream()
+                    .filter(booking -> booking.getStart().isAfter(now))
+                    .toList();
+
+            if (!pastBookings.isEmpty()) {
+                lastBooking = pastBookings.getLast();
+            }
+
+            if (!futureBookings.isEmpty()) {
+                nextBooking = futureBookings.getFirst();
+            }
+        }
+
+        map.put("last", lastBooking);
+        map.put("next", nextBooking);
+
+        return map;
     }
 }
