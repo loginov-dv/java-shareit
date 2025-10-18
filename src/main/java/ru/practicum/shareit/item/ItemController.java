@@ -41,7 +41,7 @@ public class ItemController {
     }
 
     @GetMapping
-    public List<ItemShortDto> getUserItems(@RequestHeader("X-Sharer-User-Id") @NotNull @Positive Integer userId) {
+    public List<ItemDto> getUserItems(@RequestHeader("X-Sharer-User-Id") @NotNull @Positive Integer userId) {
         log.debug("GET /items");
         log.debug("X-Sharer-User-Id = {}", userId);
         return itemService.findByUserId(userId);
