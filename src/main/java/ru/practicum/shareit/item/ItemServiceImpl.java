@@ -90,7 +90,7 @@ public class ItemServiceImpl implements ItemService {
                     .collect(Collectors.groupingBy(comment -> comment.getItem().getId()));
         Map<Integer, List<Booking>> bookingMap = bookingRepository.findByItemIdInOrderByStart(items.stream()
                 .map(Item::getId).toList()).stream()
-                    .collect(Collectors.groupingBy(booking ->booking.getItem().getId()));
+                    .collect(Collectors.groupingBy(booking -> booking.getItem().getId()));
 
         log.debug("commentMap.size() = {}", commentMap.size());
         log.debug("bookingMap.size() = {}", bookingMap.size());
