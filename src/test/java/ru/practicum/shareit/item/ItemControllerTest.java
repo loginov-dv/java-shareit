@@ -3,22 +3,29 @@ package ru.practicum.shareit.item;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
-import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.item.dto.ItemShortDto;
 import ru.practicum.shareit.item.dto.PatchItemRequest;
 import ru.practicum.shareit.user.dto.PostUserRequest;
 import ru.practicum.shareit.user.dto.UserDto;
+import ru.practicum.shareit.utils.RandomUtils;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+@ActiveProfiles("test")
 @SpringBootTest
 @AutoConfigureMockMvc
+@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
+@Sql(scripts = {"/schema.sql", "/clear.sql"})
 class ItemControllerTest {
     @Autowired
     private MockMvc mockMvc;
@@ -27,7 +34,7 @@ class ItemControllerTest {
 
     @Test
     void shouldCreateItem() throws Exception {
-        ItemDto item = createItem();
+        ItemShortDto item = createItem();
         int ownerId = createUserAndGetId();
 
         mockMvc.perform(post("/items")
@@ -44,7 +51,7 @@ class ItemControllerTest {
 
     @Test
     void shouldNotCreateItemWithoutOwnerId() throws Exception {
-        ItemDto item = createItem();
+        ItemShortDto item = createItem();
 
         mockMvc.perform(post("/items")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -54,7 +61,7 @@ class ItemControllerTest {
 
     @Test
     void shouldNotCreateItemForUnknownUser() throws Exception {
-        ItemDto item = createItem();
+        ItemShortDto item = createItem();
 
         mockMvc.perform(post("/items")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -65,7 +72,7 @@ class ItemControllerTest {
 
     @Test
     void shouldNotCreateItemWithoutName() throws Exception {
-        ItemDto item = createItem();
+        ItemShortDto item = createItem();
         item.setName(null);
         int ownerId = createUserAndGetId();
 
@@ -86,7 +93,7 @@ class ItemControllerTest {
 
     @Test
     void shouldNotCreateItemWithoutDescription() throws Exception {
-        ItemDto item = createItem();
+        ItemShortDto item = createItem();
         item.setDescription(null);
         int ownerId = createUserAndGetId();
 
@@ -107,7 +114,7 @@ class ItemControllerTest {
 
     @Test
     void shouldNotCreateItemWithoutAvailableField() throws Exception {
-        ItemDto item = createItem();
+        ItemShortDto item = createItem();
         item.setAvailable(null);
         int ownerId = createUserAndGetId();
 
@@ -120,7 +127,7 @@ class ItemControllerTest {
 
     @Test
     void shouldGetItem() throws Exception {
-        ItemDto item = createItem();
+        ItemShortDto item = createItem();
         int ownerId = createUserAndGetId();
 
         MvcResult response = mockMvc.perform(post("/items")
@@ -131,7 +138,7 @@ class ItemControllerTest {
                 .andReturn();
 
         String json = response.getResponse().getContentAsString();
-        ItemDto itemDto = objectMapper.readValue(json, ItemDto.class);
+        ItemShortDto itemDto = objectMapper.readValue(json, ItemShortDto.class);
 
         mockMvc.perform(get("/items/" + itemDto.getId())
                         .header("X-Sharer-User-Id", ownerId)
@@ -146,8 +153,8 @@ class ItemControllerTest {
 
     @Test
     void shouldGetAllUsersItems() throws Exception {
-        ItemDto item1 = createItem();
-        ItemDto item2 = createItem();
+        ItemShortDto item1 = createItem();
+        ItemShortDto item2 = createItem();
         int ownerId = createUserAndGetId();
 
         mockMvc.perform(post("/items")
@@ -170,7 +177,7 @@ class ItemControllerTest {
 
     @Test
     void shouldUpdateItem() throws Exception {
-        ItemDto item = createItem();
+        ItemShortDto item = createItem();
         int ownerId = createUserAndGetId();
 
         MvcResult response = mockMvc.perform(post("/items")
@@ -181,7 +188,7 @@ class ItemControllerTest {
                 .andReturn();
 
         String json = response.getResponse().getContentAsString();
-        ItemDto itemDto = objectMapper.readValue(json, ItemDto.class);
+        ItemShortDto itemDto = objectMapper.readValue(json, ItemShortDto.class);
 
         PatchItemRequest updatedItem = new PatchItemRequest();
         updatedItem.setName("new name");
@@ -206,7 +213,7 @@ class ItemControllerTest {
 
     @Test
     void shouldNotUpdateItemWithoutOwnerId() throws Exception {
-        ItemDto item = createItem();
+        ItemShortDto item = createItem();
         int ownerId = createUserAndGetId();
 
         MvcResult response = mockMvc.perform(post("/items")
@@ -217,7 +224,7 @@ class ItemControllerTest {
                 .andReturn();
 
         String json = response.getResponse().getContentAsString();
-        ItemDto itemDto = objectMapper.readValue(json, ItemDto.class);
+        ItemShortDto itemDto = objectMapper.readValue(json, ItemShortDto.class);
 
         PatchItemRequest updatedItem = new PatchItemRequest();
         updatedItem.setName("new name");
@@ -232,7 +239,7 @@ class ItemControllerTest {
 
     @Test
     void shouldNotUpdateSomeoneElsesItem() throws Exception {
-        ItemDto item = createItem();
+        ItemShortDto item = createItem();
         int ownerId = createUserAndGetId();
 
         MvcResult response = mockMvc.perform(post("/items")
@@ -243,7 +250,7 @@ class ItemControllerTest {
                 .andReturn();
 
         String json = response.getResponse().getContentAsString();
-        ItemDto itemDto = objectMapper.readValue(json, ItemDto.class);
+        ItemShortDto itemDto = objectMapper.readValue(json, ItemShortDto.class);
 
         PatchItemRequest updatedItem = new PatchItemRequest();
         updatedItem.setName("new name");
@@ -261,7 +268,7 @@ class ItemControllerTest {
 
     @Test
     void shouldNotUpdateWithInvalidName() throws Exception {
-        ItemDto item = createItem();
+        ItemShortDto item = createItem();
         int ownerId = createUserAndGetId();
 
         MvcResult response = mockMvc.perform(post("/items")
@@ -272,7 +279,7 @@ class ItemControllerTest {
                 .andReturn();
 
         String json = response.getResponse().getContentAsString();
-        ItemDto itemDto = objectMapper.readValue(json, ItemDto.class);
+        ItemShortDto itemDto = objectMapper.readValue(json, ItemShortDto.class);
 
         PatchItemRequest updatedItem = new PatchItemRequest();
         updatedItem.setName("");
@@ -288,9 +295,9 @@ class ItemControllerTest {
 
     @Test
     void shouldGetItemsBySearchString() throws Exception {
-        ItemDto item1 = createItem();
+        ItemShortDto item1 = createItem();
         item1.setName("regerger search regerge");
-        ItemDto item2 = createItem();
+        ItemShortDto item2 = createItem();
         item2.setDescription("search rwegergeg");
         int ownerId = createUserAndGetId();
 
@@ -326,7 +333,7 @@ class ItemControllerTest {
 
     @Test
     void shouldNotFindUnavailableItems() throws Exception {
-        ItemDto item = createItem();
+        ItemShortDto item = createItem();
         item.setName("unavailable");
         item.setAvailable(false);
         int ownerId = createUserAndGetId();
@@ -361,7 +368,7 @@ class ItemControllerTest {
 
     private PostUserRequest createUser() {
         PostUserRequest user = new PostUserRequest();
-        String name = createName();
+        String name = RandomUtils.createName();
 
         user.setName(name);
         user.setEmail(name + "@mail.ru");
@@ -369,31 +376,13 @@ class ItemControllerTest {
         return user;
     }
 
-    private ItemDto createItem() {
-        ItemDto item = new ItemDto();
+    private ItemShortDto createItem() {
+        ItemShortDto item = new ItemShortDto();
 
-        item.setName(createName());
-        item.setDescription(createName(50));
+        item.setName(RandomUtils.createName());
+        item.setDescription(RandomUtils.createName(50));
         item.setAvailable(true);
 
         return item;
-    }
-
-    private String createName() {
-        return createName(10);
-    }
-
-    private String createName(int length) {
-        String chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
-        int charsLength = chars.length();
-        int counter = 0;
-        String result = "";
-
-        while (counter < length) {
-            result += chars.charAt((int)Math.round(Math.random() * (charsLength - 1)));
-            counter++;
-        }
-
-        return result;
     }
 }

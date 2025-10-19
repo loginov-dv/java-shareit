@@ -3,6 +3,7 @@ package ru.practicum.shareit.user;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.exception.EmailConflictException;
 import ru.practicum.shareit.exception.ExceptionConstants;
 import ru.practicum.shareit.exception.LogConstants;
@@ -22,14 +23,16 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
 
     @Override
+    @Transactional
     public UserDto createUser(PostUserRequest request) {
+        log.debug("Запрос на создание пользователя: {}", request);
+
         if (userRepository.findByEmail(request.getEmail()).isPresent()) {
             log.warn(LogConstants.EMAIL_CONFLICT, request.getEmail());
             throw new EmailConflictException(ExceptionConstants.EMAIL_CONFLICT);
         }
 
-        User user = UserMapper.toUser(request);
-        user = userRepository.save(user);
+        User user = userRepository.save(UserMapper.toUser(request));
 
         log.debug("Добавлен пользователь: {}", user);
 
@@ -37,7 +40,10 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public UserDto findById(int userId) {
+        log.debug("Запрос на получение пользователя с id = {}", userId);
+
         Optional<User> maybeUser = userRepository.findById(userId);
 
         if (maybeUser.isEmpty()) {
@@ -45,13 +51,16 @@ public class UserServiceImpl implements UserService {
             throw new NotFoundException(String.format(ExceptionConstants.USER_NOT_FOUND_BY_ID, userId));
         }
 
-        log.debug("Найден пользователь по id = {}: {}", userId, maybeUser.get());
+        log.debug("Пользователь: {}", maybeUser.get());
 
         return UserMapper.toUserDto(maybeUser.get());
     }
 
     @Override
+    @Transactional
     public UserDto update(int userId, PatchUserRequest request) {
+        log.debug("Запрос на обновление пользователя с id = {}", userId);
+
         Optional<User> maybeUser = userRepository.findById(userId);
 
         if (maybeUser.isEmpty()) {
@@ -72,15 +81,17 @@ public class UserServiceImpl implements UserService {
         log.debug("Исходное состояние пользователя: {}", user);
 
         UserMapper.updateUserFields(user, request);
-        userRepository.update(user);
 
+        user = userRepository.save(user);
         log.debug("Изменён пользователь: {}", user);
 
         return UserMapper.toUserDto(user);
     }
 
     @Override
+    @Transactional
     public void deleteById(int userId) {
+        log.debug("Запрос на удаление пользователя с id = {}", userId);
         userRepository.deleteById(userId);
         log.debug("Удалён пользователь с id = {}", userId);
     }

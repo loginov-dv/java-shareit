@@ -28,7 +28,7 @@ public final class UserMapper {
         return user;
     }
 
-    public static User updateUserFields(User user, PatchUserRequest request) {
+    public static void updateUserFields(User user, PatchUserRequest request) {
         if (request.hasName()) {
             user.setName(request.getName());
         }
@@ -36,7 +36,5 @@ public final class UserMapper {
         if (request.hasEmail()) {
             user.setEmail(request.getEmail());
         }
-
-        return user;
     }
 }
