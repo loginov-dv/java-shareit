@@ -4,6 +4,7 @@ import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import ru.practicum.shareit.booking.mapper.BookingMapper;
 import ru.practicum.shareit.booking.model.Booking;
+import ru.practicum.shareit.item.dto.ItemDetailedDto;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.ItemShortDto;
 import ru.practicum.shareit.item.dto.PatchItemRequest;
@@ -15,8 +16,8 @@ import java.util.List;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class ItemMapper {
-    public static ItemShortDto toItemShortDto(Item item) {
-        ItemShortDto dto = new ItemShortDto();
+    public static ItemDto toItemDto(Item item) {
+        ItemDto dto = new ItemDto();
 
         dto.setId(item.getId());
         dto.setOwnerId(item.getOwner().getId());
@@ -28,8 +29,8 @@ public final class ItemMapper {
         return dto;
     }
 
-    public static ItemShortDto toItemShortDto(Item item, List<Comment> comments) {
-        ItemShortDto dto = toItemShortDto(item);
+    public static ItemDto toItemDto(Item item, List<Comment> comments) {
+        ItemDto dto = toItemDto(item);
 
         if (comments != null && !comments.isEmpty()) {
             dto.setComments(comments.stream().map(CommentMapper::toCommentDto).toList());
@@ -38,18 +39,19 @@ public final class ItemMapper {
         return dto;
     }
 
-    public static Item toNewItem(User user, ItemShortDto dto) {
+    public static Item toNewItem(User user, ItemDto dto) {
         Item item = new Item();
 
         item.setName(dto.getName());
         item.setDescription(dto.getDescription());
         item.setOwner(user);
         item.setAvailable(dto.getAvailable());
+        item.setRequestId(dto.getRequestId());
 
         return item;
     }
 
-    public static Item toItem(User user, ItemShortDto dto) {
+    public static Item toItem(User user, ItemDto dto) {
         Item item = toNewItem(user, dto);
 
         if (dto.getId() != null) {
@@ -73,16 +75,16 @@ public final class ItemMapper {
         }
     }
 
-    public static ItemDto toItemDto(Item item, Booking lastBooking, Booking nextBooking,
-                                    List<Comment> comments) {
-        ItemDto dto = new ItemDto();
+    public static ItemDetailedDto toItemDetailedDto(Item item, Booking lastBooking, Booking nextBooking,
+                                                    List<Comment> comments) {
+        ItemDetailedDto dto = new ItemDetailedDto();
 
         dto.setId(item.getId());
         dto.setOwnerId(item.getOwner().getId());
         dto.setName(item.getName());
         dto.setDescription(item.getDescription());
         dto.setAvailable(item.isAvailable());
-        //dto.setRequestId(item.getRequestId());
+        dto.setRequestId(item.getRequestId());
 
         if (lastBooking != null) {
             dto.setLastBooking(BookingMapper.toBookingShortDto(lastBooking));
@@ -95,6 +97,16 @@ public final class ItemMapper {
         if (comments != null && !comments.isEmpty()) {
             dto.setComments(comments.stream().map(CommentMapper::toCommentDto).toList());
         }
+
+        return dto;
+    }
+
+    public static ItemShortDto toItemShortDto(Item item) {
+        ItemShortDto dto = new ItemShortDto();
+
+        dto.setId(item.getId());
+        dto.setName(item.getName());
+        dto.setOwnerId(item.getOwner().getId());
 
         return dto;
     }
