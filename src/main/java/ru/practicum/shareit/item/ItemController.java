@@ -8,9 +8,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.item.dto.ItemDetailedDto;
 import ru.practicum.shareit.item.dto.CommentDto;
-import ru.practicum.shareit.item.dto.ItemShortDto;
+import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.PatchItemRequest;
 
 import java.util.List;
@@ -25,40 +25,40 @@ public class ItemController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public ItemShortDto createItem(@RequestHeader("X-Sharer-User-Id") @NotNull @Positive Integer userId,
-                                   @Valid @RequestBody ItemShortDto itemDto) {
+    public ItemDto createItem(@RequestHeader("X-Sharer-User-Id") @NotNull @Positive Integer userId,
+                              @Valid @RequestBody ItemDto itemDto) {
         log.debug("POST /items");
         log.debug("X-Sharer-User-Id = {}", userId);
         return itemService.createItem(userId, itemDto);
     }
 
     @GetMapping("/{itemId}")
-    public ItemDto getItem(@RequestHeader("X-Sharer-User-Id") @NotNull @Positive Integer userId,
-                           @PathVariable @Positive int itemId) {
+    public ItemDetailedDto getItem(@RequestHeader("X-Sharer-User-Id") @NotNull @Positive Integer userId,
+                                   @PathVariable @Positive int itemId) {
         log.debug("GET /items/{}", itemId);
         log.debug("X-Sharer-User-Id = {}", userId);
         return itemService.findById(userId, itemId);
     }
 
     @GetMapping
-    public List<ItemDto> getUserItems(@RequestHeader("X-Sharer-User-Id") @NotNull @Positive Integer userId) {
+    public List<ItemDetailedDto> getUserItems(@RequestHeader("X-Sharer-User-Id") @NotNull @Positive Integer userId) {
         log.debug("GET /items");
         log.debug("X-Sharer-User-Id = {}", userId);
         return itemService.findByUserId(userId);
     }
 
     @GetMapping("/search")
-    public List<ItemShortDto> search(@RequestHeader("X-Sharer-User-Id") @NotNull @Positive Integer userId,
-                                     @RequestParam String text) {
+    public List<ItemDto> search(@RequestHeader("X-Sharer-User-Id") @NotNull @Positive Integer userId,
+                                @RequestParam String text) {
         log.debug("GET /items/search?text={}", text);
         log.debug("X-Sharer-User-Id = {}", userId);
         return itemService.search(text);
     }
 
     @PatchMapping("/{itemId}")
-    public ItemShortDto update(@RequestHeader("X-Sharer-User-Id") @NotNull @Positive Integer userId,
-                               @PathVariable @Positive int itemId,
-                               @Valid @RequestBody PatchItemRequest request) {
+    public ItemDto update(@RequestHeader("X-Sharer-User-Id") @NotNull @Positive Integer userId,
+                          @PathVariable @Positive int itemId,
+                          @Valid @RequestBody PatchItemRequest request) {
         log.debug("PATCH /items/{}", itemId);
         log.debug("X-Sharer-User-Id = {}", userId);
         return itemService.update(userId, itemId, request);
