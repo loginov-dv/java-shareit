@@ -4,6 +4,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import ru.practicum.shareit.item.model.Item;
 
+import java.util.Collection;
 import java.util.List;
 
 public interface ItemRepository extends JpaRepository<Item, Integer> {
@@ -15,4 +16,8 @@ public interface ItemRepository extends JpaRepository<Item, Integer> {
             "(UPPER(item.name) LIKE UPPER(CONCAT('%', ?1, '%')) " +
             "OR UPPER(item.description) LIKE UPPER(CONCAT('%', ?1, '%')))")
     List<Item> search(String text);
+
+    List<Item> findByRequestId(int requestId);
+
+    List<Item> findByRequestIdIn(Collection<Integer> requestIds);
 }
