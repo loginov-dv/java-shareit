@@ -7,9 +7,9 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.BookingRepository;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.exception.*;
-import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.item.dto.ItemDetailedDto;
 import ru.practicum.shareit.item.dto.CommentDto;
-import ru.practicum.shareit.item.dto.ItemShortDto;
+import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.PatchItemRequest;
 import ru.practicum.shareit.item.mapper.CommentMapper;
 import ru.practicum.shareit.item.mapper.ItemMapper;
@@ -33,21 +33,25 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     @Transactional
-    public ItemShortDto createItem(int userId, ItemShortDto itemDto) {
+    public ItemDto createItem(int userId, ItemDto itemDto) {
         log.debug("Запрос на создание предмета от пользователя с id = {}: {}", userId, itemDto);
 
         User user = findAndGetUser(userId);
         Item item = ItemMapper.toNewItem(user, itemDto);
 
         item = itemRepository.save(item);
-        log.debug("Добавлен предмет: {}", item);
+        if (itemDto.getRequestId() != null) {
+            log.debug("Добавлен предмет на запрос с id = {}: {}", itemDto.getRequestId(), item);
+        } else {
+            log.debug("Добавлен предмет: {}", item);
+        }
 
-        return ItemMapper.toItemShortDto(item);
+        return ItemMapper.toItemDto(item);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public ItemDto findById(int userId, int itemId) {
+    public ItemDetailedDto findById(int userId, int itemId) {
         log.debug("Запрос на получение предмета с id = {}", itemId);
 
         Item item = findAndGetItem(itemId);
@@ -66,12 +70,12 @@ public class ItemServiceImpl implements ItemService {
 
         List<Comment> comments = commentRepository.findByItemId(itemId);
 
-        return ItemMapper.toItemDto(item, lastBooking, nextBooking, comments);
+        return ItemMapper.toItemDetailedDto(item, lastBooking, nextBooking, comments);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public List<ItemDto> findByUserId(int userId) {
+    public List<ItemDetailedDto> findByUserId(int userId) {
         log.debug("Запрос на получение предметов пользователя с id = {}", userId);
 
         Optional<User> maybeUser = userRepository.findById(userId);
@@ -95,12 +99,12 @@ public class ItemServiceImpl implements ItemService {
         log.debug("commentMap.size() = {}", commentMap.size());
         log.debug("bookingMap.size() = {}", bookingMap.size());
 
-        List<ItemDto> itemDtoList = new ArrayList<>();
+        List<ItemDetailedDto> itemDtoList = new ArrayList<>();
 
         for (Item item : items) {
             Map<String, Booking> lastAndNext = getLastAndNextBooking(bookingMap.get(item.getId()));
 
-            itemDtoList.add(ItemMapper.toItemDto(item, lastAndNext.get("last"), lastAndNext.get("next"),
+            itemDtoList.add(ItemMapper.toItemDetailedDto(item, lastAndNext.get("last"), lastAndNext.get("next"),
                     commentMap.getOrDefault(item.getId(), Collections.emptyList())));
         }
 
@@ -109,7 +113,7 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<ItemShortDto> search(String text) {
+    public List<ItemDto> search(String text) {
         if (text == null || text.isBlank()) {
             log.warn("Строка для поиска была пустой");
             return Collections.emptyList();
@@ -122,13 +126,13 @@ public class ItemServiceImpl implements ItemService {
         log.debug("Количество предметов: {}", items.size());
 
         return items.stream()
-                .map(ItemMapper::toItemShortDto)
+                .map(ItemMapper::toItemDto)
                 .toList();
     }
 
     @Override
     @Transactional
-    public ItemShortDto update(int userId, int itemId, PatchItemRequest request) {
+    public ItemDto update(int userId, int itemId, PatchItemRequest request) {
         log.debug("Запрос на обновление предмета с id = {} от пользователя с id = {}", itemId, userId);
 
         User user = findAndGetUser(userId);
@@ -148,7 +152,7 @@ public class ItemServiceImpl implements ItemService {
 
         log.debug("Изменён предмет: {}", item);
 
-        return ItemMapper.toItemShortDto(item);
+        return ItemMapper.toItemDto(item);
     }
 
     @Override
