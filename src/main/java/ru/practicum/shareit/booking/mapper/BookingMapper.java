@@ -34,7 +34,7 @@ public final class BookingMapper {
         BookingDto dto = new BookingDto();
 
         dto.setId(booking.getId());
-        dto.setItem(ItemMapper.toItemShortDto(booking.getItem()));
+        dto.setItem(ItemMapper.toItemDto(booking.getItem()));
         dto.setBooker(UserMapper.toUserDto(booking.getBooker()));
         dto.setStatus(booking.getStatus().name());
         dto.setStart(DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(booking.getStart()));
