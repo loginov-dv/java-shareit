@@ -23,7 +23,7 @@ public class BookingController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public BookingDto createBooking(@RequestHeader("X-Sharer-User-Id") @NotNull @Positive Integer bookerId,
+    public BookingDto createBooking(@RequestHeader("X-Sharer-User-Id") @Positive Integer bookerId,
                                     @Valid @RequestBody PostBookingRequest request) {
         log.debug("POST /bookings");
         log.debug("X-Sharer-User-Id = {}", bookerId);
@@ -31,7 +31,7 @@ public class BookingController {
     }
 
     @PatchMapping("/{bookingId}")
-    public BookingDto changeStatus(@RequestHeader("X-Sharer-User-Id") @NotNull @Positive Integer userId,
+    public BookingDto changeStatus(@RequestHeader("X-Sharer-User-Id") @Positive Integer userId,
                                    @PathVariable @Positive int bookingId,
                                    @RequestParam boolean approved) {
         log.debug("PATCH /bookings/{bookingId}?approved={}", approved);
@@ -40,7 +40,7 @@ public class BookingController {
     }
 
     @GetMapping("/{bookingId}")
-    public BookingDto getBooking(@RequestHeader("X-Sharer-User-Id") @NotNull @Positive Integer userId,
+    public BookingDto getBooking(@RequestHeader("X-Sharer-User-Id") @Positive Integer userId,
                                  @PathVariable @Positive int bookingId) {
         log.debug("GET /bookings/{}", bookingId);
         log.debug("X-Sharer-User-Id = {}", userId);
@@ -48,7 +48,7 @@ public class BookingController {
     }
 
     @GetMapping
-    public List<BookingDto> getAllUsersBookings(@RequestHeader("X-Sharer-User-Id") @NotNull @Positive Integer userId,
+    public List<BookingDto> getAllUsersBookings(@RequestHeader("X-Sharer-User-Id") @Positive Integer userId,
                                                 @RequestParam(required = false, defaultValue = "ALL") String state) {
         log.debug("GET /bookings?state={}", state);
         log.debug("X-Sharer-User-Id = {}", userId);
@@ -56,7 +56,7 @@ public class BookingController {
     }
 
     @GetMapping("/owner")
-    public List<BookingDto> getAllOwnersBookings(@RequestHeader("X-Sharer-User-Id") @NotNull @Positive Integer userId,
+    public List<BookingDto> getAllOwnersBookings(@RequestHeader("X-Sharer-User-Id") @Positive Integer userId,
                                                  @RequestParam(required = false, defaultValue = "ALL") String state) {
         log.debug("GET /bookings/owner?state={}", state);
         log.debug("X-Sharer-User-Id = {}", userId);
