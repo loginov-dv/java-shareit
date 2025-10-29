@@ -23,7 +23,7 @@ public class ItemRequestController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public ItemRequestShortDto createRequest(@RequestHeader("X-Sharer-User-Id") @NotNull @Positive Integer userId,
+    public ItemRequestShortDto createRequest(@RequestHeader("X-Sharer-User-Id") @Positive Integer userId,
                                              @Valid @RequestBody ItemRequestShortDto itemRequestDto) {
         log.debug("POST /requests");
         log.debug("X-Sharer-User-Id = {}", userId);
@@ -31,22 +31,22 @@ public class ItemRequestController {
     }
 
     @GetMapping
-    public List<ItemRequestDto> getUserRequests(@RequestHeader("X-Sharer-User-Id") @NotNull @Positive Integer userId) {
+    public List<ItemRequestDto> getUserRequests(@RequestHeader("X-Sharer-User-Id") @Positive Integer userId) {
         log.debug("GET /requests");
         log.debug("X-Sharer-User-Id = {}", userId);
         return itemRequestService.findByUserId(userId);
     }
 
     @GetMapping("/all")
-    public List<ItemRequestShortDto> getAllRequests(@RequestHeader("X-Sharer-User-Id") @NotNull @Positive Integer userId) {
+    public List<ItemRequestShortDto> getAllRequests(@RequestHeader("X-Sharer-User-Id") @Positive Integer userId) {
         log.debug("GET /requests/all");
         log.debug("X-Sharer-User-Id = {}", userId);
         return itemRequestService.findAll(userId);
     }
 
     @GetMapping("/{requestId}")
-    public ItemRequestDto getRequest(@RequestHeader("X-Sharer-User-Id") @NotNull @Positive Integer userId,
-                                          @PathVariable @Positive int requestId) {
+    public ItemRequestDto getRequest(@RequestHeader("X-Sharer-User-Id") @Positive Integer userId,
+                                     @PathVariable @Positive int requestId) {
         log.debug("GET /requests/{}", requestId);
         log.debug("X-Sharer-User-Id = {}", userId);
         return itemRequestService.findById(requestId);
