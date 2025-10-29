@@ -2,387 +2,450 @@ package ru.practicum.shareit.item;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.NullAndEmptySource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MvcResult;
-import ru.practicum.shareit.item.dto.ItemShortDto;
+import ru.practicum.shareit.exception.ExceptionConstants;
+import ru.practicum.shareit.exception.NoAccessException;
+import ru.practicum.shareit.exception.NotAvailableException;
+import ru.practicum.shareit.exception.NotFoundException;
+import ru.practicum.shareit.item.dto.CommentDto;
+import ru.practicum.shareit.item.dto.ItemDetailedDto;
+import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.PatchItemRequest;
-import ru.practicum.shareit.user.dto.PostUserRequest;
-import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.utils.RandomUtils;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.List;
+import java.util.Random;
+
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ActiveProfiles("test")
-@SpringBootTest
-@AutoConfigureMockMvc
-@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-@Sql(scripts = {"/schema.sql", "/clear.sql"})
+@WebMvcTest(controllers = ItemController.class)
 class ItemControllerTest {
     @Autowired
     private MockMvc mockMvc;
     @Autowired
     private ObjectMapper objectMapper;
+    @MockBean
+    private ItemService itemService;
+
+    private final Random random = new Random();
 
     @Test
     void shouldCreateItem() throws Exception {
-        ItemShortDto item = createItem();
-        int ownerId = createUserAndGetId();
+        ItemDto newItem = createNewItem();
+        ItemDto savedItem = new ItemDto();
+        savedItem.setId(random.nextInt(100));
+        savedItem.setName(newItem.getName());
+        savedItem.setDescription(newItem.getDescription());
+        savedItem.setAvailable(newItem.getAvailable());
+        savedItem.setOwnerId(random.nextInt(100));
+
+        when(itemService.createItem(anyInt(), any())).thenReturn(savedItem);
 
         mockMvc.perform(post("/items")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .header("X-Sharer-User-Id", ownerId)
-                        .content(objectMapper.writeValueAsString(item)))
+                        .header("X-Sharer-User-Id", savedItem.getOwnerId())
+                        .content(objectMapper.writeValueAsString(newItem)))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.id").exists())
-                .andExpect(jsonPath("$.name").value(item.getName()))
-                .andExpect(jsonPath("$.description").value(item.getDescription()))
-                .andExpect(jsonPath("$.available").value(item.getAvailable()))
-                .andExpect(jsonPath("$.ownerId").value(ownerId));
+                .andExpect(jsonPath("$.id").value(savedItem.getId()))
+                .andExpect(jsonPath("$.name").value(newItem.getName()))
+                .andExpect(jsonPath("$.description").value(newItem.getDescription()))
+                .andExpect(jsonPath("$.available").value(newItem.getAvailable()))
+                .andExpect(jsonPath("$.ownerId").value(savedItem.getOwnerId()));
     }
 
     @Test
-    void shouldNotCreateItemWithoutOwnerId() throws Exception {
-        ItemShortDto item = createItem();
+    void shouldNotCreateItemOfUnknownUser() throws Exception {
+        ItemDto newItem = createNewItem();
+
+        when(itemService.createItem(anyInt(), any()))
+                .thenThrow(new NotFoundException(String.format(ExceptionConstants.USER_NOT_FOUND_BY_ID, 999)));
 
         mockMvc.perform(post("/items")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(item)))
+                        .header("X-Sharer-User-Id", 999)
+                        .content(objectMapper.writeValueAsString(newItem)))
+                .andExpect(status().isNotFound());
+    }
+
+    @ParameterizedTest
+    @NullAndEmptySource
+    void shouldNotCreateItemWithNullOrEmptyName(String name) throws Exception {
+        ItemDto newItem = createNewItem();
+        newItem.setName(name);
+
+        mockMvc.perform(post("/items")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header("X-Sharer-User-Id", 1)
+                        .content(objectMapper.writeValueAsString(newItem)))
+                .andExpect(status().isBadRequest());
+    }
+
+    @ParameterizedTest
+    @NullAndEmptySource
+    void shouldNotCreateItemWithNullOrEmptyDescription(String description) throws Exception {
+        ItemDto newItem = createNewItem();
+        newItem.setDescription(description);
+
+        mockMvc.perform(post("/items")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header("X-Sharer-User-Id", 1)
+                        .content(objectMapper.writeValueAsString(newItem)))
                 .andExpect(status().isBadRequest());
     }
 
     @Test
-    void shouldNotCreateItemForUnknownUser() throws Exception {
-        ItemShortDto item = createItem();
+    void shouldNotCreateItemWithNullAvailableField() throws Exception {
+        ItemDto newItem = createNewItem();
+        newItem.setAvailable(null);
 
         mockMvc.perform(post("/items")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .header("X-Sharer-User-Id", 9999)
-                        .content(objectMapper.writeValueAsString(item)))
+                        .header("X-Sharer-User-Id", 1)
+                        .content(objectMapper.writeValueAsString(newItem)))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void shouldGetItemById() throws Exception {
+        ItemDetailedDto item = createItemDetailedDto();
+
+        when(itemService.findById(anyInt(), anyInt()))
+                .thenReturn(item);
+
+        mockMvc.perform(get("/items/" + item.getId())
+                        .header("X-Sharer-User-Id", item.getOwnerId())
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(item.getId()))
+                .andExpect(jsonPath("$.name").value(item.getName()))
+                .andExpect(jsonPath("$.description").value(item.getDescription()))
+                .andExpect(jsonPath("$.available").value(item.getAvailable()))
+                .andExpect(jsonPath("$.ownerId").value(item.getOwnerId()));
+    }
+
+    @Test
+    void shouldNotGetUnknownItem() throws Exception {
+        when(itemService.findById(anyInt(), anyInt()))
+                .thenThrow(new NotFoundException(String.format(ExceptionConstants.ITEM_NOT_FOUND_BY_ID, 999)));
+
+        mockMvc.perform(get("/items/" + 999)
+                        .header("X-Sharer-User-Id", 999)
+                        .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNotFound());
     }
 
     @Test
-    void shouldNotCreateItemWithoutName() throws Exception {
-        ItemShortDto item = createItem();
-        item.setName(null);
-        int ownerId = createUserAndGetId();
-
-        mockMvc.perform(post("/items")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .header("X-Sharer-User-Id", ownerId)
-                        .content(objectMapper.writeValueAsString(item)))
-                .andExpect(status().isBadRequest());
-
-        item.setName("");
-
-        mockMvc.perform(post("/items")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .header("X-Sharer-User-Id", ownerId)
-                        .content(objectMapper.writeValueAsString(item)))
-                .andExpect(status().isBadRequest());
-    }
-
-    @Test
-    void shouldNotCreateItemWithoutDescription() throws Exception {
-        ItemShortDto item = createItem();
-        item.setDescription(null);
-        int ownerId = createUserAndGetId();
-
-        mockMvc.perform(post("/items")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .header("X-Sharer-User-Id", ownerId)
-                        .content(objectMapper.writeValueAsString(item)))
-                .andExpect(status().isBadRequest());
-
-        item.setDescription("");
-
-        mockMvc.perform(post("/items")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .header("X-Sharer-User-Id", ownerId)
-                        .content(objectMapper.writeValueAsString(item)))
-                .andExpect(status().isBadRequest());
-    }
-
-    @Test
-    void shouldNotCreateItemWithoutAvailableField() throws Exception {
-        ItemShortDto item = createItem();
-        item.setAvailable(null);
-        int ownerId = createUserAndGetId();
-
-        mockMvc.perform(post("/items")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .header("X-Sharer-User-Id", ownerId)
-                        .content(objectMapper.writeValueAsString(item)))
-                .andExpect(status().isBadRequest());
-    }
-
-    @Test
-    void shouldGetItem() throws Exception {
-        ItemShortDto item = createItem();
-        int ownerId = createUserAndGetId();
-
-        MvcResult response = mockMvc.perform(post("/items")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .header("X-Sharer-User-Id", ownerId)
-                        .content(objectMapper.writeValueAsString(item)))
-                .andExpect(status().isCreated())
-                .andReturn();
-
-        String json = response.getResponse().getContentAsString();
-        ItemShortDto itemDto = objectMapper.readValue(json, ItemShortDto.class);
-
-        mockMvc.perform(get("/items/" + itemDto.getId())
-                        .header("X-Sharer-User-Id", ownerId)
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(itemDto.getId()))
-                .andExpect(jsonPath("$.name").value(item.getName()))
-                .andExpect(jsonPath("$.description").value(item.getDescription()))
-                .andExpect(jsonPath("$.available").value(item.getAvailable()))
-                .andExpect(jsonPath("$.ownerId").value(ownerId));
-    }
-
-    @Test
     void shouldGetAllUsersItems() throws Exception {
-        ItemShortDto item1 = createItem();
-        ItemShortDto item2 = createItem();
-        int ownerId = createUserAndGetId();
+        ItemDetailedDto item1 = createItemDetailedDto();
+        ItemDetailedDto item2 = createItemDetailedDto();
+        item2.setOwnerId(item1.getOwnerId());
 
-        mockMvc.perform(post("/items")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .header("X-Sharer-User-Id", ownerId)
-                        .content(objectMapper.writeValueAsString(item1)))
-                .andExpect(status().isCreated());
-
-        mockMvc.perform(post("/items")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .header("X-Sharer-User-Id", ownerId)
-                        .content(objectMapper.writeValueAsString(item2)))
-                .andExpect(status().isCreated());
+        when(itemService.findByUserId(anyInt()))
+                .thenReturn(List.of(item1, item2));
 
         mockMvc.perform(get("/items")
-                .header("X-Sharer-User-Id", ownerId))
+                        .header("X-Sharer-User-Id", item1.getOwnerId()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(2));
     }
 
     @Test
-    void shouldUpdateItem() throws Exception {
-        ItemShortDto item = createItem();
-        int ownerId = createUserAndGetId();
+    void shouldNotGetItemsForUnknownUser() throws Exception {
+        when(itemService.findByUserId(anyInt()))
+                .thenThrow(new NotFoundException(String.format(ExceptionConstants.USER_NOT_FOUND_BY_ID, 999)));
 
-        MvcResult response = mockMvc.perform(post("/items")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .header("X-Sharer-User-Id", ownerId)
-                        .content(objectMapper.writeValueAsString(item)))
-                .andExpect(status().isCreated())
-                .andReturn();
-
-        String json = response.getResponse().getContentAsString();
-        ItemShortDto itemDto = objectMapper.readValue(json, ItemShortDto.class);
-
-        PatchItemRequest updatedItem = new PatchItemRequest();
-        updatedItem.setName("new name");
-        updatedItem.setDescription("new description");
-        updatedItem.setAvailable(false);
-
-        mockMvc.perform(patch("/items/" + itemDto.getId())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .header("X-Sharer-User-Id", ownerId)
-                        .content(objectMapper.writeValueAsString(updatedItem)))
-                .andExpect(status().isOk());
-
-        mockMvc.perform(get("/items/" + itemDto.getId())
-                        .header("X-Sharer-User-Id", ownerId)
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(itemDto.getId()))
-                .andExpect(jsonPath("$.name").value(updatedItem.getName()))
-                .andExpect(jsonPath("$.description").value(updatedItem.getDescription()))
-                .andExpect(jsonPath("$.available").value(updatedItem.getAvailable()));
+        mockMvc.perform(get("/items")
+                        .header("X-Sharer-User-Id", 999))
+                .andExpect(status().isNotFound());
     }
 
     @Test
-    void shouldNotUpdateItemWithoutOwnerId() throws Exception {
-        ItemShortDto item = createItem();
-        int ownerId = createUserAndGetId();
+    void shouldUpdateItem() throws Exception {
+        PatchItemRequest request = createPatchItemRequest();
 
-        MvcResult response = mockMvc.perform(post("/items")
+        ItemDto updatedItem = new ItemDto();
+        updatedItem.setOwnerId(random.nextInt(100));
+        updatedItem.setName(request.getName());
+        updatedItem.setDescription(request.getDescription());
+        updatedItem.setAvailable(request.getAvailable());
+        updatedItem.setId(random.nextInt(100));
+
+        when(itemService.update(anyInt(), anyInt(), any()))
+                .thenReturn(updatedItem);
+
+        mockMvc.perform(patch("/items/" + updatedItem.getId())
                         .contentType(MediaType.APPLICATION_JSON)
-                        .header("X-Sharer-User-Id", ownerId)
-                        .content(objectMapper.writeValueAsString(item)))
-                .andExpect(status().isCreated())
-                .andReturn();
+                        .header("X-Sharer-User-Id", updatedItem.getOwnerId())
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(updatedItem.getId()))
+                .andExpect(jsonPath("$.name").value(request.getName()))
+                .andExpect(jsonPath("$.description").value(request.getDescription()))
+                .andExpect(jsonPath("$.available").value(request.getAvailable()))
+                .andExpect(jsonPath("$.ownerId").value(updatedItem.getOwnerId()));
+    }
 
-        String json = response.getResponse().getContentAsString();
-        ItemShortDto itemDto = objectMapper.readValue(json, ItemShortDto.class);
+    @Test
+    void shouldNotUpdateIfNotFoundItemOrUser() throws Exception {
+        PatchItemRequest request = createPatchItemRequest();
 
-        PatchItemRequest updatedItem = new PatchItemRequest();
-        updatedItem.setName("new name");
-        updatedItem.setDescription("new description");
-        updatedItem.setAvailable(false);
+        when(itemService.update(anyInt(), anyInt(), any()))
+                .thenThrow(new NotFoundException("not found"));
 
-        mockMvc.perform(patch("/items/" + itemDto.getId())
+        mockMvc.perform(patch("/items/" + 1)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(updatedItem)))
-                .andExpect(status().isBadRequest());
+                        .header("X-Sharer-User-Id", 1)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isNotFound());
     }
 
     @Test
     void shouldNotUpdateSomeoneElsesItem() throws Exception {
-        ItemShortDto item = createItem();
-        int ownerId = createUserAndGetId();
+        PatchItemRequest request = createPatchItemRequest();
 
-        MvcResult response = mockMvc.perform(post("/items")
+        when(itemService.update(anyInt(), anyInt(), any()))
+                .thenThrow(new NoAccessException("Нет доступа на изменение предмета"));
+
+        mockMvc.perform(patch("/items/" + 1)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .header("X-Sharer-User-Id", ownerId)
-                        .content(objectMapper.writeValueAsString(item)))
-                .andExpect(status().isCreated())
-                .andReturn();
-
-        String json = response.getResponse().getContentAsString();
-        ItemShortDto itemDto = objectMapper.readValue(json, ItemShortDto.class);
-
-        PatchItemRequest updatedItem = new PatchItemRequest();
-        updatedItem.setName("new name");
-        updatedItem.setDescription("new description");
-        updatedItem.setAvailable(false);
-
-        int someoneElse = createUserAndGetId();
-
-        mockMvc.perform(patch("/items/" + itemDto.getId())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .header("X-Sharer-User-Id", someoneElse)
-                        .content(objectMapper.writeValueAsString(updatedItem)))
+                        .header("X-Sharer-User-Id", 1)
+                        .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isForbidden());
     }
 
-    @Test
-    void shouldNotUpdateWithInvalidName() throws Exception {
-        ItemShortDto item = createItem();
-        int ownerId = createUserAndGetId();
+    @ParameterizedTest
+    @ValueSource(strings = {"", " "})
+    void shouldNotUpdateItemIfNewNameIsInvalid(String name) throws Exception {
+        PatchItemRequest request = createPatchItemRequest();
+        request.setName(name);
 
-        MvcResult response = mockMvc.perform(post("/items")
+        mockMvc.perform(patch("/items/" + 1)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .header("X-Sharer-User-Id", ownerId)
-                        .content(objectMapper.writeValueAsString(item)))
-                .andExpect(status().isCreated())
-                .andReturn();
-
-        String json = response.getResponse().getContentAsString();
-        ItemShortDto itemDto = objectMapper.readValue(json, ItemShortDto.class);
-
-        PatchItemRequest updatedItem = new PatchItemRequest();
-        updatedItem.setName("");
-        updatedItem.setDescription("new description");
-        updatedItem.setAvailable(false);
-
-        mockMvc.perform(patch("/items/" + itemDto.getId())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .header("X-Sharer-User-Id", ownerId)
-                        .content(objectMapper.writeValueAsString(updatedItem)))
+                        .header("X-Sharer-User-Id", 1)
+                        .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest());
     }
 
     @Test
     void shouldGetItemsBySearchString() throws Exception {
-        ItemShortDto item1 = createItem();
-        item1.setName("regerger search regerge");
-        ItemShortDto item2 = createItem();
-        item2.setDescription("search rwegergeg");
-        int ownerId = createUserAndGetId();
+        ItemDto item1 = createItemDto();
+        ItemDto item2 = createItemDto();
 
-        mockMvc.perform(post("/items")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .header("X-Sharer-User-Id", ownerId)
-                        .content(objectMapper.writeValueAsString(item1)))
-                .andExpect(status().isCreated());
-
-        mockMvc.perform(post("/items")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .header("X-Sharer-User-Id", ownerId)
-                        .content(objectMapper.writeValueAsString(item2)))
-                .andExpect(status().isCreated());
+        when(itemService.search(anyString()))
+                .thenReturn(List.of(item1, item2));
 
         mockMvc.perform(get("/items/search")
-                        .header("X-Sharer-User-Id", ownerId)
+                        .header("X-Sharer-User-Id", 1)
                         .param("text", "search"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(2));
     }
 
     @Test
-    void shouldNotGetItemsIfSearchStringIsEmpty() throws Exception {
-        int userId = createUserAndGetId();
+    void shouldCreateComment() throws Exception {
+        CommentDto request = new CommentDto();
+        request.setText(RandomUtils.createName(50));
 
-        mockMvc.perform(get("/items/search")
-                        .header("X-Sharer-User-Id", userId)
-                        .param("text", ""))
+        CommentDto savedComment = new CommentDto();
+        savedComment.setCreated(DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(LocalDateTime.now()));
+        savedComment.setId(1);
+        savedComment.setItemId(1);
+        savedComment.setAuthorName(RandomUtils.createName());
+        savedComment.setText(request.getText());
+
+        when(itemService.createComment(anyInt(), anyInt(), any()))
+                .thenReturn(savedComment);
+
+        mockMvc.perform(post("/items/" + 1 + "/comment")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header("X-Sharer-User-Id", 1)
+                        .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.length()").value(0));
+                .andExpect(jsonPath("$.id").value(1))
+                .andExpect(jsonPath("$.text").value(request.getText()))
+                .andExpect(jsonPath("$.itemId").value(savedComment.getItemId()))
+                .andExpect(jsonPath("$.authorName").value(savedComment.getAuthorName()))
+                .andExpect(jsonPath("$.created").value(savedComment.getCreated()));
     }
 
     @Test
-    void shouldNotFindUnavailableItems() throws Exception {
-        ItemShortDto item = createItem();
-        item.setName("unavailable");
-        item.setAvailable(false);
-        int ownerId = createUserAndGetId();
+    void shouldNotCreateCommentIfNotFoundItemOrUser() throws Exception {
+        CommentDto request = new CommentDto();
+        request.setText(RandomUtils.createName(50));
 
+        when(itemService.createComment(anyInt(), anyInt(), any()))
+                .thenThrow(new NotFoundException("not found"));
+
+        mockMvc.perform(post("/items/" + 1 + "/comment")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header("X-Sharer-User-Id", 1)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void shouldNotCreateCommentIfUserHasNoPastBookings() throws Exception {
+        CommentDto request = new CommentDto();
+        request.setText(RandomUtils.createName(50));
+
+        when(itemService.createComment(anyInt(), anyInt(), any()))
+                .thenThrow(new NotAvailableException("Невозможно оставить комментарий (нет завершённой аренды)"));
+
+        mockMvc.perform(post("/items/" + 1 + "/comment")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header("X-Sharer-User-Id", 1)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void shouldReturnBadRequestIfUserHeaderIsMissing() throws Exception {
         mockMvc.perform(post("/items")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .header("X-Sharer-User-Id", ownerId)
-                        .content(objectMapper.writeValueAsString(item)))
-                .andExpect(status().isCreated());
+                        .content(objectMapper.writeValueAsString(createNewItem())))
+                .andExpect(status().isBadRequest());
+
+        mockMvc.perform(get("/items/" + 1)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest());
+
+        mockMvc.perform(get("/items"))
+                .andExpect(status().isBadRequest());
 
         mockMvc.perform(get("/items/search")
-                        .header("X-Sharer-User-Id", ownerId)
-                        .param("text", "unavailable"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.length()").value(0));
-    }
+                        .param("text", "search"))
+                .andExpect(status().isBadRequest());
 
-    private int createUserAndGetId() throws Exception {
-        PostUserRequest user = createUser();
-
-        MvcResult response = mockMvc.perform(post("/users")
+        mockMvc.perform(patch("/items/" + 1)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(user)))
-                .andExpect(status().isCreated())
-                .andReturn();
+                        .content(objectMapper.writeValueAsString(createNewItem())))
+                .andExpect(status().isBadRequest());
 
-        String json = response.getResponse().getContentAsString();
-        UserDto userDto = objectMapper.readValue(json, UserDto.class);
+        CommentDto comment = new CommentDto();
+        comment.setText(RandomUtils.createName(50));
 
-        return userDto.getId();
+        mockMvc.perform(post("/items/" + 1 + "/comment")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(comment)))
+                .andExpect(status().isBadRequest());
     }
 
-    private PostUserRequest createUser() {
-        PostUserRequest user = new PostUserRequest();
-        String name = RandomUtils.createName();
+    @ParameterizedTest
+    @ValueSource(ints = {-1, 0})
+    void shouldReturnBadRequestIfUserHeaderIdNotPositive(int id) throws Exception {
+        mockMvc.perform(post("/items")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header("X-Sharer-User-Id", id)
+                        .content(objectMapper.writeValueAsString(createNewItem())))
+                .andExpect(status().isBadRequest());
 
-        user.setName(name);
-        user.setEmail(name + "@mail.ru");
+        mockMvc.perform(get("/items/" + 1)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header("X-Sharer-User-Id", id))
+                .andExpect(status().isBadRequest());
 
-        return user;
+        mockMvc.perform(get("/items")
+                        .header("X-Sharer-User-Id", id))
+                .andExpect(status().isBadRequest());
+
+        mockMvc.perform(get("/items/search")
+                        .param("text", "search")
+                        .header("X-Sharer-User-Id", id))
+                .andExpect(status().isBadRequest());
+
+        mockMvc.perform(patch("/items/" + 1)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header("X-Sharer-User-Id", id)
+                        .content(objectMapper.writeValueAsString(createNewItem())))
+                .andExpect(status().isBadRequest());
+
+        CommentDto comment = new CommentDto();
+        comment.setText(RandomUtils.createName(50));
+
+        mockMvc.perform(post("/items/" + 1 + "/comment")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header("X-Sharer-User-Id", id)
+                        .content(objectMapper.writeValueAsString(comment)))
+                .andExpect(status().isBadRequest());
     }
 
-    private ItemShortDto createItem() {
-        ItemShortDto item = new ItemShortDto();
+    @ParameterizedTest
+    @ValueSource(ints = {-1, 0})
+    void shouldReturnBadRequestIfItemIdNotPositive(int id) throws Exception {
+        mockMvc.perform(get("/items/" + id)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header("X-Sharer-User-Id", 1))
+                .andExpect(status().isBadRequest());
+
+        mockMvc.perform(patch("/items/" + id)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header("X-Sharer-User-Id", 1)
+                        .content(objectMapper.writeValueAsString(createNewItem())))
+                .andExpect(status().isBadRequest());
+
+        CommentDto comment = new CommentDto();
+        comment.setText(RandomUtils.createName(50));
+
+        mockMvc.perform(post("/items/" + id + "/comment")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header("X-Sharer-User-Id", 1)
+                        .content(objectMapper.writeValueAsString(comment)))
+                .andExpect(status().isBadRequest());
+    }
+
+    private ItemDetailedDto createItemDetailedDto() {
+        ItemDetailedDto dto = new ItemDetailedDto();
+
+        dto.setId(random.nextInt(100));
+        dto.setName(RandomUtils.createName());
+        dto.setDescription(RandomUtils.createName(50));
+        dto.setAvailable(true);
+        dto.setOwnerId(random.nextInt(100));
+
+        return dto;
+    }
+
+    private ItemDto createItemDto() {
+        ItemDto item = createNewItem();
+
+        item.setId(random.nextInt(100));
+        item.setOwnerId(random.nextInt(100));
+
+        return item;
+    }
+
+    private ItemDto createNewItem() {
+        ItemDto item = new ItemDto();
 
         item.setName(RandomUtils.createName());
         item.setDescription(RandomUtils.createName(50));
         item.setAvailable(true);
 
         return item;
+    }
+
+    private PatchItemRequest createPatchItemRequest() {
+        PatchItemRequest request = new PatchItemRequest();
+
+        request.setName("new name");
+        request.setDescription("new description");
+        request.setAvailable(false);
+
+        return request;
     }
 }
