@@ -3,6 +3,7 @@ package ru.practicum.shareit.request;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.exception.ExceptionConstants;
 import ru.practicum.shareit.exception.LogConstants;
 import ru.practicum.shareit.exception.NotFoundException;
@@ -27,6 +28,7 @@ public class ItemRequestServiceImpl implements ItemRequestService {
     private final ItemRepository itemRepository;
 
     @Override
+    @Transactional
     public ItemRequestShortDto createRequest(int userId, ItemRequestShortDto dto) {
         log.debug("Создание нового запроса вещи от пользователя с id = {}: {}", userId, dto);
 
@@ -40,6 +42,7 @@ public class ItemRequestServiceImpl implements ItemRequestService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<ItemRequestDto> findByUserId(int userId) {
         log.debug("Получение всех запросов пользователя с id = {}", userId);
 
@@ -59,6 +62,7 @@ public class ItemRequestServiceImpl implements ItemRequestService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<ItemRequestShortDto> findAll(int userId) {
         log.debug("Получение всех чужих запросов для пользователя с id = {}", userId);
 
@@ -70,6 +74,7 @@ public class ItemRequestServiceImpl implements ItemRequestService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public ItemRequestDto findById(int requestId) {
         log.debug("Получение запроса с id = {}", requestId);
 
@@ -87,6 +92,7 @@ public class ItemRequestServiceImpl implements ItemRequestService {
         return ItemRequestMapper.toItemRequestDto(maybeRequest.get(), items);
     }
 
+    @Transactional(readOnly = true)
     private User findAndGetUser(int userId) {
         Optional<User> maybeUser = userRepository.findById(userId);
 
