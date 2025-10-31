@@ -163,7 +163,7 @@ public class BookingServiceImpl implements BookingService {
                 break;
             }
             case WAITING, REJECTED: {
-                bookings = bookingRepository.findByBookerIdAndStatusOrderByStartDesc(bookerId, state);
+                bookings = bookingRepository.findByBookerIdAndStatusOrderByStartDesc(bookerId, BookingStatus.valueOf(state));
                 break;
             }
         }
@@ -216,7 +216,8 @@ public class BookingServiceImpl implements BookingService {
                 break;
             }
             case WAITING, REJECTED: {
-                bookings = bookingRepository.findByItemOwnerIdAndStatusOrderByStartDesc(ownerId, state);
+                bookings = bookingRepository.findByItemOwnerIdAndStatusOrderByStartDesc(ownerId,
+                        BookingStatus.valueOf(state));
                 break;
             }
         }
