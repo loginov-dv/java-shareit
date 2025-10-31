@@ -1,5 +1,6 @@
 package ru.practicum.shareit.user;
 
+import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
@@ -18,9 +19,9 @@ import static org.junit.jupiter.api.Assertions.*;
 // используем настройки из application-test.properties
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @Sql(scripts = {"/schema.sql", "/clear.sql"})
+@RequiredArgsConstructor(onConstructor_ = @Autowired)
 class UserRepositoryTest {
-    @Autowired
-    private UserRepository userRepository;
+    private final UserRepository userRepository;
 
     @Test
     void shouldSaveUser() {
