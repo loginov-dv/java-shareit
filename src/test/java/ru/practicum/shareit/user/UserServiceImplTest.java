@@ -33,9 +33,7 @@ class UserServiceImplTest {
 
     @Test
     void shouldCreateUser() {
-        PostUserRequest request = new PostUserRequest();
-        request.setName(RandomUtils.createName());
-        request.setEmail(request.getName() + "@mail.ru");
+        PostUserRequest request = createPostUserRequest();
 
         User savedUser = new User();
         savedUser.setId(random.nextInt(100));
@@ -56,9 +54,7 @@ class UserServiceImplTest {
 
     @Test
     void shouldNotCreateUserWithAlreadyExistingEmail() {
-        PostUserRequest request = new PostUserRequest();
-        request.setName(RandomUtils.createName());
-        request.setEmail(request.getName() + "@mail.ru");
+        PostUserRequest request = createPostUserRequest();
 
         User existingUser = new User();
         existingUser.setId(random.nextInt(100));
@@ -109,9 +105,7 @@ class UserServiceImplTest {
 
     @Test
     void shouldUpdateUser() {
-        PatchUserRequest request = new PatchUserRequest();
-        request.setName(RandomUtils.createName());
-        request.setEmail(request.getName() + "@mail.ru");
+        PatchUserRequest request = createPatchUserRequest();
 
         User existingUser = new User();
         existingUser.setId(random.nextInt(100));
@@ -139,9 +133,7 @@ class UserServiceImplTest {
 
     @Test
     void shouldNotUpdateUnknownUser() {
-        PatchUserRequest request = new PatchUserRequest();
-        request.setName(RandomUtils.createName());
-        request.setEmail(request.getName() + "@mail.ru");
+        PatchUserRequest request = createPatchUserRequest();
 
         when(userRepository.findById(anyInt()))
                 .thenReturn(Optional.empty());
@@ -151,9 +143,7 @@ class UserServiceImplTest {
 
     @Test
     void shouldNotUpdateUserIfNewEmailAlreadyExists() {
-        PatchUserRequest request = new PatchUserRequest();
-        request.setName(RandomUtils.createName());
-        request.setEmail(request.getName() + "@mail.ru");
+        PatchUserRequest request = createPatchUserRequest();
 
         User existingUser = new User();
         existingUser.setId(random.nextInt(100));
@@ -171,5 +161,23 @@ class UserServiceImplTest {
                 .thenReturn(Optional.of(userWithTheSameEmail));
 
         assertThrows(EmailConflictException.class, () -> userService.update(existingUser.getId(), request));
+    }
+
+    private PatchUserRequest createPatchUserRequest() {
+        PatchUserRequest request = new PatchUserRequest();
+
+        request.setName(RandomUtils.createName());
+        request.setEmail(request.getName() + "@mail.ru");
+
+        return request;
+    }
+
+    private PostUserRequest createPostUserRequest() {
+        PostUserRequest request = new PostUserRequest();
+
+        request.setName(RandomUtils.createName());
+        request.setEmail(request.getName() + "@mail.ru");
+
+        return request;
     }
 }
