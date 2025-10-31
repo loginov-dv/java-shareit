@@ -332,7 +332,7 @@ class BookingServiceImplTest {
                 .thenReturn(bookings);
         when(bookingRepository.findCurrentByBookerId(anyInt(), any(LocalDateTime.class)))
                 .thenReturn(bookings);
-        when(bookingRepository.findByBookerIdAndStatusOrderByStartDesc(anyInt(), anyString()))
+        when(bookingRepository.findByBookerIdAndStatusOrderByStartDesc(anyInt(), any()))
                 .thenReturn(bookings);
 
         List<BookingDto> result = bookingService.findAllByBookerId(booker.getId(), state.name());
@@ -376,7 +376,7 @@ class BookingServiceImplTest {
                 .thenReturn(bookings);
         when(bookingRepository.findCurrentByOwnerId(anyInt(), any(LocalDateTime.class)))
                 .thenReturn(bookings);
-        when(bookingRepository.findByItemOwnerIdAndStatusOrderByStartDesc(anyInt(), anyString()))
+        when(bookingRepository.findByItemOwnerIdAndStatusOrderByStartDesc(anyInt(), any()))
                 .thenReturn(bookings);
 
         List<BookingDto> result = bookingService.findAllByOwnerId(owner.getId(), state.name());
