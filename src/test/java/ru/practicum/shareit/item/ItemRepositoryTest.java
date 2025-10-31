@@ -1,5 +1,6 @@
 package ru.practicum.shareit.item;
 
+import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
@@ -7,6 +8,8 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
 import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.request.ItemRequestRepository;
+import ru.practicum.shareit.request.model.ItemRequest;
 import ru.practicum.shareit.user.UserRepository;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.utils.RandomUtils;
@@ -21,11 +24,11 @@ import static org.junit.jupiter.api.Assertions.*;
 // используем настройки из application-test.properties
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @Sql(scripts = {"/schema.sql", "/clear.sql"})
+@RequiredArgsConstructor(onConstructor_ = @Autowired)
 class ItemRepositoryTest {
-    @Autowired
-    private ItemRepository itemRepository;
-    @Autowired
-    private UserRepository userRepository;
+    private final ItemRepository itemRepository;
+    private final UserRepository userRepository;
+    private final ItemRequestRepository requestRepository;
 
     @Test
     void shouldSaveItem() {
@@ -113,6 +116,52 @@ class ItemRepositoryTest {
         assertEquals(2, items.size());
     }
 
+    @Test
+    void shouldDeleteItem() {
+        Item item = createItem();
+        item = itemRepository.save(item);
+
+        itemRepository.deleteById(item.getId());
+
+        Optional<Item> maybeFoundItem = itemRepository.findById(item.getId());
+
+        if (maybeFoundItem.isPresent()) {
+            fail();
+        }
+    }
+
+    @Test
+    void shouldFindItemByRequestId() {
+        ItemRequest request = createRequest();
+        Item itemForRequest = createItem();
+
+        itemForRequest.setRequestId(request.getId());
+        itemRepository.save(itemForRequest);
+
+        List<Item> items = itemRepository.findByRequestId(request.getId());
+
+        assertEquals(1, items.size());
+    }
+
+    @Test
+    void shouldFindItemByRequestIdIn() {
+        ItemRequest request1 = createRequest();
+        ItemRequest request2 = createRequest();
+        Item item1 = createItem();
+        Item item2 = createItem();
+
+        item1.setRequestId(request1.getId());
+        item2.setRequestId(request2.getId());
+        itemRepository.save(item1);
+        itemRepository.save(item2);
+
+        List<Item> items = itemRepository.findByRequestIdIn(List.of(request1.getId(), request2.getId()));
+
+        assertEquals(2, items.size());
+        assertTrue(items.contains(item1));
+        assertTrue(items.contains(item2));
+    }
+
     // для предмета сначала создаётся владелец
     private Item createItem() {
         User user = createUser();
@@ -137,5 +186,16 @@ class ItemRepositoryTest {
         user = userRepository.save(user);
 
         return user;
+    }
+
+    private ItemRequest createRequest() {
+        User requestor = createUser();
+        ItemRequest request = new ItemRequest();
+
+        request.setRequestor(requestor);
+        request.setDescription(RandomUtils.createName(20));
+        request = requestRepository.save(request);
+
+        return request;
     }
 }
