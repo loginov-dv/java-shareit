@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
+
 import ru.practicum.shareit.exception.EmailConflictException;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.user.dto.PatchUserRequest;
@@ -13,6 +14,7 @@ import ru.practicum.shareit.user.dto.PostUserRequest;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.utils.RandomUtils;
+import ru.practicum.shareit.utils.UserTestData;
 
 import java.util.Optional;
 import java.util.Random;
@@ -33,7 +35,7 @@ class UserServiceImplTest {
 
     @Test
     void shouldCreateUser() {
-        PostUserRequest request = createPostUserRequest();
+        PostUserRequest request = UserTestData.createPostUserRequest();
 
         User savedUser = new User();
         savedUser.setId(random.nextInt(100));
@@ -54,7 +56,7 @@ class UserServiceImplTest {
 
     @Test
     void shouldNotCreateUserWithAlreadyExistingEmail() {
-        PostUserRequest request = createPostUserRequest();
+        PostUserRequest request = UserTestData.createPostUserRequest();
 
         User existingUser = new User();
         existingUser.setId(random.nextInt(100));
@@ -69,10 +71,7 @@ class UserServiceImplTest {
 
     @Test
     void shouldFindUserById() {
-        User savedUser = new User();
-        savedUser.setId(random.nextInt(100));
-        savedUser.setName(RandomUtils.createName());
-        savedUser.setEmail(savedUser.getName() + "@mail.ru");
+        User savedUser = UserTestData.createUser();
 
         when(userRepository.findById(anyInt()))
                 .thenReturn(Optional.of(savedUser));
@@ -105,12 +104,9 @@ class UserServiceImplTest {
 
     @Test
     void shouldUpdateUser() {
-        PatchUserRequest request = createPatchUserRequest();
+        PatchUserRequest request = UserTestData.createPatchUserRequest();
 
-        User existingUser = new User();
-        existingUser.setId(random.nextInt(100));
-        existingUser.setName(RandomUtils.createName());
-        existingUser.setEmail(existingUser.getName() + "@mail.ru");
+        User existingUser = UserTestData.createUser();
 
         User updatedUser = new User();
         updatedUser.setId(existingUser.getId());
@@ -133,7 +129,7 @@ class UserServiceImplTest {
 
     @Test
     void shouldNotUpdateUnknownUser() {
-        PatchUserRequest request = createPatchUserRequest();
+        PatchUserRequest request = UserTestData.createPatchUserRequest();
 
         when(userRepository.findById(anyInt()))
                 .thenReturn(Optional.empty());
@@ -143,12 +139,9 @@ class UserServiceImplTest {
 
     @Test
     void shouldNotUpdateUserIfNewEmailAlreadyExists() {
-        PatchUserRequest request = createPatchUserRequest();
+        PatchUserRequest request = UserTestData.createPatchUserRequest();
 
-        User existingUser = new User();
-        existingUser.setId(random.nextInt(100));
-        existingUser.setName(RandomUtils.createName());
-        existingUser.setEmail(existingUser.getName() + "@mail.ru");
+        User existingUser = UserTestData.createUser();
 
         User userWithTheSameEmail = new User();
         userWithTheSameEmail.setId(random.nextInt(100));
@@ -161,23 +154,5 @@ class UserServiceImplTest {
                 .thenReturn(Optional.of(userWithTheSameEmail));
 
         assertThrows(EmailConflictException.class, () -> userService.update(existingUser.getId(), request));
-    }
-
-    private PatchUserRequest createPatchUserRequest() {
-        PatchUserRequest request = new PatchUserRequest();
-
-        request.setName(RandomUtils.createName());
-        request.setEmail(request.getName() + "@mail.ru");
-
-        return request;
-    }
-
-    private PostUserRequest createPostUserRequest() {
-        PostUserRequest request = new PostUserRequest();
-
-        request.setName(RandomUtils.createName());
-        request.setEmail(request.getName() + "@mail.ru");
-
-        return request;
     }
 }

@@ -7,8 +7,9 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
+
 import ru.practicum.shareit.user.model.User;
-import ru.practicum.shareit.utils.RandomUtils;
+import ru.practicum.shareit.utils.UserTestData;
 
 import java.util.Optional;
 
@@ -16,7 +17,6 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @ActiveProfiles("test")
 @DataJpaTest
-// используем настройки из application-test.properties
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @Sql(scripts = {"/schema.sql", "/clear.sql"})
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
@@ -25,16 +25,14 @@ class UserRepositoryTest {
 
     @Test
     void shouldSaveUser() {
-        User user = createUser();
-        user = userRepository.save(user);
+        User user = userRepository.save(UserTestData.createNewUser());
 
         assertNotNull(user.getId());
     }
 
     @Test
     void shouldFindUserById() {
-        User user = createUser();
-        user = userRepository.save(user);
+        User user = userRepository.save(UserTestData.createNewUser());
         Optional<User> maybeFoundUser = userRepository.findById(user.getId());
 
         if (maybeFoundUser.isEmpty()) {
@@ -59,8 +57,7 @@ class UserRepositoryTest {
 
     @Test
     void shouldDeleteUser() {
-        User user = createUser();
-        user = userRepository.save(user);
+        User user = userRepository.save(UserTestData.createNewUser());
 
         userRepository.deleteById(user.getId());
 
@@ -73,8 +70,7 @@ class UserRepositoryTest {
 
     @Test
     void shouldFindUserByEmail() {
-        User user = createUser();
-        user = userRepository.save(user);
+        User user = userRepository.save(UserTestData.createNewUser());
         Optional<User> maybeFoundUser = userRepository.findByEmail(user.getEmail());
 
         if (maybeFoundUser.isEmpty()) {
@@ -90,8 +86,7 @@ class UserRepositoryTest {
 
     @Test
     void shouldUpdateUser() {
-        User user = createUser();
-        user = userRepository.save(user);
+        User user = userRepository.save(UserTestData.createNewUser());
 
         user.setName("new name");
         user.setEmail("new@mail.ru");
@@ -108,16 +103,6 @@ class UserRepositoryTest {
         assertEquals(user.getId(), foundUser.getId());
         assertEquals(user.getName(), foundUser.getName());
         assertEquals(user.getEmail(), foundUser.getEmail());
-    }
-
-    private User createUser() {
-        User user = new User();
-        String name = RandomUtils.createName();
-
-        user.setName(name);
-        user.setEmail(name + "@mail.ru");
-
-        return user;
     }
 }
 

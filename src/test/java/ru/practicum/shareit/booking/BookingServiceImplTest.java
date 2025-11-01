@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
+
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.PostBookingRequest;
 import ru.practicum.shareit.booking.model.Booking;
@@ -20,13 +21,14 @@ import ru.practicum.shareit.item.ItemRepository;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.UserRepository;
 import ru.practicum.shareit.user.model.User;
-import ru.practicum.shareit.utils.RandomUtils;
+import ru.practicum.shareit.utils.BookingTestData;
+import ru.practicum.shareit.utils.ItemTestData;
+import ru.practicum.shareit.utils.UserTestData;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
-import java.util.Random;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -45,23 +47,19 @@ class BookingServiceImplTest {
     @MockBean
     private ItemRepository itemRepository;
 
-    private final Random random = new Random();
-
     @Test
     void shouldCreateBooking() {
-        Item item = createItem();
-        User booker = createUser();
-        PostBookingRequest request = new PostBookingRequest();
-        request.setItemId(item.getId());
-        request.setStart(DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(LocalDateTime.now().plusHours(1)));
-        request.setEnd(DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(LocalDateTime.now().plusHours(2)));
+        Item item = ItemTestData.createItem(UserTestData.createUser());
+        User booker = UserTestData.createUser();
+
+        PostBookingRequest request = BookingTestData.createPostBookingRequest(item);
 
         when(userRepository.findById(anyInt()))
                 .thenReturn(Optional.of(booker));
         when(itemRepository.findById(anyInt()))
                 .thenReturn(Optional.of(item));
 
-        Booking booking = createBooking(item, booker, request);
+        Booking booking = BookingTestData.createBooking(item, booker, request);
 
         when(bookingRepository.save(any(Booking.class)))
                 .thenReturn(booking);
@@ -78,11 +76,9 @@ class BookingServiceImplTest {
 
     @Test
     void shouldNotCreateBookingForUnknownUser() {
-        Item item = createItem();
-        PostBookingRequest request = new PostBookingRequest();
-        request.setItemId(item.getId());
-        request.setStart(DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(LocalDateTime.now().plusHours(1)));
-        request.setEnd(DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(LocalDateTime.now().plusHours(2)));
+        Item item = ItemTestData.createItem(UserTestData.createUser());
+
+        PostBookingRequest request = BookingTestData.createPostBookingRequest(item);
 
         when(userRepository.findById(anyInt()))
                 .thenReturn(Optional.empty());
@@ -92,7 +88,8 @@ class BookingServiceImplTest {
 
     @Test
     void shouldNotCreateBookingOfUnknownItem() {
-        User booker = createUser();
+        User booker = UserTestData.createUser();
+
         PostBookingRequest request = new PostBookingRequest();
         request.setItemId(999);
         request.setStart(DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(LocalDateTime.now().plusHours(1)));
@@ -109,8 +106,9 @@ class BookingServiceImplTest {
     @ParameterizedTest
     @MethodSource("provideInvalidDates")
     void shouldNotCreateBookingIfDatesAreInvalid(String start, String end) {
-        Item item = createItem();
-        User booker = createUser();
+        Item item = ItemTestData.createItem(UserTestData.createUser());
+        User booker = UserTestData.createUser();
+
         PostBookingRequest request = new PostBookingRequest();
         request.setItemId(item.getId());
         request.setStart(start);
@@ -143,13 +141,12 @@ class BookingServiceImplTest {
 
     @Test
     void shouldNotCreateBookingIfItemIsUnavailable() {
-        Item item = createItem();
+        Item item = ItemTestData.createItem(UserTestData.createUser());
         item.setAvailable(false);
-        User booker = createUser();
-        PostBookingRequest request = new PostBookingRequest();
-        request.setItemId(item.getId());
-        request.setStart(DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(LocalDateTime.now().plusHours(1)));
-        request.setEnd(DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(LocalDateTime.now().plusHours(2)));
+
+        User booker = UserTestData.createUser();
+
+        PostBookingRequest request = BookingTestData.createPostBookingRequest(item);
 
         when(userRepository.findById(anyInt()))
                 .thenReturn(Optional.of(booker));
@@ -162,10 +159,10 @@ class BookingServiceImplTest {
     @ParameterizedTest
     @ValueSource(booleans = {true, false})
     void shouldChangeBookingStatusByOwner(boolean approved) {
-        User owner = createUser();
-        Item item = createItem(owner);
-        User booker = createUser();
-        Booking booking = createBooking(item, booker, false);
+        User owner = UserTestData.createUser();
+        Item item = ItemTestData.createItem(owner);
+        User booker = UserTestData.createUser();
+        Booking booking = BookingTestData.createBooking(item, booker, false);
 
         when(bookingRepository.findById(anyInt()))
                 .thenReturn(Optional.of(booking));
@@ -195,10 +192,10 @@ class BookingServiceImplTest {
 
     @Test
     void shouldNotChangeBookingStatusByUnknownUser() {
-        User owner = createUser();
-        Item item = createItem(owner);
-        User booker = createUser();
-        Booking booking = createBooking(item, booker, false);
+        User owner = UserTestData.createUser();
+        Item item = ItemTestData.createItem(owner);
+        User booker = UserTestData.createUser();
+        Booking booking = BookingTestData.createBooking(item, booker, false);
 
         when(bookingRepository.findById(anyInt()))
                 .thenReturn(Optional.of(booking));
@@ -218,10 +215,10 @@ class BookingServiceImplTest {
 
     @Test
     void shouldNotChangeBookingStatusIfOwnerNotFound() {
-        User owner = createUser();
-        Item item = createItem(owner);
-        User booker = createUser();
-        Booking booking = createBooking(item, booker, false);
+        User owner = UserTestData.createUser();
+        Item item = ItemTestData.createItem(owner);
+        User booker = UserTestData.createUser();
+        Booking booking = BookingTestData.createBooking(item, booker, false);
 
         when(bookingRepository.findById(anyInt()))
                 .thenReturn(Optional.of(booking));
@@ -234,10 +231,10 @@ class BookingServiceImplTest {
 
     @Test
     void shouldFindBookingByIdForOwner() {
-        User owner = createUser();
-        Item item = createItem(owner);
-        User booker = createUser();
-        Booking booking = createBooking(item, booker, false);
+        User owner = UserTestData.createUser();
+        Item item = ItemTestData.createItem(owner);
+        User booker = UserTestData.createUser();
+        Booking booking = BookingTestData.createBooking(item, booker, false);
 
         when(userRepository.findById(anyInt()))
                 .thenReturn(Optional.of(owner));
@@ -256,10 +253,10 @@ class BookingServiceImplTest {
 
     @Test
     void shouldFindBookingByIdForBooker() {
-        User owner = createUser();
-        Item item = createItem(owner);
-        User booker = createUser();
-        Booking booking = createBooking(item, booker, false);
+        User owner = UserTestData.createUser();
+        Item item = ItemTestData.createItem(owner);
+        User booker = UserTestData.createUser();
+        Booking booking = BookingTestData.createBooking(item, booker, false);
 
         when(userRepository.findById(anyInt()))
                 .thenReturn(Optional.of(booker));
@@ -278,11 +275,12 @@ class BookingServiceImplTest {
 
     @Test
     void shouldNotFindBookingByIdForUnknownUser() {
-        User owner = createUser();
-        Item item = createItem(owner);
-        User booker = createUser();
-        Booking booking = createBooking(item, booker, false);
-        User someSuspiciousPerson = createUser();
+        User owner = UserTestData.createUser();
+        Item item = ItemTestData.createItem(owner);
+        User booker = UserTestData.createUser();
+        Booking booking = BookingTestData.createBooking(item, booker, false);
+
+        User someSuspiciousPerson = UserTestData.createUser();
 
         when(userRepository.findById(anyInt()))
                 .thenReturn(Optional.of(someSuspiciousPerson));
@@ -304,7 +302,7 @@ class BookingServiceImplTest {
 
     @Test
     void shouldNotFindUnknownBookingById() {
-        User watcher = createUser();
+        User watcher = UserTestData.createUser();
 
         when(userRepository.findById(anyInt()))
                 .thenReturn(Optional.of(watcher));
@@ -318,9 +316,11 @@ class BookingServiceImplTest {
     @ParameterizedTest
     @EnumSource(BookingState.class)
     void shouldFindAllBookingsForBooker(BookingState state) {
-        User booker = createUser();
-        List<Booking> bookings = List.of(createBooking(createItem(), booker, true),
-                createBooking(createItem(), booker, false));
+        User booker = UserTestData.createUser();
+        List<Booking> bookings = List.of(
+                BookingTestData.createBooking(ItemTestData.createItem(UserTestData.createUser()), booker, true),
+                BookingTestData.createBooking(ItemTestData.createItem(UserTestData.createUser()), booker, false)
+        );
 
         when(userRepository.findById(anyInt()))
                 .thenReturn(Optional.of(booker));
@@ -350,21 +350,24 @@ class BookingServiceImplTest {
 
     @Test
     void shouldNotReturnAllBookingsForBookerIfBookingStateIsInvalid() {
-        User booker = createUser();
+        User booker = UserTestData.createUser();
 
         when(userRepository.findById(anyInt()))
                 .thenReturn(Optional.of(booker));
 
-        assertThrows(ArgumentException.class, () -> bookingService.findAllByBookerId(booker.getId(), "invalid"));
+        assertThrows(ArgumentException.class,
+                () -> bookingService.findAllByBookerId(booker.getId(), "invalid"));
     }
 
     @ParameterizedTest
     @EnumSource(BookingState.class)
     void shouldFindAllBookingsForOwner(BookingState state) {
-        User owner = createUser();
+        User owner = UserTestData.createUser();
 
-        List<Booking> bookings = List.of(createBooking(createItem(owner), createUser(), true),
-                createBooking(createItem(owner), createUser(), false));
+        List<Booking> bookings = List.of(
+                BookingTestData.createBooking(ItemTestData.createItem(owner), UserTestData.createUser(), true),
+                BookingTestData.createBooking(ItemTestData.createItem(owner), UserTestData.createUser(), false)
+        );
 
         when(userRepository.findById(anyInt()))
                 .thenReturn(Optional.of(owner));
@@ -389,89 +392,18 @@ class BookingServiceImplTest {
         when(userRepository.findById(anyInt()))
                 .thenReturn(Optional.empty());
 
-        assertThrows(NotFoundException.class, () -> bookingService.findAllByOwnerId(999, "state"));
+        assertThrows(NotFoundException.class,
+                () -> bookingService.findAllByOwnerId(999, "state"));
     }
 
     @Test
     void shouldNotReturnAllBookingsForOwnerIfBookingStateIsInvalid() {
-        User owner = createUser();
+        User owner = UserTestData.createUser();
 
         when(userRepository.findById(anyInt()))
                 .thenReturn(Optional.of(owner));
 
-        assertThrows(ArgumentException.class, () -> bookingService.findAllByOwnerId(owner.getId(), "invalid"));
-    }
-
-    private Item createItem(User owner) {
-        Item item = new Item();
-
-        item.setId(random.nextInt(100));
-        item.setName(RandomUtils.createName());
-        item.setDescription(RandomUtils.createName(50));
-        item.setAvailable(true);
-        item.setOwner(owner);
-
-        return item;
-    }
-
-    private Booking createBooking(Item item, User booker, PostBookingRequest request) {
-        Booking booking = new Booking();
-
-        booking.setId(random.nextInt(100));
-        booking.setItem(item);
-        booking.setBooker(booker);
-        booking.setStatus(BookingStatus.WAITING);
-
-        booking.setStart(LocalDateTime.parse(request.getStart(), DateTimeFormatter.ISO_LOCAL_DATE_TIME));
-        booking.setEnd(LocalDateTime.parse(request.getEnd(), DateTimeFormatter.ISO_LOCAL_DATE_TIME));
-
-        return booking;
-    }
-
-    private Booking createBooking(Item item, User booker, boolean isCompleted) {
-        Booking booking = new Booking();
-
-        booking.setId(random.nextInt(100));
-        booking.setItem(item);
-        booking.setBooker(booker);
-        booking.setStatus(BookingStatus.WAITING);
-
-        if (isCompleted) {
-            booking.setStart(LocalDateTime.now().minusHours(random.nextLong(5, 20)));
-        } else {
-            booking.setStart(LocalDateTime.now().plusMinutes(random.nextLong(1, 100)));
-        }
-
-        booking.setEnd(booking.getStart().plusHours(1));
-
-        return booking;
-    }
-
-    private Item createItem(int id) {
-        Item item = new Item();
-
-        item.setId(id);
-        item.setName(RandomUtils.createName());
-        item.setDescription(RandomUtils.createName(50));
-        item.setAvailable(true);
-        item.setOwner(createUser());
-
-        return item;
-    }
-
-    private Item createItem() {
-        return createItem(random.nextInt(100));
-    }
-
-    private User createUser(int id) {
-        User owner = new User();
-        owner.setId(id);
-        owner.setName(RandomUtils.createName());
-        owner.setEmail(owner.getName() + "@mail.ru");
-        return owner;
-    }
-
-    private User createUser() {
-        return createUser(random.nextInt(100));
+        assertThrows(ArgumentException.class,
+                () -> bookingService.findAllByOwnerId(owner.getId(), "invalid"));
     }
 }

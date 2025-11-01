@@ -11,6 +11,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
+
 import ru.practicum.shareit.exception.ExceptionConstants;
 import ru.practicum.shareit.exception.NoAccessException;
 import ru.practicum.shareit.exception.NotAvailableException;
@@ -19,6 +20,7 @@ import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDetailedDto;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.PatchItemRequest;
+import ru.practicum.shareit.utils.ItemTestData;
 import ru.practicum.shareit.utils.RandomUtils;
 
 import java.time.LocalDateTime;
@@ -46,7 +48,8 @@ class ItemControllerTest {
 
     @Test
     void shouldCreateItem() throws Exception {
-        ItemDto newItem = createNewItem();
+        ItemDto newItem = ItemTestData.createNewItemDto();
+
         ItemDto savedItem = new ItemDto();
         savedItem.setId(random.nextInt(100));
         savedItem.setName(newItem.getName());
@@ -54,7 +57,7 @@ class ItemControllerTest {
         savedItem.setAvailable(newItem.getAvailable());
         savedItem.setOwnerId(random.nextInt(100));
 
-        when(itemService.createItem(anyInt(), any())).thenReturn(savedItem);
+        when(itemService.createItem(anyInt(), any(ItemDto.class))).thenReturn(savedItem);
 
         mockMvc.perform(post("/items")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -70,9 +73,9 @@ class ItemControllerTest {
 
     @Test
     void shouldNotCreateItemOfUnknownUser() throws Exception {
-        ItemDto newItem = createNewItem();
+        ItemDto newItem = ItemTestData.createNewItemDto();
 
-        when(itemService.createItem(anyInt(), any()))
+        when(itemService.createItem(anyInt(), any(ItemDto.class)))
                 .thenThrow(new NotFoundException(String.format(ExceptionConstants.USER_NOT_FOUND_BY_ID, 999)));
 
         mockMvc.perform(post("/items")
@@ -85,7 +88,7 @@ class ItemControllerTest {
     @ParameterizedTest
     @NullAndEmptySource
     void shouldNotCreateItemWithNullOrEmptyName(String name) throws Exception {
-        ItemDto newItem = createNewItem();
+        ItemDto newItem = ItemTestData.createNewItemDto();
         newItem.setName(name);
 
         mockMvc.perform(post("/items")
@@ -98,7 +101,7 @@ class ItemControllerTest {
     @ParameterizedTest
     @NullAndEmptySource
     void shouldNotCreateItemWithNullOrEmptyDescription(String description) throws Exception {
-        ItemDto newItem = createNewItem();
+        ItemDto newItem = ItemTestData.createNewItemDto();
         newItem.setDescription(description);
 
         mockMvc.perform(post("/items")
@@ -110,7 +113,7 @@ class ItemControllerTest {
 
     @Test
     void shouldNotCreateItemWithNullAvailableField() throws Exception {
-        ItemDto newItem = createNewItem();
+        ItemDto newItem = ItemTestData.createNewItemDto();
         newItem.setAvailable(null);
 
         mockMvc.perform(post("/items")
@@ -122,7 +125,7 @@ class ItemControllerTest {
 
     @Test
     void shouldGetItemById() throws Exception {
-        ItemDetailedDto item = createItemDetailedDto();
+        ItemDetailedDto item = ItemTestData.createItemDetailedDto();
 
         when(itemService.findById(anyInt(), anyInt()))
                 .thenReturn(item);
@@ -151,8 +154,8 @@ class ItemControllerTest {
 
     @Test
     void shouldGetAllUsersItems() throws Exception {
-        ItemDetailedDto item1 = createItemDetailedDto();
-        ItemDetailedDto item2 = createItemDetailedDto();
+        ItemDetailedDto item1 = ItemTestData.createItemDetailedDto();
+        ItemDetailedDto item2 = ItemTestData.createItemDetailedDto();
         item2.setOwnerId(item1.getOwnerId());
 
         when(itemService.findByUserId(anyInt()))
@@ -176,7 +179,7 @@ class ItemControllerTest {
 
     @Test
     void shouldUpdateItem() throws Exception {
-        PatchItemRequest request = createPatchItemRequest();
+        PatchItemRequest request = ItemTestData.createPatchItemRequest();
 
         ItemDto updatedItem = new ItemDto();
         updatedItem.setOwnerId(random.nextInt(100));
@@ -185,7 +188,7 @@ class ItemControllerTest {
         updatedItem.setAvailable(request.getAvailable());
         updatedItem.setId(random.nextInt(100));
 
-        when(itemService.update(anyInt(), anyInt(), any()))
+        when(itemService.update(anyInt(), anyInt(), any(PatchItemRequest.class)))
                 .thenReturn(updatedItem);
 
         mockMvc.perform(patch("/items/" + updatedItem.getId())
@@ -202,9 +205,9 @@ class ItemControllerTest {
 
     @Test
     void shouldNotUpdateIfNotFoundItemOrUser() throws Exception {
-        PatchItemRequest request = createPatchItemRequest();
+        PatchItemRequest request = ItemTestData.createPatchItemRequest();
 
-        when(itemService.update(anyInt(), anyInt(), any()))
+        when(itemService.update(anyInt(), anyInt(), any(PatchItemRequest.class)))
                 .thenThrow(new NotFoundException("not found"));
 
         mockMvc.perform(patch("/items/" + 1)
@@ -216,9 +219,9 @@ class ItemControllerTest {
 
     @Test
     void shouldNotUpdateSomeoneElsesItem() throws Exception {
-        PatchItemRequest request = createPatchItemRequest();
+        PatchItemRequest request = ItemTestData.createPatchItemRequest();
 
-        when(itemService.update(anyInt(), anyInt(), any()))
+        when(itemService.update(anyInt(), anyInt(), any(PatchItemRequest.class)))
                 .thenThrow(new NoAccessException("Нет доступа на изменение предмета"));
 
         mockMvc.perform(patch("/items/" + 1)
@@ -231,7 +234,7 @@ class ItemControllerTest {
     @ParameterizedTest
     @ValueSource(strings = {"", " "})
     void shouldNotUpdateItemIfNewNameIsInvalid(String name) throws Exception {
-        PatchItemRequest request = createPatchItemRequest();
+        PatchItemRequest request = ItemTestData.createPatchItemRequest();
         request.setName(name);
 
         mockMvc.perform(patch("/items/" + 1)
@@ -243,8 +246,8 @@ class ItemControllerTest {
 
     @Test
     void shouldGetItemsBySearchString() throws Exception {
-        ItemDto item1 = createItemDto();
-        ItemDto item2 = createItemDto();
+        ItemDto item1 = ItemTestData.createItemDto();
+        ItemDto item2 = ItemTestData.createItemDto();
 
         when(itemService.search(anyString()))
                 .thenReturn(List.of(item1, item2));
@@ -258,8 +261,7 @@ class ItemControllerTest {
 
     @Test
     void shouldCreateComment() throws Exception {
-        CommentDto request = new CommentDto();
-        request.setText(RandomUtils.createName(50));
+        CommentDto request = ItemTestData.createNewCommentDto();
 
         CommentDto savedComment = new CommentDto();
         savedComment.setCreated(DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(LocalDateTime.now()));
@@ -268,7 +270,7 @@ class ItemControllerTest {
         savedComment.setAuthorName(RandomUtils.createName());
         savedComment.setText(request.getText());
 
-        when(itemService.createComment(anyInt(), anyInt(), any()))
+        when(itemService.createComment(anyInt(), anyInt(), any(CommentDto.class)))
                 .thenReturn(savedComment);
 
         mockMvc.perform(post("/items/" + 1 + "/comment")
@@ -285,10 +287,9 @@ class ItemControllerTest {
 
     @Test
     void shouldNotCreateCommentIfNotFoundItemOrUser() throws Exception {
-        CommentDto request = new CommentDto();
-        request.setText(RandomUtils.createName(50));
+        CommentDto request = ItemTestData.createNewCommentDto();
 
-        when(itemService.createComment(anyInt(), anyInt(), any()))
+        when(itemService.createComment(anyInt(), anyInt(), any(CommentDto.class)))
                 .thenThrow(new NotFoundException("not found"));
 
         mockMvc.perform(post("/items/" + 1 + "/comment")
@@ -300,10 +301,9 @@ class ItemControllerTest {
 
     @Test
     void shouldNotCreateCommentIfUserHasNoPastBookings() throws Exception {
-        CommentDto request = new CommentDto();
-        request.setText(RandomUtils.createName(50));
+        CommentDto request = ItemTestData.createNewCommentDto();
 
-        when(itemService.createComment(anyInt(), anyInt(), any()))
+        when(itemService.createComment(anyInt(), anyInt(), any(CommentDto.class)))
                 .thenThrow(new NotAvailableException("Невозможно оставить комментарий (нет завершённой аренды)"));
 
         mockMvc.perform(post("/items/" + 1 + "/comment")
@@ -317,7 +317,7 @@ class ItemControllerTest {
     void shouldReturnBadRequestIfUserHeaderIsMissing() throws Exception {
         mockMvc.perform(post("/items")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(createNewItem())))
+                        .content(objectMapper.writeValueAsString(ItemTestData.createNewItemDto())))
                 .andExpect(status().isBadRequest());
 
         mockMvc.perform(get("/items/" + 1)
@@ -333,15 +333,12 @@ class ItemControllerTest {
 
         mockMvc.perform(patch("/items/" + 1)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(createNewItem())))
+                        .content(objectMapper.writeValueAsString(ItemTestData.createNewItemDto())))
                 .andExpect(status().isBadRequest());
-
-        CommentDto comment = new CommentDto();
-        comment.setText(RandomUtils.createName(50));
 
         mockMvc.perform(post("/items/" + 1 + "/comment")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(comment)))
+                        .content(objectMapper.writeValueAsString(ItemTestData.createNewCommentDto())))
                 .andExpect(status().isBadRequest());
     }
 
@@ -351,7 +348,7 @@ class ItemControllerTest {
         mockMvc.perform(post("/items")
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("X-Sharer-User-Id", id)
-                        .content(objectMapper.writeValueAsString(createNewItem())))
+                        .content(objectMapper.writeValueAsString(ItemTestData.createNewItemDto())))
                 .andExpect(status().isBadRequest());
 
         mockMvc.perform(get("/items/" + 1)
@@ -371,16 +368,13 @@ class ItemControllerTest {
         mockMvc.perform(patch("/items/" + 1)
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("X-Sharer-User-Id", id)
-                        .content(objectMapper.writeValueAsString(createNewItem())))
+                        .content(objectMapper.writeValueAsString(ItemTestData.createNewItemDto())))
                 .andExpect(status().isBadRequest());
-
-        CommentDto comment = new CommentDto();
-        comment.setText(RandomUtils.createName(50));
 
         mockMvc.perform(post("/items/" + 1 + "/comment")
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("X-Sharer-User-Id", id)
-                        .content(objectMapper.writeValueAsString(comment)))
+                        .content(objectMapper.writeValueAsString(ItemTestData.createNewCommentDto())))
                 .andExpect(status().isBadRequest());
     }
 
@@ -395,57 +389,13 @@ class ItemControllerTest {
         mockMvc.perform(patch("/items/" + id)
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("X-Sharer-User-Id", 1)
-                        .content(objectMapper.writeValueAsString(createNewItem())))
+                        .content(objectMapper.writeValueAsString(ItemTestData.createNewItemDto())))
                 .andExpect(status().isBadRequest());
-
-        CommentDto comment = new CommentDto();
-        comment.setText(RandomUtils.createName(50));
 
         mockMvc.perform(post("/items/" + id + "/comment")
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("X-Sharer-User-Id", 1)
-                        .content(objectMapper.writeValueAsString(comment)))
+                        .content(objectMapper.writeValueAsString(ItemTestData.createNewCommentDto())))
                 .andExpect(status().isBadRequest());
-    }
-
-    private ItemDetailedDto createItemDetailedDto() {
-        ItemDetailedDto dto = new ItemDetailedDto();
-
-        dto.setId(random.nextInt(100));
-        dto.setName(RandomUtils.createName());
-        dto.setDescription(RandomUtils.createName(50));
-        dto.setAvailable(true);
-        dto.setOwnerId(random.nextInt(100));
-
-        return dto;
-    }
-
-    private ItemDto createItemDto() {
-        ItemDto item = createNewItem();
-
-        item.setId(random.nextInt(100));
-        item.setOwnerId(random.nextInt(100));
-
-        return item;
-    }
-
-    private ItemDto createNewItem() {
-        ItemDto item = new ItemDto();
-
-        item.setName(RandomUtils.createName());
-        item.setDescription(RandomUtils.createName(50));
-        item.setAvailable(true);
-
-        return item;
-    }
-
-    private PatchItemRequest createPatchItemRequest() {
-        PatchItemRequest request = new PatchItemRequest();
-
-        request.setName("new name");
-        request.setDescription("new description");
-        request.setAvailable(false);
-
-        return request;
     }
 }

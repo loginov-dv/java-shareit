@@ -11,11 +11,12 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
+
 import ru.practicum.shareit.exception.ExceptionConstants;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.request.dto.ItemRequestDto;
 import ru.practicum.shareit.request.dto.ItemRequestShortDto;
-import ru.practicum.shareit.utils.RandomUtils;
+import ru.practicum.shareit.utils.ItemRequestTestData;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -43,14 +44,15 @@ class ItemRequestControllerTest {
 
     @Test
     void shouldCreateItemRequest() throws Exception {
-        ItemRequestShortDto request = createNewItemRequest();
+        ItemRequestShortDto request = ItemRequestTestData.createNewItemRequest();
+
         ItemRequestShortDto savedRequest = new ItemRequestShortDto();
         savedRequest.setDescription(request.getDescription());
         savedRequest.setRequestorId(request.getRequestorId());
         savedRequest.setId(random.nextInt(100));
         savedRequest.setCreated(DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(LocalDateTime.now()));
 
-        when(requestService.createRequest(anyInt(), any()))
+        when(requestService.createRequest(anyInt(), any(ItemRequestShortDto.class)))
                 .thenReturn(savedRequest);
 
         mockMvc.perform(post("/requests")
@@ -66,22 +68,20 @@ class ItemRequestControllerTest {
 
     @Test
     void shouldNotCreateItemRequestIfRequestorNotFound() throws Exception {
-        ItemRequestShortDto request = createNewItemRequest();
-
-        when(requestService.createRequest(anyInt(), any()))
+        when(requestService.createRequest(anyInt(), any(ItemRequestShortDto.class)))
                 .thenThrow(new NotFoundException(String.format(ExceptionConstants.USER_NOT_FOUND_BY_ID, 999)));
 
         mockMvc.perform(post("/requests")
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("X-Sharer-User-Id", 999)
-                        .content(objectMapper.writeValueAsString(request)))
+                        .content(objectMapper.writeValueAsString(ItemRequestTestData.createNewItemRequest())))
                 .andExpect(status().isNotFound());
     }
 
     @ParameterizedTest
     @NullAndEmptySource
     void shouldNotCreateItemRequestWithNullOrEmptyDescription(String description) throws Exception {
-        ItemRequestShortDto request = createNewItemRequest();
+        ItemRequestShortDto request = ItemRequestTestData.createNewItemRequest();
         request.setDescription(description);
 
         mockMvc.perform(post("/requests")
@@ -93,14 +93,14 @@ class ItemRequestControllerTest {
 
     @Test
     void shouldGetItemRequestById() throws Exception {
-        ItemRequestDto dto = createItemRequestDto();
+        ItemRequestDto dto = ItemRequestTestData.createItemRequestDto();
 
         when(requestService.findById(anyInt()))
                 .thenReturn(dto);
 
         mockMvc.perform(get("/requests/" + dto.getId())
                         .contentType(MediaType.APPLICATION_JSON)
-                        .header("X-Sharer-User-Id", random.nextInt(100)))
+                        .header("X-Sharer-User-Id", 1))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(dto.getId()))
                 .andExpect((jsonPath("$.description").value(dto.getDescription())))
@@ -115,14 +115,14 @@ class ItemRequestControllerTest {
 
         mockMvc.perform(get("/requests/" + 999)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .header("X-Sharer-User-Id", random.nextInt(100)))
+                        .header("X-Sharer-User-Id", 1))
                 .andExpect(status().isNotFound());
     }
 
     @Test
     void shouldGetAllItemRequestsByRequestorId() throws Exception {
-        ItemRequestDto itemRequest1 = createItemRequestDto();
-        ItemRequestDto itemRequest2 = createItemRequestDto();
+        ItemRequestDto itemRequest1 = ItemRequestTestData.createItemRequestDto();
+        ItemRequestDto itemRequest2 = ItemRequestTestData.createItemRequestDto();
         itemRequest2.setRequestorId(itemRequest1.getRequestorId());
 
         when(requestService.findByUserId(anyInt()))
@@ -148,26 +148,24 @@ class ItemRequestControllerTest {
 
     @Test
     void shouldGetAllItemRequests() throws Exception {
-        ItemRequestShortDto itemRequest1 = createItemRequestShortDto();
-        ItemRequestShortDto itemRequest2 = createItemRequestShortDto();
+        ItemRequestShortDto itemRequest1 = ItemRequestTestData.createItemRequestShortDto();
+        ItemRequestShortDto itemRequest2 = ItemRequestTestData.createItemRequestShortDto();
 
         when(requestService.findAll(anyInt()))
                 .thenReturn(List.of(itemRequest1, itemRequest2));
 
         mockMvc.perform(get("/requests/all")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .header("X-Sharer-User-Id", random.nextInt(100)))
+                        .header("X-Sharer-User-Id", 1))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(2));
     }
 
     @Test
     void shouldReturnBadRequestIfUserHeaderIsMissing() throws Exception {
-        ItemRequestShortDto request = createNewItemRequest();
-
         mockMvc.perform(post("/requests")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
+                        .content(objectMapper.writeValueAsString(ItemRequestTestData.createNewItemRequest())))
                 .andExpect(status().isBadRequest());
 
         mockMvc.perform(get("/requests/" + 999)
@@ -186,12 +184,10 @@ class ItemRequestControllerTest {
     @ParameterizedTest
     @ValueSource(ints = {-1, 0})
     void shouldReturnBadRequestIfUserHeaderIdNotPositive(int id) throws Exception {
-        ItemRequestShortDto request = createNewItemRequest();
-
         mockMvc.perform(post("/requests")
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("X-Sharer-User-Id", id)
-                        .content(objectMapper.writeValueAsString(request)))
+                        .content(objectMapper.writeValueAsString(ItemRequestTestData.createNewItemRequest())))
                 .andExpect(status().isBadRequest());
 
         mockMvc.perform(get("/requests/" + 999)
@@ -219,34 +215,5 @@ class ItemRequestControllerTest {
                 .andExpect(status().isBadRequest());
     }
 
-    private ItemRequestShortDto createNewItemRequest() {
-        ItemRequestShortDto dto = new ItemRequestShortDto();
 
-        dto.setRequestorId(random.nextInt(100));
-        dto.setDescription(RandomUtils.createName(50));
-
-        return dto;
-    }
-
-    private ItemRequestDto createItemRequestDto() {
-        ItemRequestDto dto = new ItemRequestDto();
-
-        dto.setId(random.nextInt(100));
-        dto.setCreated(DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(LocalDateTime.now()));
-        dto.setRequestorId(random.nextInt(100));
-        dto.setDescription(RandomUtils.createName(50));
-
-        return dto;
-    }
-
-    private ItemRequestShortDto createItemRequestShortDto() {
-        ItemRequestShortDto dto = new ItemRequestShortDto();
-
-        dto.setId(random.nextInt(100));
-        dto.setCreated(DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(LocalDateTime.now()));
-        dto.setRequestorId(random.nextInt(100));
-        dto.setDescription(RandomUtils.createName(50));
-
-        return dto;
-    }
 }

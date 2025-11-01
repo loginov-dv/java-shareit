@@ -13,7 +13,10 @@ import ru.practicum.shareit.request.dto.ItemRequestShortDto;
 import ru.practicum.shareit.request.model.ItemRequest;
 import ru.practicum.shareit.user.UserRepository;
 import ru.practicum.shareit.user.model.User;
+import ru.practicum.shareit.utils.ItemRequestTestData;
+import ru.practicum.shareit.utils.ItemTestData;
 import ru.practicum.shareit.utils.RandomUtils;
+import ru.practicum.shareit.utils.UserTestData;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -43,7 +46,9 @@ class ItemRequestServiceImplTest {
     void shouldCreateRequest() {
         ItemRequestShortDto request = new ItemRequestShortDto();
         request.setDescription(RandomUtils.createName(50));
-        User requestor = createUser();
+
+        User requestor = UserTestData.createUser();
+
         ItemRequest savedRequest = new ItemRequest();
         savedRequest.setCreated(LocalDateTime.now());
         savedRequest.setRequestor(requestor);
@@ -76,11 +81,15 @@ class ItemRequestServiceImplTest {
 
     @Test
     void shouldFindAllRequestsByRequestorId() {
-        User requestor = createUser();
-        ItemRequest request1 = createRequest(requestor);
-        ItemRequest request2 = createRequest(requestor);
+        User requestor = UserTestData.createUser();
+
+        ItemRequest request1 = ItemRequestTestData.createRequest(requestor);
+        ItemRequest request2 = ItemRequestTestData.createRequest(requestor);
         // предметы только для первого запроса
-        List<Item> items = List.of(createItem(request1), createItem(request1));
+        List<Item> items = List.of(
+                ItemTestData.createItem(UserTestData.createUser(), request1),
+                ItemTestData.createItem(UserTestData.createUser(), request1)
+        );
 
         when(userRepository.findById(anyInt()))
                 .thenReturn(Optional.of(requestor));
@@ -128,7 +137,10 @@ class ItemRequestServiceImplTest {
 
     @Test
     void shouldFindAllRequests() {
-        List<ItemRequest> requests = List.of(createRequest(createUser()), createRequest(createUser()));
+        List<ItemRequest> requests = List.of(
+                ItemRequestTestData.createRequest(UserTestData.createUser()),
+                ItemRequestTestData.createRequest(UserTestData.createUser())
+        );
 
         when(itemRequestRepository.findByRequestorIdNotOrderByCreatedDesc(anyInt()))
                 .thenReturn(requests);
@@ -140,8 +152,12 @@ class ItemRequestServiceImplTest {
 
     @Test
     void shouldFindRequestById() {
-        ItemRequest request = createRequest(createUser());
-        List<Item> items = List.of(createItem(request), createItem(request));
+        ItemRequest request = ItemRequestTestData.createRequest(UserTestData.createUser());
+
+        List<Item> items = List.of(
+                ItemTestData.createItem(UserTestData.createUser(), request),
+                ItemTestData.createItem(UserTestData.createUser(), request)
+        );
 
         when(itemRequestRepository.findById(anyInt()))
                 .thenReturn(Optional.of(request));
@@ -157,20 +173,7 @@ class ItemRequestServiceImplTest {
         assertEquals(items.size(), result.getItems().size());
     }
 
-    private Item createItem(ItemRequest request) {
-        Item item = new Item();
-
-        item.setId(random.nextInt(100));
-        item.setName(RandomUtils.createName());
-        item.setDescription(RandomUtils.createName(50));
-        item.setAvailable(true);
-        item.setOwner(createUser());
-        item.setRequestId(request.getId());
-
-        return item;
-    }
-
-    private ItemRequest createRequest(User requestor) {
+    /*private ItemRequest createRequest(User requestor) {
         ItemRequest request = new ItemRequest();
 
         request.setId(random.nextInt(100));
@@ -179,17 +182,5 @@ class ItemRequestServiceImplTest {
         request.setRequestor(requestor);
 
         return request;
-    }
-
-    private User createUser(int id) {
-        User owner = new User();
-        owner.setId(id);
-        owner.setName(RandomUtils.createName());
-        owner.setEmail(owner.getName() + "@mail.ru");
-        return owner;
-    }
-
-    private User createUser() {
-        return createUser(random.nextInt(100));
-    }
+    }*/
 }

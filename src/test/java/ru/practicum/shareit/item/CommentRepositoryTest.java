@@ -7,11 +7,13 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
+
 import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.UserRepository;
 import ru.practicum.shareit.user.model.User;
-import ru.practicum.shareit.utils.RandomUtils;
+import ru.practicum.shareit.utils.ItemTestData;
+import ru.practicum.shareit.utils.UserTestData;
 
 import java.util.List;
 import java.util.Optional;
@@ -30,16 +32,21 @@ class CommentRepositoryTest {
 
     @Test
     void shouldSaveComment() {
-        Comment comment = createComment();
-        comment = commentRepository.save(comment);
+        User owner = userRepository.save(UserTestData.createNewUser());
+        Item item = itemRepository.save(ItemTestData.createNewItem(owner));
+        User author = userRepository.save(UserTestData.createNewUser());
+        Comment comment = commentRepository.save(ItemTestData.createNewComment(item, author));
 
         assertNotNull(comment.getId());
     }
 
     @Test
     void shouldFindCommentById() {
-        Comment comment = createComment();
-        comment = commentRepository.save(comment);
+        User owner = userRepository.save(UserTestData.createNewUser());
+        Item item = itemRepository.save(ItemTestData.createNewItem(owner));
+        User author = userRepository.save(UserTestData.createNewUser());
+        Comment comment = commentRepository.save(ItemTestData.createNewComment(item, author));
+
         Optional<Comment> maybeFoundComment = commentRepository.findById(comment.getId());
 
         if (maybeFoundComment.isEmpty()) {
@@ -57,11 +64,14 @@ class CommentRepositoryTest {
 
     @Test
     void shouldFindCommentsByItemId() {
-        Item item = createItem();
-        Comment comment1 = createComment(item);
-        Comment comment2 = createComment(item);
-        comment1 = commentRepository.save(comment1);
-        comment2 = commentRepository.save(comment2);
+        User owner = userRepository.save(UserTestData.createNewUser());
+        Item item = itemRepository.save(ItemTestData.createNewItem(owner));
+
+        User author1 = userRepository.save(UserTestData.createNewUser());
+        User author2 = userRepository.save(UserTestData.createNewUser());
+
+        Comment comment1 = commentRepository.save(ItemTestData.createNewComment(item, author1));
+        Comment comment2 = commentRepository.save(ItemTestData.createNewComment(item, author2));
 
         List<Comment> commentList = commentRepository.findByItemId(item.getId());
 
@@ -72,12 +82,15 @@ class CommentRepositoryTest {
 
     @Test
     void shouldFindCommentsByItemIdIn() {
-        Item item1 = createItem();
-        Item item2 = createItem();
-        Comment comment1 = createComment(item1);
-        Comment comment2 = createComment(item2);
-        comment1 = commentRepository.save(comment1);
-        comment2 = commentRepository.save(comment2);
+        User owner = userRepository.save(UserTestData.createNewUser());
+
+        Item item1 = itemRepository.save(ItemTestData.createNewItem(owner));
+        Item item2 = itemRepository.save(ItemTestData.createNewItem(owner));
+
+        User author = userRepository.save(UserTestData.createNewUser());
+
+        Comment comment1 = commentRepository.save(ItemTestData.createNewComment(item1, author));
+        Comment comment2 = commentRepository.save(ItemTestData.createNewComment(item2, author));
 
         List<Comment> commentList = commentRepository.findByItemIdIn(List.of(item1.getId(), item2.getId()));
 
@@ -85,47 +98,4 @@ class CommentRepositoryTest {
         assertTrue(commentList.contains(comment1));
         assertTrue(commentList.contains(comment2));
     }
-
-    private Comment createComment() {
-        Item item = createItem();
-
-        return createComment(item);
-    }
-
-    private Comment createComment(Item item) {
-        Comment comment = new Comment();
-
-        comment.setItem(item);
-        comment.setAuthor(item.getOwner());
-        comment.setText(RandomUtils.createName(100));
-
-        return comment;
-    }
-
-    private Item createItem() {
-        User user = createUser();
-        Item item = new Item();
-
-        item.setName(RandomUtils.createName());
-        item.setDescription(RandomUtils.createName(50));
-        item.setAvailable(true);
-        item.setOwner(user);
-
-        item = itemRepository.save(item);
-
-        return item;
-    }
-
-    private User createUser() {
-        User user = new User();
-        String name = RandomUtils.createName();
-
-        user.setName(name);
-        user.setEmail(name + "@mail.ru");
-
-        user = userRepository.save(user);
-
-        return user;
-    }
-
 }

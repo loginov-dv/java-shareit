@@ -9,13 +9,16 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
+
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.model.BookingStatus;
 import ru.practicum.shareit.item.ItemRepository;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.UserRepository;
 import ru.practicum.shareit.user.model.User;
-import ru.practicum.shareit.utils.RandomUtils;
+import ru.practicum.shareit.utils.BookingTestData;
+import ru.practicum.shareit.utils.ItemTestData;
+import ru.practicum.shareit.utils.UserTestData;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -35,16 +38,20 @@ class BookingRepositoryTest {
 
     @Test
     void shouldSaveBooking() {
-        Booking booking = createBooking();
-        booking = bookingRepository.save(booking);
+        User owner = userRepository.save(UserTestData.createNewUser());
+        Item item = itemRepository.save(ItemTestData.createNewItem(owner));
+        User booker = userRepository.save(UserTestData.createNewUser());
+        Booking booking = bookingRepository.save(BookingTestData.createNewBooking(item, booker));
 
         assertNotNull(booking.getId());
     }
 
     @Test
     void shouldFindBookingById() {
-        Booking booking = createBooking();
-        booking = bookingRepository.save(booking);
+        User owner = userRepository.save(UserTestData.createNewUser());
+        Item item = itemRepository.save(ItemTestData.createNewItem(owner));
+        User booker = userRepository.save(UserTestData.createNewUser());
+        Booking booking = bookingRepository.save(BookingTestData.createNewBooking(item, booker));
         Optional<Booking> maybeFoundBooking = bookingRepository.findById(booking.getId());
 
         if (maybeFoundBooking.isEmpty()) {
@@ -64,14 +71,16 @@ class BookingRepositoryTest {
     @ParameterizedTest
     @EnumSource(value = BookingStatus.class, names = {"APPROVED", "REJECTED", "CANCELED"})
     void shouldFindBookingsByBookerIdAndStatus(BookingStatus status) {
-        User booker = createUser();
-        Booking bookingWaiting = createBooking(); // одно бронирование всегда со статусом WAITING
-        bookingWaiting.setBooker(booker);
-        Booking bookingWithStatus = createBooking();
-        bookingWithStatus.setBooker(booker);
+        User owner = userRepository.save(UserTestData.createNewUser());
+        Item item1 = itemRepository.save(ItemTestData.createNewItem(owner));
+        Item item2 = itemRepository.save(ItemTestData.createNewItem(owner));
+        User booker = userRepository.save(UserTestData.createNewUser());
 
-        bookingWithStatus.setStatus(status); // для второго бронирования задаём статус
-        bookingWaiting = bookingRepository.save(bookingWaiting);
+        // одно бронирование всегда со статусом WAITING
+        Booking bookingWaiting = bookingRepository.save(BookingTestData.createNewBooking(item1, booker));
+        // для второго бронирования задаём статус
+        Booking bookingWithStatus = BookingTestData.createNewBooking(item2, booker);
+        bookingWithStatus.setStatus(status);
         bookingWithStatus = bookingRepository.save(bookingWithStatus);
 
         List<Booking> bookings = bookingRepository.findByBookerIdAndStatusOrderByStartDesc(booker.getId(),
@@ -83,11 +92,11 @@ class BookingRepositoryTest {
 
     @Test
     void shouldFindBookingByBookerId() {
-        Booking booking = createBooking();
-
-        booking = bookingRepository.save(booking);
-
-        List<Booking> bookings = bookingRepository.findByBookerIdOrderByStartDesc(booking.getBooker().getId());
+        User owner = userRepository.save(UserTestData.createNewUser());
+        Item item = itemRepository.save(ItemTestData.createNewItem(owner));
+        User booker = userRepository.save(UserTestData.createNewUser());
+        Booking booking = bookingRepository.save(BookingTestData.createNewBooking(item, booker));
+        List<Booking> bookings = bookingRepository.findByBookerIdOrderByStartDesc(booker.getId());
 
         assertEquals(1, bookings.size());
         assertTrue(bookings.contains(booking));
@@ -95,14 +104,15 @@ class BookingRepositoryTest {
 
     @Test
     void shouldFindPastBookingsForBooker() {
-        User booker = createUser();
-        Booking pastBooking = createBooking(LocalDateTime.now().minusHours(5));
-        pastBooking.setBooker(booker);
-        Booking futureBooking = createBooking(LocalDateTime.now().plusHours(5));
-        pastBooking.setBooker(booker);
+        User owner = userRepository.save(UserTestData.createNewUser());
+        Item item1 = itemRepository.save(ItemTestData.createNewItem(owner));
+        Item item2 = itemRepository.save(ItemTestData.createNewItem(owner));
+        User booker = userRepository.save(UserTestData.createNewUser());
 
-        pastBooking = bookingRepository.save(pastBooking);
-        futureBooking = bookingRepository.save(futureBooking);
+        Booking pastBooking = bookingRepository.save(BookingTestData.createNewBooking(item1, booker,
+                LocalDateTime.now().minusHours(5)));
+        Booking futureBooking = bookingRepository.save(BookingTestData.createNewBooking(item2, booker,
+                LocalDateTime.now().plusHours(5)));
 
         List<Booking> bookings = bookingRepository.findByBookerIdAndEndBeforeOrderByStartDesc(booker.getId(),
                 LocalDateTime.now());
@@ -113,14 +123,15 @@ class BookingRepositoryTest {
 
     @Test
     void shouldFindFutureBookingsForBooker() {
-        User booker = createUser();
-        Booking pastBooking = createBooking(LocalDateTime.now().minusHours(5));
-        pastBooking.setBooker(booker);
-        Booking futureBooking = createBooking(LocalDateTime.now().plusHours(5));
-        futureBooking.setBooker(booker);
+        User owner = userRepository.save(UserTestData.createNewUser());
+        Item item1 = itemRepository.save(ItemTestData.createNewItem(owner));
+        Item item2 = itemRepository.save(ItemTestData.createNewItem(owner));
+        User booker = userRepository.save(UserTestData.createNewUser());
 
-        pastBooking = bookingRepository.save(pastBooking);
-        futureBooking = bookingRepository.save(futureBooking);
+        Booking pastBooking = bookingRepository.save(BookingTestData.createNewBooking(item1, booker,
+                LocalDateTime.now().minusHours(5)));
+        Booking futureBooking = bookingRepository.save(BookingTestData.createNewBooking(item2, booker,
+                LocalDateTime.now().plusHours(5)));
 
         List<Booking> bookings = bookingRepository.findByBookerIdAndStartAfterOrderByStartDesc(booker.getId(),
                 LocalDateTime.now());
@@ -131,17 +142,18 @@ class BookingRepositoryTest {
 
     @Test
     void shouldFindCurrentBookingsForBooker() {
-        User booker = createUser();
-        Booking pastBooking = createBooking(LocalDateTime.now().minusHours(5));
-        pastBooking.setBooker(booker);
-        Booking currentBooking = createBooking(LocalDateTime.now().minusMinutes(30));
-        currentBooking.setBooker(booker);
-        Booking futureBooking = createBooking(LocalDateTime.now().plusHours(5));
-        pastBooking.setBooker(booker);
+        User owner = userRepository.save(UserTestData.createNewUser());
+        Item item1 = itemRepository.save(ItemTestData.createNewItem(owner));
+        Item item2 = itemRepository.save(ItemTestData.createNewItem(owner));
+        Item item3 = itemRepository.save(ItemTestData.createNewItem(owner));
+        User booker = userRepository.save(UserTestData.createNewUser());
 
-        pastBooking = bookingRepository.save(pastBooking);
-        currentBooking = bookingRepository.save(currentBooking);
-        futureBooking = bookingRepository.save(futureBooking);
+        Booking pastBooking = bookingRepository.save(BookingTestData.createNewBooking(item1, booker,
+                LocalDateTime.now().minusHours(5)));
+        Booking currentBooking = bookingRepository.save(BookingTestData.createNewBooking(item2, booker,
+                LocalDateTime.now().minusMinutes(30)));
+        Booking futureBooking = bookingRepository.save(BookingTestData.createNewBooking(item3, booker,
+                LocalDateTime.now().plusHours(5)));
 
         List<Booking> bookings = bookingRepository.findCurrentByBookerId(booker.getId(),
                 LocalDateTime.now());
@@ -153,13 +165,15 @@ class BookingRepositoryTest {
     @ParameterizedTest
     @EnumSource(value = BookingStatus.class, names = {"APPROVED", "REJECTED", "CANCELED"})
     void shouldFindBookingsByOwnerIdAndStatus(BookingStatus status) {
-        User owner = createUser();
-        Item item = createItem(owner);
+        User owner = userRepository.save(UserTestData.createNewUser());
+        Item item = itemRepository.save(ItemTestData.createNewItem(owner));
+        User booker = userRepository.save(UserTestData.createNewUser());
 
-        Booking bookingWaiting = createBooking(item); // одно бронирование всегда со статусом WAITING
-        Booking bookingWithStatus = createBooking(item);
-        bookingWithStatus.setStatus(status); // для второго бронирования задаём статус
-        bookingWaiting = bookingRepository.save(bookingWaiting);
+        // одно бронирование всегда со статусом WAITING
+        Booking bookingWaiting = bookingRepository.save(BookingTestData.createNewBooking(item, booker));
+        // для второго бронирования задаём статус
+        Booking bookingWithStatus = BookingTestData.createNewBooking(item, booker);
+        bookingWithStatus.setStatus(status);
         bookingWithStatus = bookingRepository.save(bookingWithStatus);
 
         List<Booking> bookings = bookingRepository.findByItemOwnerIdAndStatusOrderByStartDesc(owner.getId(),
@@ -171,11 +185,10 @@ class BookingRepositoryTest {
 
     @Test
     void shouldFindBookingByOwnerId() {
-        User owner = createUser();
-        Item item = createItem(owner);
-        Booking booking = createBooking(item);
-
-        booking = bookingRepository.save(booking);
+        User owner = userRepository.save(UserTestData.createNewUser());
+        Item item = itemRepository.save(ItemTestData.createNewItem(owner));
+        User booker = userRepository.save(UserTestData.createNewUser());
+        Booking booking = bookingRepository.save(BookingTestData.createNewBooking(item, booker));
 
         List<Booking> bookings = bookingRepository.findByItemOwnerIdOrderByStartDesc(owner.getId());
 
@@ -185,14 +198,14 @@ class BookingRepositoryTest {
 
     @Test
     void shouldFindPastBookingsForOwner() {
-        User owner = createUser();
-        Item item = createItem(owner);
+        User owner = userRepository.save(UserTestData.createNewUser());
+        Item item = itemRepository.save(ItemTestData.createNewItem(owner));
+        User booker = userRepository.save(UserTestData.createNewUser());
 
-        Booking pastBooking = createBooking(item, LocalDateTime.now().minusHours(5));
-        Booking futureBooking = createBooking(item, LocalDateTime.now().plusHours(5));
-
-        pastBooking = bookingRepository.save(pastBooking);
-        futureBooking = bookingRepository.save(futureBooking);
+        Booking pastBooking = bookingRepository.save(BookingTestData.createNewBooking(item, booker,
+                LocalDateTime.now().minusHours(5)));
+        Booking futureBooking = bookingRepository.save(BookingTestData.createNewBooking(item, booker,
+                LocalDateTime.now().plusHours(5)));
 
         List<Booking> bookings = bookingRepository.findByItemOwnerIdAndEndBeforeOrderByStartDesc(owner.getId(),
                 LocalDateTime.now());
@@ -203,14 +216,14 @@ class BookingRepositoryTest {
 
     @Test
     void shouldFindFutureBookingsForOwner() {
-        User owner = createUser();
-        Item item = createItem(owner);
+        User owner = userRepository.save(UserTestData.createNewUser());
+        Item item = itemRepository.save(ItemTestData.createNewItem(owner));
+        User booker = userRepository.save(UserTestData.createNewUser());
 
-        Booking pastBooking = createBooking(item, LocalDateTime.now().minusHours(5));
-        Booking futureBooking = createBooking(item, LocalDateTime.now().plusHours(5));
-
-        pastBooking = bookingRepository.save(pastBooking);
-        futureBooking = bookingRepository.save(futureBooking);
+        Booking pastBooking = bookingRepository.save(BookingTestData.createNewBooking(item, booker,
+                LocalDateTime.now().minusHours(5)));
+        Booking futureBooking = bookingRepository.save(BookingTestData.createNewBooking(item, booker,
+                LocalDateTime.now().plusHours(5)));
 
         List<Booking> bookings = bookingRepository.findByItemOwnerIdAndStartAfterOrderByStartDesc(owner.getId(),
                 LocalDateTime.now());
@@ -221,107 +234,21 @@ class BookingRepositoryTest {
 
     @Test
     void shouldFindCurrentBookingsForOwner() {
-        User owner = createUser();
-        Item item = createItem(owner);
+        User owner = userRepository.save(UserTestData.createNewUser());
+        Item item = itemRepository.save(ItemTestData.createNewItem(owner));
+        User booker = userRepository.save(UserTestData.createNewUser());
 
-        Booking pastBooking = createBooking(item, LocalDateTime.now().minusHours(5));
-        Booking currentBooking = createBooking(item, LocalDateTime.now().minusMinutes(30));
-        Booking futureBooking = createBooking(item, LocalDateTime.now().plusHours(5));
-
-        pastBooking = bookingRepository.save(pastBooking);
-        currentBooking = bookingRepository.save(currentBooking);
-        futureBooking = bookingRepository.save(futureBooking);
+        Booking pastBooking = bookingRepository.save(BookingTestData.createNewBooking(item, booker,
+                LocalDateTime.now().minusHours(5)));
+        Booking currentBooking = bookingRepository.save(BookingTestData.createNewBooking(item, booker,
+                LocalDateTime.now().minusMinutes(30)));
+        Booking futureBooking = bookingRepository.save(BookingTestData.createNewBooking(item, booker,
+                LocalDateTime.now().plusHours(5)));
 
         List<Booking> bookings = bookingRepository.findCurrentByOwnerId(owner.getId(),
                 LocalDateTime.now());
 
         assertEquals(1, bookings.size());
         assertTrue(bookings.contains(currentBooking));
-    }
-
-
-    private Booking createBooking() {
-        return createBooking(LocalDateTime.now().plusHours(1));
-    }
-
-    private Booking createBooking(Item item, LocalDateTime start) {
-        Booking booking = new Booking();
-
-        booking.setStatus(BookingStatus.WAITING);
-        booking.setStart(start);
-        booking.setEnd(booking.getStart().plusHours(1));
-
-        booking.setItem(item);
-        booking.setBooker(createUser());
-
-        return booking;
-    }
-
-    private Booking createBooking(LocalDateTime start) {
-        Booking booking = new Booking();
-
-        booking.setStatus(BookingStatus.WAITING);
-        booking.setStart(start);
-        booking.setEnd(start.plusHours(1));
-
-        Item item = createItem();
-        User booker = createUser();
-
-        booking.setItem(item);
-        booking.setBooker(booker);
-
-        return booking;
-    }
-
-    private Booking createBooking(Item item) {
-        Booking booking = new Booking();
-
-        booking.setStatus(BookingStatus.WAITING);
-        booking.setStart(LocalDateTime.now().plusHours(1));
-        booking.setEnd(booking.getStart().plusHours(1));
-
-        booking.setItem(item);
-        booking.setBooker(createUser());
-
-        return booking;
-    }
-
-    private Item createItem() {
-        User user = createUser();
-        Item item = new Item();
-
-        item.setName(RandomUtils.createName());
-        item.setDescription(RandomUtils.createName(50));
-        item.setAvailable(true);
-        item.setOwner(user);
-
-        item = itemRepository.save(item);
-
-        return item;
-    }
-
-    private Item createItem(User owner) {
-        Item item = new Item();
-
-        item.setName(RandomUtils.createName());
-        item.setDescription(RandomUtils.createName(50));
-        item.setAvailable(true);
-        item.setOwner(owner);
-
-        item = itemRepository.save(item);
-
-        return item;
-    }
-
-    private User createUser() {
-        User user = new User();
-        String name = RandomUtils.createName();
-
-        user.setName(name);
-        user.setEmail(name + "@mail.ru");
-
-        user = userRepository.save(user);
-
-        return user;
     }
 }

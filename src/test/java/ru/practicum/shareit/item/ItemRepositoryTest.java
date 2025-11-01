@@ -7,12 +7,15 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
+
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.request.ItemRequestRepository;
 import ru.practicum.shareit.request.model.ItemRequest;
 import ru.practicum.shareit.user.UserRepository;
 import ru.practicum.shareit.user.model.User;
-import ru.practicum.shareit.utils.RandomUtils;
+import ru.practicum.shareit.utils.ItemRequestTestData;
+import ru.practicum.shareit.utils.ItemTestData;
+import ru.practicum.shareit.utils.UserTestData;
 
 import java.util.List;
 import java.util.Optional;
@@ -32,16 +35,17 @@ class ItemRepositoryTest {
 
     @Test
     void shouldSaveItem() {
-        Item item = createItem();
-        item = itemRepository.save(item);
+        User owner = userRepository.save(UserTestData.createNewUser());
+        Item item = itemRepository.save(ItemTestData.createNewItem(owner));
 
         assertNotNull(item.getId());
     }
 
     @Test
     void shouldFindItemById() {
-        Item item = createItem();
-        item = itemRepository.save(item);
+        User owner = userRepository.save(UserTestData.createNewUser());
+        Item item = itemRepository.save(ItemTestData.createNewItem(owner));
+
         Optional<Item> maybeFoundItem = itemRepository.findById(item.getId());
 
         if (maybeFoundItem.isEmpty()) {
@@ -68,8 +72,9 @@ class ItemRepositoryTest {
 
     @Test
     void shouldFindItemByUserId() {
-        Item item = createItem();
-        item = itemRepository.save(item);
+        User owner = userRepository.save(UserTestData.createNewUser());
+        Item item = itemRepository.save(ItemTestData.createNewItem(owner));
+
         List<Item> items = itemRepository.findByOwnerId(item.getOwner().getId());
 
         assertEquals(1, items.size());
@@ -77,9 +82,9 @@ class ItemRepositoryTest {
 
     @Test
     void shouldUpdateItem() {
-        Item item = createItem();
-        item = itemRepository.save(item);
+        User owner = userRepository.save(UserTestData.createNewUser());
 
+        Item item = itemRepository.save(ItemTestData.createNewItem(owner));
         item.setName("new name");
         item.setDescription("new description");
         item.setAvailable(false);
@@ -103,11 +108,13 @@ class ItemRepositoryTest {
 
     @Test
     void shouldFindItemsBySearchString() {
-        Item item1 = createItem();
-        Item item2 = createItem();
+        User owner = userRepository.save(UserTestData.createNewUser());
 
+        Item item1 = ItemTestData.createNewItem(owner);
+        Item item2 = ItemTestData.createNewItem(owner);
         item1.setName("rieugeiruge search ewwgw");
         item2.setDescription("search rgeerg eer");
+
         itemRepository.save(item1);
         itemRepository.save(item2);
 
@@ -118,8 +125,8 @@ class ItemRepositoryTest {
 
     @Test
     void shouldDeleteItem() {
-        Item item = createItem();
-        item = itemRepository.save(item);
+        User owner = userRepository.save(UserTestData.createNewUser());
+        Item item = itemRepository.save(ItemTestData.createNewItem(owner));
 
         itemRepository.deleteById(item.getId());
 
@@ -132,9 +139,13 @@ class ItemRepositoryTest {
 
     @Test
     void shouldFindItemByRequestId() {
-        ItemRequest request = createRequest();
-        Item itemForRequest = createItem();
+        User owner = userRepository.save(UserTestData.createNewUser());
 
+        User requestor = userRepository.save(UserTestData.createNewUser());
+
+        ItemRequest request = requestRepository.save(ItemRequestTestData.createNewRequest(requestor));
+
+        Item itemForRequest = ItemTestData.createNewItem(owner);
         itemForRequest.setRequestId(request.getId());
         itemRepository.save(itemForRequest);
 
@@ -145,13 +156,18 @@ class ItemRepositoryTest {
 
     @Test
     void shouldFindItemByRequestIdIn() {
-        ItemRequest request1 = createRequest();
-        ItemRequest request2 = createRequest();
-        Item item1 = createItem();
-        Item item2 = createItem();
+        User owner = userRepository.save(UserTestData.createNewUser());
 
+        Item item1 = ItemTestData.createNewItem(owner);
+        Item item2 = ItemTestData.createNewItem(owner);
+
+        User requestor = userRepository.save(UserTestData.createNewUser());
+
+        ItemRequest request1 = requestRepository.save(ItemRequestTestData.createNewRequest(requestor));
+        ItemRequest request2 = requestRepository.save(ItemRequestTestData.createNewRequest(requestor));
         item1.setRequestId(request1.getId());
         item2.setRequestId(request2.getId());
+
         itemRepository.save(item1);
         itemRepository.save(item2);
 
@@ -160,42 +176,5 @@ class ItemRepositoryTest {
         assertEquals(2, items.size());
         assertTrue(items.contains(item1));
         assertTrue(items.contains(item2));
-    }
-
-    // для предмета сначала создаётся владелец
-    private Item createItem() {
-        User user = createUser();
-        Item item = new Item();
-
-        item.setName(RandomUtils.createName());
-        item.setDescription(RandomUtils.createName(50));
-        item.setAvailable(true);
-        item.setOwner(user);
-
-        return item;
-    }
-
-    // с сохранением в таблицу users
-    private User createUser() {
-        User user = new User();
-        String name = RandomUtils.createName();
-
-        user.setName(name);
-        user.setEmail(name + "@mail.ru");
-
-        user = userRepository.save(user);
-
-        return user;
-    }
-
-    private ItemRequest createRequest() {
-        User requestor = createUser();
-        ItemRequest request = new ItemRequest();
-
-        request.setRequestor(requestor);
-        request.setDescription(RandomUtils.createName(20));
-        request = requestRepository.save(request);
-
-        return request;
     }
 }

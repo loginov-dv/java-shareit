@@ -22,7 +22,9 @@ import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.UserRepository;
 import ru.practicum.shareit.user.model.User;
-import ru.practicum.shareit.utils.RandomUtils;
+import ru.practicum.shareit.utils.BookingTestData;
+import ru.practicum.shareit.utils.ItemTestData;
+import ru.practicum.shareit.utils.UserTestData;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -51,10 +53,9 @@ class ItemServiceImplTest {
 
     @Test
     void shouldCreateItem() {
-        ItemDto request = createNewItemDto();
+        ItemDto request = ItemTestData.createNewItemDto();
 
-        int ownerId = random.nextInt(100);
-        User owner = createUser(ownerId);
+        User owner = UserTestData.createUser();
 
         Item savedItem = new Item();
         savedItem.setId(random.nextInt(100));
@@ -68,7 +69,7 @@ class ItemServiceImplTest {
         when(itemRepository.save(any(Item.class)))
                 .thenReturn(savedItem);
 
-        ItemDto result = itemService.createItem(ownerId, request);
+        ItemDto result = itemService.createItem(owner.getId(), request);
 
         assertEquals(savedItem.getId(), result.getId());
         assertEquals(savedItem.getName(), result.getName());
@@ -79,36 +80,28 @@ class ItemServiceImplTest {
 
     @Test
     void shouldNotCreateItemOfUnknownUser() {
-        ItemDto request = createNewItemDto();
-
-        int ownerId = random.nextInt(100);
+        ItemDto request = ItemTestData.createNewItemDto();
 
         when(userRepository.findById(anyInt()))
                 .thenReturn(Optional.empty());
 
-        assertThrows(NotFoundException.class, () -> itemService.createItem(ownerId, request));
+        assertThrows(NotFoundException.class, () -> itemService.createItem(999, request));
     }
 
     @ParameterizedTest
     @ValueSource(booleans = {true, false})
     void shouldFindItemById(boolean requestFromOwner) {
-        Item item = new Item();
-        int ownerId = random.nextInt(100);
-        item.setId(random.nextInt(100));
-        item.setName(RandomUtils.createName());
-        item.setDescription(RandomUtils.createName(50));
-        item.setAvailable(true);
-        item.setOwner(createUser(ownerId));
+        Item item = ItemTestData.createItem(UserTestData.createUser());
 
         // бронирования
-        Booking pastBooking = createBooking(item, createUser(), true);
-        Booking futureBooking = createBooking(item, createUser(), false);
+        Booking pastBooking = BookingTestData.createBooking(item, UserTestData.createUser(), true);
+        Booking futureBooking = BookingTestData.createBooking(item, UserTestData.createUser(), false);
         List<Booking> bookings = Stream.of(pastBooking, futureBooking)
                 .sorted(Comparator.comparing(Booking::getStart))
                 .collect(Collectors.toCollection(LinkedList::new));
 
         // комментарии
-        Comment comment = createComment(item, pastBooking.getBooker());
+        Comment comment = ItemTestData.createComment(item, pastBooking.getBooker());
         List<Comment> comments = List.of(comment);
 
         // мокируем вызовы методов репозитория
@@ -121,7 +114,7 @@ class ItemServiceImplTest {
 
         ItemDetailedDto result;
         if (requestFromOwner) {
-            result = itemService.findById(ownerId, item.getId());
+            result = itemService.findById(item.getOwner().getId(), item.getId());
         } else {
             result = itemService.findById(999, item.getId());
         }
@@ -153,16 +146,15 @@ class ItemServiceImplTest {
 
     @Test
     void shouldFindItemsByUserId() {
-        int ownerId = random.nextInt(100);
-        User owner = createUser(ownerId);
-        Item item1 = createItem(owner);
-        Item item2 = createItem(owner);
+        User owner = UserTestData.createUser();
+        Item item1 = ItemTestData.createItem(owner);
+        Item item2 = ItemTestData.createItem(owner);
         List<Item> items = List.of(item1, item2);
 
         // завершённое бронирование и отзыв только для первого предмета
-        User booker = createUser();
-        List<Booking> bookings = List.of(createBooking(item1, booker, true));
-        List<Comment> comments = List.of(createComment(item1, booker));
+        User booker = UserTestData.createUser();
+        List<Booking> bookings = List.of(BookingTestData.createBooking(item1, booker, true));
+        List<Comment> comments = List.of(ItemTestData.createComment(item1, booker));
 
         when(userRepository.findById(anyInt()))
                 .thenReturn(Optional.of(owner));
@@ -173,7 +165,7 @@ class ItemServiceImplTest {
         when(bookingRepository.findByItemIdInOrderByStart(anyList()))
                 .thenReturn(bookings);
 
-        List<ItemDetailedDto> result = itemService.findByUserId(ownerId);
+        List<ItemDetailedDto> result = itemService.findByUserId(owner.getId());
 
         assertEquals(items.size(), result.size());
 
@@ -218,7 +210,8 @@ class ItemServiceImplTest {
 
     @Test
     void shouldFindItemsBySearchString() {
-        List<Item> items = List.of(createItem(), createItem());
+        List<Item> items = List.of(ItemTestData.createItem(UserTestData.createUser()),
+                ItemTestData.createItem(UserTestData.createUser()));
 
         when(itemRepository.search(anyString()))
                 .thenReturn(items);
@@ -238,13 +231,10 @@ class ItemServiceImplTest {
 
     @Test
     void shouldUpdateItem() {
-        PatchItemRequest request = new PatchItemRequest();
-        request.setName(RandomUtils.createName());
-        request.setDescription(RandomUtils.createName(50));
-        request.setAvailable(false);
+        PatchItemRequest request = ItemTestData.createPatchItemRequest();
 
-        User owner = createUser();
-        Item savedItem = createItem(owner);
+        User owner = UserTestData.createUser();
+        Item savedItem = ItemTestData.createItem(owner);
 
         when(userRepository.findById(anyInt()))
                 .thenReturn(Optional.of(owner));
@@ -261,10 +251,7 @@ class ItemServiceImplTest {
 
     @Test
     void shouldNotUpdateItemIfOwnerNotFound() {
-        PatchItemRequest request = new PatchItemRequest();
-        request.setName(RandomUtils.createName());
-        request.setDescription(RandomUtils.createName(50));
-        request.setAvailable(false);
+        PatchItemRequest request = ItemTestData.createPatchItemRequest();
 
         when(userRepository.findById(anyInt()))
                 .thenReturn(Optional.empty());
@@ -274,12 +261,9 @@ class ItemServiceImplTest {
 
     @Test
     void shouldNotUpdateItemIfItemNotFound() {
-        PatchItemRequest request = new PatchItemRequest();
-        request.setName(RandomUtils.createName());
-        request.setDescription(RandomUtils.createName(50));
-        request.setAvailable(false);
+        PatchItemRequest request = ItemTestData.createPatchItemRequest();
 
-        User owner = createUser();
+        User owner = UserTestData.createUser();
 
         when(userRepository.findById(anyInt()))
                 .thenReturn(Optional.of(owner));
@@ -291,15 +275,12 @@ class ItemServiceImplTest {
 
     @Test
     void shouldNotUpdateItemIfNoAccess() {
-        PatchItemRequest request = new PatchItemRequest();
-        request.setName(RandomUtils.createName());
-        request.setDescription(RandomUtils.createName(50));
-        request.setAvailable(false);
+        PatchItemRequest request = ItemTestData.createPatchItemRequest();
 
-        User owner = createUser();
-        Item savedItem = createItem(owner);
+        User owner = UserTestData.createUser();
+        Item savedItem = ItemTestData.createItem(owner);
 
-        User someSuspiciousPerson = createUser();
+        User someSuspiciousPerson = UserTestData.createUser();
 
         when(userRepository.findById(anyInt()))
                 .thenReturn(Optional.of(someSuspiciousPerson));
@@ -311,15 +292,14 @@ class ItemServiceImplTest {
 
     @Test
     void shouldCreateComment() {
-        CommentDto commentDto = new CommentDto();
-        commentDto.setText(RandomUtils.createName(50));
+        CommentDto commentDto = ItemTestData.createNewCommentDto();
 
-        User author = createUser();
-        Item item = createItem();
+        User author = UserTestData.createUser();
+        Item item = ItemTestData.createItem(UserTestData.createUser());
 
-        Booking pastBooking = createBooking(item, author, true);
+        Booking pastBooking = BookingTestData.createBooking(item, author, true);
 
-        Comment savedComment = createComment(item, author);
+        Comment savedComment = ItemTestData.createComment(item, author);
         savedComment.setText(commentDto.getText());
 
         when(userRepository.findById(anyInt()))
@@ -341,11 +321,10 @@ class ItemServiceImplTest {
 
     @Test
     void shouldNotCreateCommentIfUserHasNoPastBookings() {
-        CommentDto commentDto = new CommentDto();
-        commentDto.setText(RandomUtils.createName(50));
+        CommentDto commentDto = ItemTestData.createNewCommentDto();
 
-        User author = createUser();
-        Item item = createItem();
+        User author = UserTestData.createUser();
+        Item item = ItemTestData.createItem(UserTestData.createUser());
 
         when(userRepository.findById(anyInt()))
                 .thenReturn(Optional.of(author));
@@ -360,8 +339,7 @@ class ItemServiceImplTest {
 
     @Test
     void shouldNotCreateCommentIfAuthorNotFound() {
-        CommentDto commentDto = new CommentDto();
-        commentDto.setText(RandomUtils.createName(50));
+        CommentDto commentDto = ItemTestData.createNewCommentDto();
 
         when(userRepository.findById(anyInt()))
                 .thenReturn(Optional.empty());
@@ -371,10 +349,9 @@ class ItemServiceImplTest {
 
     @Test
     void shouldNotCreateCommentIfItemNotFound() {
-        CommentDto commentDto = new CommentDto();
-        commentDto.setText(RandomUtils.createName(50));
+        CommentDto commentDto = ItemTestData.createNewCommentDto();
 
-        User author = createUser();
+        User author = UserTestData.createUser();
 
         when(userRepository.findById(anyInt()))
                 .thenReturn(Optional.of(author));
@@ -382,95 +359,5 @@ class ItemServiceImplTest {
                 .thenReturn(Optional.empty());
 
         assertThrows(NotFoundException.class, () -> itemService.createComment(1,1,commentDto));
-    }
-
-    // TODO: вынести методы в отдельный утилитарный класс
-    private Item createItem() {
-        Item item = new Item();
-
-        item.setId(random.nextInt(100));
-        item.setName(RandomUtils.createName());
-        item.setDescription(RandomUtils.createName(50));
-        item.setAvailable(true);
-        item.setOwner(createUser());
-
-        return item;
-    }
-
-    private Item createItem(User owner) {
-        Item item = new Item();
-
-        item.setId(random.nextInt(100));
-        item.setName(RandomUtils.createName());
-        item.setDescription(RandomUtils.createName(50));
-        item.setAvailable(true);
-        item.setOwner(owner);
-
-        return item;
-    }
-
-    private Item createItem(int ownerId) {
-        Item item = new Item();
-
-        item.setId(random.nextInt(100));
-        item.setName(RandomUtils.createName());
-        item.setDescription(RandomUtils.createName(50));
-        item.setAvailable(true);
-        item.setOwner(createUser(ownerId));
-
-        return item;
-    }
-
-    private Comment createComment(Item item, User author) {
-        Comment comment = new Comment();
-
-        comment.setId(random.nextInt(100));
-        comment.setText(RandomUtils.createName(100));
-        comment.setItem(item);
-        comment.setAuthor(author);
-        comment.setCreated(LocalDateTime.now());
-
-        return comment;
-    }
-
-    private Booking createBooking(Item item, User booker, boolean isCompleted) {
-        Booking booking = new Booking();
-
-        booking.setId(random.nextInt(100));
-        booking.setItem(item);
-        booking.setBooker(booker);
-        booking.setStatus(BookingStatus.WAITING);
-
-        if (isCompleted) {
-            booking.setStart(LocalDateTime.now().minusHours(random.nextLong(5, 20)));
-        } else {
-            booking.setStart(LocalDateTime.now().plusMinutes(random.nextLong(1, 100)));
-        }
-
-        booking.setEnd(booking.getStart().plusHours(1));
-
-        return booking;
-    }
-
-    private User createUser(int id) {
-        User owner = new User();
-        owner.setId(id);
-        owner.setName(RandomUtils.createName());
-        owner.setEmail(owner.getName() + "@mail.ru");
-        return owner;
-    }
-
-    private User createUser() {
-        return createUser(random.nextInt(100));
-    }
-
-    private ItemDto createNewItemDto() {
-        ItemDto request = new ItemDto();
-
-        request.setName(RandomUtils.createName());
-        request.setDescription(RandomUtils.createName(50));
-        request.setAvailable(true);
-
-        return request;
     }
 }

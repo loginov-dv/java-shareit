@@ -18,7 +18,7 @@ import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.user.dto.PatchUserRequest;
 import ru.practicum.shareit.user.dto.PostUserRequest;
 import ru.practicum.shareit.user.dto.UserDto;
-import ru.practicum.shareit.utils.RandomUtils;
+import ru.practicum.shareit.utils.UserTestData;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -39,10 +39,10 @@ class UserControllerTest {
 
     @Test
     void shouldCreateUser() throws Exception {
-        PostUserRequest newUser = createNewUser();
-        UserDto savedUser = createUserDto(newUser);
+        PostUserRequest newUser = UserTestData.createPostUserRequest();
+        UserDto savedUser = UserTestData.createUserDto(newUser);
 
-        when(userService.createUser(any()))
+        when(userService.createUser(any(PostUserRequest.class)))
                 .thenReturn(savedUser);
 
         mockMvc.perform(post("/users")
@@ -58,12 +58,12 @@ class UserControllerTest {
     @NullAndEmptySource
     @ValueSource(strings = {"", " ", "invalid email", "invalid_email"})
     void shouldNotCreateUserWithInvalidEmail(String email) throws Exception {
-        PostUserRequest newUser = createNewUser();
+        PostUserRequest newUser = UserTestData.createPostUserRequest();
         newUser.setEmail(email);
 
-        UserDto savedUser = createUserDto(newUser);
+        UserDto savedUser = UserTestData.createUserDto(newUser);
 
-        when(userService.createUser(any()))
+        when(userService.createUser(any(PostUserRequest.class)))
                 .thenReturn(savedUser);
 
         mockMvc.perform(post("/users")
@@ -75,12 +75,12 @@ class UserControllerTest {
     @ParameterizedTest
     @NullAndEmptySource
     void shouldNotCreateUserWithNullOrEmptyName(String name) throws Exception {
-        PostUserRequest newUser = createNewUser();
+        PostUserRequest newUser = UserTestData.createPostUserRequest();
         newUser.setName(name);
 
-        UserDto savedUser = createUserDto(newUser);
+        UserDto savedUser = UserTestData.createUserDto(newUser);
 
-        when(userService.createUser(any()))
+        when(userService.createUser(any(PostUserRequest.class)))
                 .thenReturn(savedUser);
 
         mockMvc.perform(post("/users")
@@ -91,20 +91,20 @@ class UserControllerTest {
 
     @Test
     void shouldNotCreateUserWithAlreadyExistingEmail() throws Exception {
-        when(userService.createUser(any()))
+        when(userService.createUser(any(PostUserRequest.class)))
                 .thenThrow(new EmailConflictException(ExceptionConstants.EMAIL_CONFLICT));
 
         mockMvc.perform(post("/users")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(createNewUser())))
+                        .content(objectMapper.writeValueAsString(UserTestData.createPostUserRequest())))
                 .andExpect(status().isConflict());
     }
 
     @Test
     void shouldGetUserById() throws Exception {
-        UserDto savedUser = createUserDto(createNewUser());
+        UserDto savedUser = UserTestData.createUserDto(UserTestData.createPostUserRequest());
 
-        when(userService.findById(savedUser.getId()))
+        when(userService.findById(anyInt()))
                 .thenReturn(savedUser);
 
         mockMvc.perform(get("/users/" + savedUser.getId())
@@ -117,7 +117,7 @@ class UserControllerTest {
 
     @Test
     void shouldNotGetUnknownUserById() throws Exception {
-        when(userService.findById(999))
+        when(userService.findById(anyInt()))
                 .thenThrow(new NotFoundException(String.format(ExceptionConstants.USER_NOT_FOUND_BY_ID, 999)));
 
         mockMvc.perform(get("/users/" + 999)
@@ -138,20 +138,19 @@ class UserControllerTest {
 
     @Test
     void shouldUpdateUser() throws Exception {
-        PatchUserRequest request = new PatchUserRequest();
+        PatchUserRequest request = UserTestData.createPatchUserRequest();
+
         UserDto updatedUser = new UserDto();
-        request.setName("name");
-        request.setEmail("name@mail.ru");
         updatedUser.setId(1);
         updatedUser.setName(request.getName());
         updatedUser.setEmail(request.getEmail());
 
-        when(userService.update(anyInt(), any()))
+        when(userService.update(anyInt(), any(PatchUserRequest.class)))
                 .thenReturn(updatedUser);
 
         mockMvc.perform(patch("/users/" + 1)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(updatedUser)))
+                        .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(updatedUser.getId()))
                 .andExpect(jsonPath("$.name").value(updatedUser.getName()))
@@ -161,9 +160,8 @@ class UserControllerTest {
     @ParameterizedTest
     @ValueSource(strings = {" ", ""})
     void shouldNotUpdateUserIfNewNameIsInvalid(String name) throws Exception {
-        PatchUserRequest request = new PatchUserRequest();
+        PatchUserRequest request = UserTestData.createPatchUserRequest();
         request.setName(name);
-        request.setEmail("name@mail.ru");
 
         mockMvc.perform(patch("/users/" + 1)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -174,8 +172,7 @@ class UserControllerTest {
     @ParameterizedTest
     @ValueSource(strings = {"", " ", "invalid email", "invalid_email"})
     void shouldNotUpdateUserIfNewEmailIsInvalid(String email) throws Exception {
-        PatchUserRequest request = new PatchUserRequest();
-        request.setName("name");
+        PatchUserRequest request = UserTestData.createPatchUserRequest();
         request.setEmail(email);
 
         mockMvc.perform(patch("/users/" + 1)
@@ -186,31 +183,23 @@ class UserControllerTest {
 
     @Test
     void shouldNotUpdateUnknownUser() throws Exception {
-        when(userService.update(anyInt(), any()))
+        when(userService.update(anyInt(), any(PatchUserRequest.class)))
                 .thenThrow(new NotFoundException(String.format(ExceptionConstants.USER_NOT_FOUND_BY_ID, 999)));
-
-        PatchUserRequest request = new PatchUserRequest();
-        request.setName("name");
-        request.setEmail("name@mail.ru");
 
         mockMvc.perform(patch("/users/" + 999)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
+                        .content(objectMapper.writeValueAsString(UserTestData.createPatchUserRequest())))
                 .andExpect(status().isNotFound());
     }
 
     @Test
     void shouldNotUpdateUserIfNewEmailAlreadyExists() throws Exception {
-        when(userService.update(anyInt(), any()))
+        when(userService.update(anyInt(), any(PatchUserRequest.class)))
                 .thenThrow(new EmailConflictException(ExceptionConstants.EMAIL_CONFLICT));
-
-        PatchUserRequest request = new PatchUserRequest();
-        request.setName("name");
-        request.setEmail("name@mail.ru");
 
         mockMvc.perform(patch("/users/" + 999)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
+                        .content(objectMapper.writeValueAsString(UserTestData.createPatchUserRequest())))
                 .andExpect(status().isConflict());
     }
 
@@ -225,33 +214,9 @@ class UserControllerTest {
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest());
 
-        PatchUserRequest request = new PatchUserRequest();
-        request.setName("name");
-        request.setEmail("name@mail.ru");
-
         mockMvc.perform(patch("/users/" + id)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
+                        .content(objectMapper.writeValueAsString(UserTestData.createPatchUserRequest())))
                 .andExpect(status().isBadRequest());
-    }
-
-    private PostUserRequest createNewUser() {
-        PostUserRequest user = new PostUserRequest();
-        String name = RandomUtils.createName();
-
-        user.setName(name);
-        user.setEmail(name + "@mail.ru");
-
-        return user;
-    }
-
-    private UserDto createUserDto(PostUserRequest request) {
-        UserDto dto = new UserDto();
-
-        dto.setId(1);
-        dto.setName(request.getName());
-        dto.setEmail(request.getEmail());
-
-        return dto;
     }
 }

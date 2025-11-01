@@ -7,10 +7,12 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
+
 import ru.practicum.shareit.request.model.ItemRequest;
 import ru.practicum.shareit.user.UserRepository;
 import ru.practicum.shareit.user.model.User;
-import ru.practicum.shareit.utils.RandomUtils;
+import ru.practicum.shareit.utils.ItemRequestTestData;
+import ru.practicum.shareit.utils.UserTestData;
 
 import java.util.List;
 import java.util.Optional;
@@ -28,16 +30,16 @@ class ItemRequestRepositoryTest {
 
     @Test
     void shouldSaveRequest() {
-        ItemRequest request = createRequest();
-        request = requestRepository.save(request);
+        User requestor = userRepository.save(UserTestData.createNewUser());
+        ItemRequest request = requestRepository.save(ItemRequestTestData.createNewRequest(requestor));
 
         assertNotNull(request.getId());
     }
 
     @Test
     void shouldFindRequestById() {
-        ItemRequest request = createRequest();
-        request = requestRepository.save(request);
+        User requestor = userRepository.save(UserTestData.createNewUser());
+        ItemRequest request = requestRepository.save(ItemRequestTestData.createNewRequest(requestor));
         Optional<ItemRequest> maybeFoundRequest = requestRepository.findById(request.getId());
 
         if (maybeFoundRequest.isEmpty()) {
@@ -54,9 +56,10 @@ class ItemRequestRepositoryTest {
 
     @Test
     void shouldFindRequestByRequestorId() {
-        ItemRequest request = createRequest();
-        request = requestRepository.save(request);
-        List<ItemRequest> foundRequests = requestRepository.findByRequestorIdOrderByCreatedDesc(request.getRequestor().getId());
+        User requestor = userRepository.save(UserTestData.createNewUser());
+        ItemRequest request = requestRepository.save(ItemRequestTestData.createNewRequest(requestor));
+        List<ItemRequest> foundRequests =
+                requestRepository.findByRequestorIdOrderByCreatedDesc(request.getRequestor().getId());
 
         assertEquals(1, foundRequests.size());
         assertTrue(foundRequests.contains(request));
@@ -64,32 +67,11 @@ class ItemRequestRepositoryTest {
 
     @Test
     void shouldFindOtherRequests() {
-        ItemRequest request = createRequest();
-        request = requestRepository.save(request);
-        List<ItemRequest> foundRequests = requestRepository.findByRequestorIdNotOrderByCreatedDesc(request.getRequestor().getId());
+        User requestor = userRepository.save(UserTestData.createNewUser());
+        ItemRequest request = requestRepository.save(ItemRequestTestData.createNewRequest(requestor));
+        List<ItemRequest> foundRequests =
+                requestRepository.findByRequestorIdNotOrderByCreatedDesc(request.getRequestor().getId());
 
         assertFalse(foundRequests.contains(request));
-    }
-
-    private ItemRequest createRequest() {
-        User requestor = createUser();
-        ItemRequest request = new ItemRequest();
-
-        request.setRequestor(requestor);
-        request.setDescription(RandomUtils.createName(20));
-
-        return request;
-    }
-
-    private User createUser() {
-        User user = new User();
-        String name = RandomUtils.createName();
-
-        user.setName(name);
-        user.setEmail(name + "@mail.ru");
-
-        user = userRepository.save(user);
-
-        return user;
     }
 }
