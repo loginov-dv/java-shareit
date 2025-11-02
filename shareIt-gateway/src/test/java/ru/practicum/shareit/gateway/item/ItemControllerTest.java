@@ -25,7 +25,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Random;
 
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -77,7 +76,6 @@ class ItemControllerTest {
         ItemDto newItem = ItemTestData.createNewItemDto();
 
         when(itemClient.createItem(anyInt(), any(ItemDto.class)))
-                //.thenThrow(new NotFoundException(String.format(ExceptionConstants.USER_NOT_FOUND_BY_ID, 999)));
                 .thenReturn(new ResponseEntity<>(HttpStatus.NOT_FOUND));
 
         mockMvc.perform(post("/items")
@@ -146,7 +144,6 @@ class ItemControllerTest {
     @Test
     void shouldNotGetUnknownItem() throws Exception {
         when(itemClient.getItem(anyInt(), anyInt()))
-                //.thenThrow(new NotFoundException(String.format(ExceptionConstants.ITEM_NOT_FOUND_BY_ID, 999)));
                 .thenReturn(new ResponseEntity<>(HttpStatus.NOT_FOUND));
 
         mockMvc.perform(get("/items/" + 999)
@@ -173,7 +170,6 @@ class ItemControllerTest {
     @Test
     void shouldNotGetItemsForUnknownUser() throws Exception {
         when(itemClient.getItems(anyInt()))
-                //.thenThrow(new NotFoundException(String.format(ExceptionConstants.USER_NOT_FOUND_BY_ID, 999)));
                 .thenReturn(new ResponseEntity<>(HttpStatus.NOT_FOUND));
 
         mockMvc.perform(get("/items")
@@ -212,7 +208,6 @@ class ItemControllerTest {
         PatchItemRequest request = ItemTestData.createPatchItemRequest();
 
         when(itemClient.updateItem(anyInt(), anyInt(), any(PatchItemRequest.class)))
-                //.thenThrow(new NotFoundException("not found"));
                 .thenReturn(new ResponseEntity<>(HttpStatus.NOT_FOUND));
 
         mockMvc.perform(patch("/items/" + 1)
@@ -227,7 +222,6 @@ class ItemControllerTest {
         PatchItemRequest request = ItemTestData.createPatchItemRequest();
 
         when(itemClient.updateItem(anyInt(), anyInt(), any(PatchItemRequest.class)))
-                //.thenThrow(new NoAccessException("Нет доступа на изменение предмета"));
                 .thenReturn(new ResponseEntity<>(HttpStatus.FORBIDDEN));
 
         mockMvc.perform(patch("/items/" + 1)
@@ -296,7 +290,6 @@ class ItemControllerTest {
         CommentDto request = ItemTestData.createNewCommentDto();
 
         when(itemClient.createComment(anyInt(), anyInt(), any(CommentDto.class)))
-                //.thenThrow(new NotFoundException("not found"));
                 .thenReturn(new ResponseEntity<>(HttpStatus.NOT_FOUND));
 
         mockMvc.perform(post("/items/" + 1 + "/comment")
@@ -311,7 +304,6 @@ class ItemControllerTest {
         CommentDto request = ItemTestData.createNewCommentDto();
 
         when(itemClient.createComment(anyInt(), anyInt(), any(CommentDto.class)))
-                //.thenThrow(new NotAvailableException("Невозможно оставить комментарий (нет завершённой аренды)"));
                 .thenReturn(new ResponseEntity<>(HttpStatus.BAD_REQUEST));
 
         mockMvc.perform(post("/items/" + 1 + "/comment")

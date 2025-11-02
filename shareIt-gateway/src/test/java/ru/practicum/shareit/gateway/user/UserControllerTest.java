@@ -5,7 +5,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -19,10 +18,8 @@ import ru.practicum.shareit.gateway.user.dto.PostUserRequest;
 import ru.practicum.shareit.gateway.user.dto.UserDto;
 import ru.practicum.shareit.gateway.utils.UserTestData;
 
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.Mockito.*;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -62,11 +59,6 @@ class UserControllerTest {
         PostUserRequest newUser = UserTestData.createPostUserRequest();
         newUser.setEmail(email);
 
-        /*UserDto savedUser = UserTestData.createUserDto(newUser);
-
-        when(userClient.createUser(any(PostUserRequest.class)))
-                .thenReturn(new ResponseEntity<>(HttpStatus.BAD_REQUEST));*/
-
         mockMvc.perform(post("/users")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(newUser)))
@@ -79,11 +71,6 @@ class UserControllerTest {
         PostUserRequest newUser = UserTestData.createPostUserRequest();
         newUser.setName(name);
 
-        /*UserDto savedUser = UserTestData.createUserDto(newUser);
-
-        when(userService.createUser(any(PostUserRequest.class)))
-                .thenReturn(savedUser);*/
-
         mockMvc.perform(post("/users")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(newUser)))
@@ -93,7 +80,6 @@ class UserControllerTest {
     @Test
     void shouldNotCreateUserWithAlreadyExistingEmail() throws Exception {
         when(userClient.createUser(any(PostUserRequest.class)))
-                //.thenThrow(new EmailConflictException(ExceptionConstants.EMAIL_CONFLICT));
                 .thenReturn(new ResponseEntity<>(HttpStatus.CONFLICT));
 
         mockMvc.perform(post("/users")
@@ -120,7 +106,6 @@ class UserControllerTest {
     @Test
     void shouldNotGetUnknownUserById() throws Exception {
         when(userClient.getUser(anyInt()))
-                //.thenThrow(new NotFoundException(String.format(ExceptionConstants.USER_NOT_FOUND_BY_ID, 999)));
                 .thenReturn(new ResponseEntity<>(HttpStatus.NOT_FOUND));
 
         mockMvc.perform(get("/users/" + 999)
@@ -130,15 +115,12 @@ class UserControllerTest {
 
     @Test
     void shouldDeleteUserById() throws Exception {
-        //doNothing().when(userService).deleteById(anyInt());
         when(userClient.deleteUser(anyInt()))
                 .thenReturn(new ResponseEntity<>(HttpStatus.NO_CONTENT));
 
         mockMvc.perform(delete("/users/" + 999)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNoContent());
-
-        //verify(userService, Mockito.times(1)).deleteById(999);
     }
 
     @Test
@@ -189,7 +171,6 @@ class UserControllerTest {
     @Test
     void shouldNotUpdateUnknownUser() throws Exception {
         when(userClient.updateUser(anyInt(), any(PatchUserRequest.class)))
-                //.thenThrow(new NotFoundException(String.format(ExceptionConstants.USER_NOT_FOUND_BY_ID, 999)));
                 .thenReturn(new ResponseEntity<>(HttpStatus.NOT_FOUND));
 
         mockMvc.perform(patch("/users/" + 999)
@@ -201,7 +182,6 @@ class UserControllerTest {
     @Test
     void shouldNotUpdateUserIfNewEmailAlreadyExists() throws Exception {
         when(userClient.updateUser(anyInt(), any(PatchUserRequest.class)))
-                //.thenThrow(new EmailConflictException(ExceptionConstants.EMAIL_CONFLICT));
                 .thenReturn(new ResponseEntity<>(HttpStatus.CONFLICT));
 
         mockMvc.perform(patch("/users/" + 999)

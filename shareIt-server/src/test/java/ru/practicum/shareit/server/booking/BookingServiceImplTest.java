@@ -2,9 +2,7 @@ package ru.practicum.shareit.server.booking;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.EnumSource;
-import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -29,7 +27,6 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
@@ -102,42 +99,6 @@ class BookingServiceImplTest {
 
         assertThrows(NotFoundException.class, () -> bookingService.createBooking(booker.getId(), request));
     }
-
-    /*@ParameterizedTest
-    @MethodSource("provideInvalidDates")
-    void shouldNotCreateBookingIfDatesAreInvalid(String start, String end) {
-        Item item = ItemTestData.createItem(UserTestData.createUser());
-        User booker = UserTestData.createUser();
-
-        PostBookingRequest request = new PostBookingRequest();
-        request.setItemId(item.getId());
-        request.setStart(start);
-        request.setEnd(end);
-
-        when(userRepository.findById(anyInt()))
-                .thenReturn(Optional.of(booker));
-        when(itemRepository.findById(anyInt()))
-                .thenReturn(Optional.of(item));
-
-        assertThrows(BookingDateException.class, () -> bookingService.createBooking(booker.getId(), request));
-    }
-
-    private static Stream<Arguments> provideInvalidDates() {
-        return Stream.of(
-                // start после end
-                Arguments.of(DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(LocalDateTime.now().plusHours(2)),
-                        DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(LocalDateTime.now().plusHours(1))),
-                // start и end равны
-                Arguments.of(DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(LocalDateTime.now().plusHours(1)),
-                        DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(LocalDateTime.now().plusHours(1))),
-                // start в прошлом
-                Arguments.of(DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(LocalDateTime.now().minusHours(1)),
-                        DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(LocalDateTime.now().plusHours(1))),
-                // end в прошлом
-                Arguments.of(DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(LocalDateTime.now().plusHours(1)),
-                        DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(LocalDateTime.now().minusHours(1)))
-        );
-    }*/
 
     @Test
     void shouldNotCreateBookingIfItemIsUnavailable() {

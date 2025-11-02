@@ -2,9 +2,6 @@ package ru.practicum.shareit.server.request;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.NullAndEmptySource;
-import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -78,19 +75,6 @@ class ItemRequestControllerTest {
                 .andExpect(status().isNotFound());
     }
 
-    /*@ParameterizedTest
-    @NullAndEmptySource
-    void shouldNotCreateItemRequestWithNullOrEmptyDescription(String description) throws Exception {
-        ItemRequestShortDto request = ItemRequestTestData.createNewItemRequest();
-        request.setDescription(description);
-
-        mockMvc.perform(post("/requests")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .header("X-Sharer-User-Id", 999)
-                        .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isBadRequest());
-    }*/
-
     @Test
     void shouldGetItemRequestById() throws Exception {
         ItemRequestDto dto = ItemRequestTestData.createItemRequestDto();
@@ -160,58 +144,4 @@ class ItemRequestControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(2));
     }
-
-    /*@Test
-    void shouldReturnBadRequestIfUserHeaderIsMissing() throws Exception {
-        mockMvc.perform(post("/requests")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(ItemRequestTestData.createNewItemRequest())))
-                .andExpect(status().isBadRequest());
-
-        mockMvc.perform(get("/requests/" + 999)
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isBadRequest());
-
-        mockMvc.perform(get("/requests")
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isBadRequest());
-
-        mockMvc.perform(get("/requests/all")
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isBadRequest());
-    }*/
-
-    /*@ParameterizedTest
-    @ValueSource(ints = {-1, 0})
-    void shouldReturnBadRequestIfUserHeaderIdNotPositive(int id) throws Exception {
-        mockMvc.perform(post("/requests")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .header("X-Sharer-User-Id", id)
-                        .content(objectMapper.writeValueAsString(ItemRequestTestData.createNewItemRequest())))
-                .andExpect(status().isBadRequest());
-
-        mockMvc.perform(get("/requests/" + 999)
-                        .header("X-Sharer-User-Id", id)
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isBadRequest());
-
-        mockMvc.perform(get("/requests")
-                        .header("X-Sharer-User-Id", id)
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isBadRequest());
-
-        mockMvc.perform(get("/requests/all")
-                        .header("X-Sharer-User-Id", id)
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isBadRequest());
-    }*/
-
-    /*@ParameterizedTest
-    @ValueSource(ints = {-1, 0})
-    void shouldReturnBadRequestIfItemRequestIdNotPositive(int id) throws Exception {
-        mockMvc.perform(get("/requests/" + id)
-                        .header("X-Sharer-User-Id", 999)
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isBadRequest());
-    }*/
 }

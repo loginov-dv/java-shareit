@@ -5,7 +5,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -24,7 +23,6 @@ import java.util.List;
 import java.util.Random;
 
 import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -106,20 +104,6 @@ class BookingControllerTest {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isNotFound());
     }
-
-    /*@Test
-    void shouldNotCreateBookingWithInvalidDates() throws Exception {
-        PostBookingRequest request = BookingTestData.createPostBookingRequest();
-
-        when(bookingService.createBooking(anyInt(), any(PostBookingRequest.class)))
-                .thenThrow(new BookingDateException("Ошибка при валидации дат бронирования"));
-
-        mockMvc.perform(post("/bookings")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .header("X-Sharer-User-Id", 1)
-                        .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isBadRequest());
-    }*/
 
     @ParameterizedTest
     @ValueSource(booleans = {true, false})
@@ -210,26 +194,6 @@ class BookingControllerTest {
                 .andExpect(jsonPath("$.length()").value(2));
     }
 
-    /*@Test
-    void shouldGetAllUsersBookingsIfStateWasNotSpecified() throws Exception {
-        BookingDto booking1 = BookingTestData.createBookingDto(BookingTestData.createPostBookingRequest(), 100,
-                BookingStatus.WAITING);
-        BookingDto booking2 = BookingTestData.createBookingDto(BookingTestData.createPostBookingRequest(), 200,
-                BookingStatus.APPROVED);
-
-        when(bookingService.findAllByBookerId(anyInt(), anyString()))
-                .thenReturn(List.of(booking1, booking2));
-
-        mockMvc.perform(get("/bookings")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .header("X-Sharer-User-Id", 1))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.length()").value(2));
-
-        verify(bookingService, Mockito.times(1))
-                .findAllByBookerId(1, "ALL");
-    }*/
-
     @Test
     void shouldNotGetBookingsIfBookerNotFound() throws Exception {
         when(bookingService.findAllByBookerId(anyInt(), anyString()))
@@ -261,26 +225,6 @@ class BookingControllerTest {
                 .andExpect(jsonPath("$.length()").value(2));
     }
 
-    /*@Test
-    void shouldGetAllOwnersBookingsIfStateWasNotSpecified() throws Exception {
-        BookingDto booking1 = BookingTestData.createBookingDto(BookingTestData.createPostBookingRequest(), 100,
-                BookingStatus.WAITING);
-        BookingDto booking2 = BookingTestData.createBookingDto(BookingTestData.createPostBookingRequest(), 200,
-                BookingStatus.APPROVED);
-
-        when(bookingService.findAllByOwnerId(anyInt(), anyString()))
-                .thenReturn(List.of(booking1, booking2));
-
-        mockMvc.perform(get("/bookings/owner")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .header("X-Sharer-User-Id", 1))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.length()").value(2));
-
-        verify(bookingService, Mockito.times(1))
-                .findAllByOwnerId(1, "ALL");
-    }*/
-
     @Test
     void shouldNotGetBookingsIfOwnerNotFound() throws Exception {
         when(bookingService.findAllByOwnerId(anyInt(), anyString()))
@@ -292,92 +236,4 @@ class BookingControllerTest {
                         .param("state", BookingState.ALL.name()))
                 .andExpect(status().isNotFound());
     }
-
-    // TODO: убрать проверку в сервисе
-    /*@Test
-    void shouldReturnBadRequestIfStateStringWasInvalid() throws Exception {
-        when(bookingService.findAllByBookerId(anyInt(), anyString()))
-                .thenThrow(new ArgumentException(ExceptionConstants.INVALID_BOOKING_STATE));
-
-        mockMvc.perform(get("/bookings")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .header("X-Sharer-User-Id", 1))
-                .andExpect(status().isBadRequest());
-
-        when(bookingService.findAllByOwnerId(anyInt(), anyString()))
-                .thenThrow(new ArgumentException(ExceptionConstants.INVALID_BOOKING_STATE));
-
-        mockMvc.perform(get("/bookings/owner")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .header("X-Sharer-User-Id", 1))
-                .andExpect(status().isBadRequest());
-    }*/
-
-    /*@Test
-    void shouldReturnBadRequestIfUserHeaderIsMissing() throws Exception {
-        mockMvc.perform(post("/bookings")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(BookingTestData.createPostBookingRequest())))
-                .andExpect(status().isBadRequest());
-
-        mockMvc.perform(patch("/bookings/" + 1)
-                        .param("approved", "true"))
-                .andExpect(status().isBadRequest());
-
-        mockMvc.perform(get("/bookings/" + 1)
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isBadRequest());
-
-        mockMvc.perform(get("/bookings")
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isBadRequest());
-
-        mockMvc.perform(get("/bookings/owner")
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isBadRequest());
-    }*/
-
-    /*@ParameterizedTest
-    @ValueSource(ints = {-1, 0})
-    void shouldReturnBadRequestIfUserHeaderIdNotPositive(int id) throws Exception {
-        mockMvc.perform(post("/bookings")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(BookingTestData.createPostBookingRequest()))
-                        .header("X-Sharer-User-Id", id))
-                .andExpect(status().isBadRequest());
-
-        mockMvc.perform(patch("/bookings/" + 1)
-                        .param("approved", "true")
-                        .header("X-Sharer-User-Id", id))
-                .andExpect(status().isBadRequest());
-
-        mockMvc.perform(get("/bookings/" + 1)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .header("X-Sharer-User-Id", id))
-                .andExpect(status().isBadRequest());
-
-        mockMvc.perform(get("/bookings")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .header("X-Sharer-User-Id", id))
-                .andExpect(status().isBadRequest());
-
-        mockMvc.perform(get("/bookings/owner")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .header("X-Sharer-User-Id", id))
-                .andExpect(status().isBadRequest());
-    }*/
-
-    /*@ParameterizedTest
-    @ValueSource(ints = {-1, 0})
-    void shouldReturnBadRequestIfBookingIdNotPositive(int id) throws Exception {
-        mockMvc.perform(patch("/bookings/" + id)
-                        .param("approved", "true")
-                        .header("X-Sharer-User-Id", 1))
-                .andExpect(status().isBadRequest());
-
-        mockMvc.perform(get("/bookings/" + id)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .header("X-Sharer-User-Id", 1))
-                .andExpect(status().isBadRequest());
-    }*/
 }

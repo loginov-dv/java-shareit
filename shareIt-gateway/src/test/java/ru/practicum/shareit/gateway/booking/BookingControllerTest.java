@@ -32,7 +32,6 @@ import java.util.stream.Stream;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -78,7 +77,6 @@ class BookingControllerTest {
         PostBookingRequest request = BookingTestData.createPostBookingRequest();
 
         when(bookingClient.createBooking(anyInt(), any(PostBookingRequest.class)))
-                //.thenThrow(new NotAvailableException("Предмет недоступен для бронирования"));
                 .thenReturn(new ResponseEntity<>(HttpStatus.BAD_REQUEST));
 
         mockMvc.perform(post("/bookings")
@@ -93,7 +91,6 @@ class BookingControllerTest {
         PostBookingRequest request = BookingTestData.createPostBookingRequest();
 
         when(bookingClient.createBooking(anyInt(), any(PostBookingRequest.class)))
-                //.thenThrow(new NotFoundException(String.format(ExceptionConstants.USER_NOT_FOUND_BY_ID, 999)));
                 .thenReturn(new ResponseEntity<>(HttpStatus.NOT_FOUND));
 
         mockMvc.perform(post("/bookings")
@@ -103,21 +100,9 @@ class BookingControllerTest {
                 .andExpect(status().isNotFound());
     }
 
-    // TODO: перенести тест из серсива
     @ParameterizedTest
     @MethodSource("provideInvalidDates")
     void shouldNotCreateBookingWithInvalidDates(String start, String end) throws Exception {
-        /*PostBookingRequest request = BookingTestData.createPostBookingRequest();
-
-        when(bookingClient.createBooking(anyInt(), any(PostBookingRequest.class)))
-                //.thenThrow(new BookingDateException("Ошибка при валидации дат бронирования"));
-                .thenReturn(new ResponseEntity<>(HttpStatus.BAD_REQUEST));
-
-        mockMvc.perform(post("/bookings")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .header("X-Sharer-User-Id", 1)
-                        .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isBadRequest());*/
 
         PostBookingRequest request = BookingTestData.createPostBookingRequest();
         request.setStart(start);
@@ -166,7 +151,6 @@ class BookingControllerTest {
     @Test
     void shouldNotApproveBookingByWrongUser() throws Exception {
         when(bookingClient.changeBookingStatus(anyInt(), anyInt(), anyBoolean()))
-                //.thenThrow(new NoAccessException("Нет доступа на изменение статуса бронирования"));
                 .thenReturn(new ResponseEntity<>(HttpStatus.FORBIDDEN));
 
         mockMvc.perform(patch("/bookings/" + 1)
@@ -198,7 +182,6 @@ class BookingControllerTest {
     @Test
     void shouldNotGetBookingByIdIfNoAccess() throws Exception {
         when(bookingClient.getBooking(anyInt(), anyInt()))
-                //.thenThrow(new NoAccessException("Нет доступа на просмотр бронирования"));
                 .thenReturn(new ResponseEntity<>(HttpStatus.FORBIDDEN));
 
         mockMvc.perform(get("/bookings/" + 1)
@@ -210,7 +193,6 @@ class BookingControllerTest {
     @Test
     void shouldNotGetBookingByIdIfNotFoundBookingOrUser() throws Exception {
         when(bookingClient.getBooking(anyInt(), anyInt()))
-                //.thenThrow(new NotFoundException("not found"));
                 .thenReturn(new ResponseEntity<>(HttpStatus.NOT_FOUND));
 
         mockMvc.perform(get("/bookings/" + 1)
@@ -261,7 +243,6 @@ class BookingControllerTest {
     @Test
     void shouldNotGetBookingsIfBookerNotFound() throws Exception {
         when(bookingClient.getAllBookersBookings(anyInt(), any(BookingState.class)))
-                //.thenThrow(new NotFoundException(String.format(ExceptionConstants.USER_NOT_FOUND_BY_ID, 999)));
                 .thenReturn(new ResponseEntity<>(HttpStatus.NOT_FOUND));
 
         mockMvc.perform(get("/bookings")
@@ -312,7 +293,6 @@ class BookingControllerTest {
     @Test
     void shouldNotGetBookingsIfOwnerNotFound() throws Exception {
         when(bookingClient.getAllOwnersBookings(anyInt(), any(BookingState.class)))
-                //.thenThrow(new NotFoundException(String.format(ExceptionConstants.USER_NOT_FOUND_BY_ID, 999)));
                 .thenReturn(new ResponseEntity<>(HttpStatus.NOT_FOUND));
 
         mockMvc.perform(get("/bookings/owner")
@@ -324,7 +304,6 @@ class BookingControllerTest {
     @Test
     void shouldReturnBadRequestIfStateStringWasInvalid() throws Exception {
         when(bookingClient.getAllBookersBookings(anyInt(), any()))
-                //.thenThrow(new ArgumentException(ExceptionConstants.INVALID_BOOKING_STATE));
                 .thenReturn(new ResponseEntity<>(HttpStatus.BAD_REQUEST));
 
         mockMvc.perform(get("/bookings")
@@ -333,7 +312,6 @@ class BookingControllerTest {
                 .andExpect(status().isBadRequest());
 
         when(bookingClient.getAllOwnersBookings(anyInt(), any()))
-                //.thenThrow(new ArgumentException(ExceptionConstants.INVALID_BOOKING_STATE));
                 .thenReturn(new ResponseEntity<>(HttpStatus.BAD_REQUEST));
 
         mockMvc.perform(get("/bookings/owner")

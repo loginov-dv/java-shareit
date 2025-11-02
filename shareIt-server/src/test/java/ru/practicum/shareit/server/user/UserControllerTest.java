@@ -2,9 +2,6 @@ package ru.practicum.shareit.server.user;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.NullAndEmptySource;
-import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -54,36 +51,6 @@ class UserControllerTest {
                 .andExpect(jsonPath("$.name").value(newUser.getName()))
                 .andExpect(jsonPath("$.email").value(newUser.getEmail()));
     }
-
-    /*@ParameterizedTest
-    @NullAndEmptySource
-    @ValueSource(strings = {"", " ", "invalid email", "invalid_email"})
-    void shouldNotCreateUserWithInvalidEmail(String email) throws Exception {
-        PostUserRequest newUser = UserTestData.createPostUserRequest();
-        newUser.setEmail(email);
-
-        mockMvc.perform(post("/users")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(newUser)))
-                .andExpect(status().isBadRequest());
-    }*/
-
-    /*@ParameterizedTest
-    @NullAndEmptySource
-    void shouldNotCreateUserWithNullOrEmptyName(String name) throws Exception {
-        PostUserRequest newUser = UserTestData.createPostUserRequest();
-        newUser.setName(name);
-
-        UserDto savedUser = UserTestData.createUserDto(newUser);
-
-        when(userService.createUser(any(PostUserRequest.class)))
-                .thenReturn(savedUser);
-
-        mockMvc.perform(post("/users")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(newUser)))
-                .andExpect(status().isBadRequest());
-    }*/
 
     @Test
     void shouldNotCreateUserWithAlreadyExistingEmail() throws Exception {
@@ -153,30 +120,6 @@ class UserControllerTest {
                 .andExpect(jsonPath("$.email").value(updatedUser.getEmail()));
     }
 
-    /*@ParameterizedTest
-    @ValueSource(strings = {" ", ""})
-    void shouldNotUpdateUserIfNewNameIsInvalid(String name) throws Exception {
-        PatchUserRequest request = UserTestData.createPatchUserRequest();
-        request.setName(name);
-
-        mockMvc.perform(patch("/users/" + 1)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isBadRequest());
-    }*/
-
-    /*@ParameterizedTest
-    @ValueSource(strings = {"", " ", "invalid email", "invalid_email"})
-    void shouldNotUpdateUserIfNewEmailIsInvalid(String email) throws Exception {
-        PatchUserRequest request = UserTestData.createPatchUserRequest();
-        request.setEmail(email);
-
-        mockMvc.perform(patch("/users/" + 1)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isBadRequest());
-    }*/
-
     @Test
     void shouldNotUpdateUnknownUser() throws Exception {
         when(userService.update(anyInt(), any(PatchUserRequest.class)))
@@ -198,21 +141,4 @@ class UserControllerTest {
                         .content(objectMapper.writeValueAsString(UserTestData.createPatchUserRequest())))
                 .andExpect(status().isConflict());
     }
-
-    /*@ParameterizedTest
-    @ValueSource(ints = {-1, 0})
-    void shouldReturnBadRequestIfUserIdNotPositive(int id) throws Exception {
-        mockMvc.perform(get("/users/" + id)
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isBadRequest());
-
-        mockMvc.perform(delete("/users/" + id)
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isBadRequest());
-
-        mockMvc.perform(patch("/users/" + id)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(UserTestData.createPatchUserRequest())))
-                .andExpect(status().isBadRequest());
-    }*/
 }

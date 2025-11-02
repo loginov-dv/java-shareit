@@ -23,7 +23,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Random;
 
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.when;
@@ -71,7 +70,6 @@ class ItemRequestControllerTest {
     @Test
     void shouldNotCreateItemRequestIfRequestorNotFound() throws Exception {
         when(requestClient.createRequest(anyInt(), any(ItemRequestShortDto.class)))
-                //.thenThrow(new NotFoundException(String.format(ExceptionConstants.USER_NOT_FOUND_BY_ID, 999)));
                 .thenReturn(new ResponseEntity<>(HttpStatus.NOT_FOUND));
 
         mockMvc.perform(post("/requests")
@@ -114,7 +112,6 @@ class ItemRequestControllerTest {
     @Test
     void shouldNotGetUnknownItemRequest() throws Exception {
         when(requestClient.getRequest(anyInt(), anyInt()))
-                //.thenThrow(new NotFoundException("Запрос с id = " + 999 + " не найден"));
                 .thenReturn(new ResponseEntity<>(HttpStatus.NOT_FOUND));
 
         mockMvc.perform(get("/requests/" + 999)
@@ -142,7 +139,6 @@ class ItemRequestControllerTest {
     @Test
     void shouldNotGetAllItemRequestsByRequestorIdOfUnknownRequestor() throws Exception {
         when(requestClient.getAllUsersRequests(anyInt()))
-                //.thenThrow(new NotFoundException(String.format(ExceptionConstants.USER_NOT_FOUND_BY_ID, 999)));
                 .thenReturn(new ResponseEntity<>(HttpStatus.NOT_FOUND));
 
         mockMvc.perform(get("/requests")
