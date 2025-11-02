@@ -1,4 +1,4 @@
-package ru.practicum.shareit.user;
+package ru.practicum.shareit.server.user;
 
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -7,14 +7,14 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
 
-import ru.practicum.shareit.exception.EmailConflictException;
-import ru.practicum.shareit.exception.NotFoundException;
-import ru.practicum.shareit.user.dto.PatchUserRequest;
-import ru.practicum.shareit.user.dto.PostUserRequest;
-import ru.practicum.shareit.user.dto.UserDto;
-import ru.practicum.shareit.user.model.User;
-import ru.practicum.shareit.utils.RandomUtils;
-import ru.practicum.shareit.utils.UserTestData;
+import ru.practicum.shareit.server.exception.EmailConflictException;
+import ru.practicum.shareit.server.exception.NotFoundException;
+import ru.practicum.shareit.server.user.dto.PatchUserRequest;
+import ru.practicum.shareit.server.user.dto.PostUserRequest;
+import ru.practicum.shareit.server.user.dto.UserDto;
+import ru.practicum.shareit.server.user.model.User;
+import ru.practicum.shareit.server.utils.RandomUtils;
+import ru.practicum.shareit.server.utils.UserTestData;
 
 import java.util.Optional;
 import java.util.Random;

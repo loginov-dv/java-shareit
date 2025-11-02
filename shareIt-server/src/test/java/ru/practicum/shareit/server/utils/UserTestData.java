@@ -1,11 +1,11 @@
-package ru.practicum.shareit.utils;
+package ru.practicum.shareit.server.utils;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
-import ru.practicum.shareit.user.dto.PatchUserRequest;
-import ru.practicum.shareit.user.dto.PostUserRequest;
-import ru.practicum.shareit.user.dto.UserDto;
-import ru.practicum.shareit.user.model.User;
+import ru.practicum.shareit.server.user.dto.PatchUserRequest;
+import ru.practicum.shareit.server.user.dto.PostUserRequest;
+import ru.practicum.shareit.server.user.dto.UserDto;
+import ru.practicum.shareit.server.user.model.User;
 
 import java.util.Random;
 
