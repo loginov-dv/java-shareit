@@ -6,7 +6,10 @@ import ru.practicum.shareit.gateway.item.dto.CommentDto;
 import ru.practicum.shareit.gateway.item.dto.ItemDetailedDto;
 import ru.practicum.shareit.gateway.item.dto.ItemDto;
 import ru.practicum.shareit.gateway.item.dto.PatchItemRequest;
+import ru.practicum.shareit.gateway.user.dto.UserDto;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Random;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
@@ -19,6 +22,19 @@ public final class ItemTestData {
         request.setAvailable(true);
 
         return request;
+    }
+
+    public static ItemDto createItemDto(ItemDto newItemDto) {
+        ItemDto dto = new ItemDto();
+        Random random = new Random();
+
+        dto.setId(random.nextInt(100));
+        dto.setOwnerId(random.nextInt(100));
+        dto.setName(newItemDto.getName());
+        dto.setDescription(newItemDto.getDescription());
+        dto.setAvailable(newItemDto.getAvailable());
+
+        return dto;
     }
 
     // с рандомными id и id владельца
@@ -71,6 +87,19 @@ public final class ItemTestData {
         CommentDto commentDto = new CommentDto();
 
         commentDto.setText(RandomUtils.createName(50));
+
+        return commentDto;
+    }
+
+    public static CommentDto createCommentDto(ItemDto item, UserDto author, CommentDto newCommentDto) {
+        CommentDto commentDto = new CommentDto();
+        Random random = new Random();
+
+        commentDto.setId(random.nextInt(100));
+        commentDto.setText(newCommentDto.getText());
+        commentDto.setItemId(item.getId());
+        commentDto.setAuthorName(author.getName());
+        commentDto.setCreated(DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(LocalDateTime.now()));
 
         return commentDto;
     }
