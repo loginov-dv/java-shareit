@@ -1,4 +1,4 @@
-package ru.practicum.shareit.exception;
+package ru.practicum.shareit.server.exception;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
