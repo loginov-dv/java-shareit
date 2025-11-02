@@ -1,18 +1,19 @@
-package ru.practicum.shareit.user;
+package ru.practicum.shareit.server.user;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.practicum.shareit.exception.EmailConflictException;
-import ru.practicum.shareit.exception.ExceptionConstants;
-import ru.practicum.shareit.exception.LogConstants;
-import ru.practicum.shareit.exception.NotFoundException;
-import ru.practicum.shareit.user.dto.PatchUserRequest;
-import ru.practicum.shareit.user.dto.PostUserRequest;
-import ru.practicum.shareit.user.dto.UserDto;
-import ru.practicum.shareit.user.mapper.UserMapper;
-import ru.practicum.shareit.user.model.User;
+
+import ru.practicum.shareit.server.exception.EmailConflictException;
+import ru.practicum.shareit.server.exception.ExceptionConstants;
+import ru.practicum.shareit.server.exception.LogConstants;
+import ru.practicum.shareit.server.exception.NotFoundException;
+import ru.practicum.shareit.server.user.dto.PatchUserRequest;
+import ru.practicum.shareit.server.user.dto.PostUserRequest;
+import ru.practicum.shareit.server.user.dto.UserDto;
+import ru.practicum.shareit.server.user.mapper.UserMapper;
+import ru.practicum.shareit.server.user.model.User;
 
 import java.util.Optional;
 
