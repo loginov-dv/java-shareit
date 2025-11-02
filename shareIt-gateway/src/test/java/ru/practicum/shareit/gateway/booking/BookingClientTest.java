@@ -8,7 +8,6 @@ import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
@@ -21,10 +20,8 @@ import ru.practicum.shareit.gateway.booking.dto.BookingDto;
 import ru.practicum.shareit.gateway.booking.dto.PostBookingRequest;
 import ru.practicum.shareit.gateway.booking.model.BookingState;
 import ru.practicum.shareit.gateway.booking.model.BookingStatus;
-import ru.practicum.shareit.gateway.item.dto.ItemDto;
 import ru.practicum.shareit.gateway.user.dto.UserDto;
 import ru.practicum.shareit.gateway.utils.BookingTestData;
-import ru.practicum.shareit.gateway.utils.ItemTestData;
 import ru.practicum.shareit.gateway.utils.UserTestData;
 
 import java.util.List;
