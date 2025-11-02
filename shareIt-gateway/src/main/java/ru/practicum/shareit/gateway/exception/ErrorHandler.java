@@ -1,4 +1,4 @@
-package ru.practicum.shareit.exception;
+package ru.practicum.shareit.gateway.exception;
 
 import jakarta.validation.ConstraintViolationException;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
@@ -14,39 +14,10 @@ import java.util.stream.Collectors;
 
 @RestControllerAdvice
 public class ErrorHandler {
-    @ExceptionHandler(NotFoundException.class)
-    @ResponseStatus(HttpStatus.NOT_FOUND)
-    public ErrorMessage handleNotFoundException(final NotFoundException ex) {
-        return new ErrorMessage(ex.getMessage());
-    }
 
-    @ExceptionHandler(EmailConflictException.class)
-    @ResponseStatus(HttpStatus.CONFLICT)
-    public ErrorMessage handleEmailConflictException(final EmailConflictException ex) {
-        return new ErrorMessage(ex.getMessage());
-    }
-
-    @ExceptionHandler(NoAccessException.class)
-    @ResponseStatus(HttpStatus.FORBIDDEN)
-    public ErrorMessage handleNoAccessException(final NoAccessException ex) {
-        return new ErrorMessage(ex.getMessage());
-    }
-
-    @ExceptionHandler(BookingDateException.class)
+    @ExceptionHandler(IllegalArgumentException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorMessage handleBookingDateException(final BookingDateException ex) {
-        return new ErrorMessage(ex.getMessage());
-    }
-
-    @ExceptionHandler(NotAvailableException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorMessage handleNotAvailableException(final NotAvailableException ex) {
-        return new ErrorMessage(ex.getMessage());
-    }
-
-    @ExceptionHandler(ArgumentException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorMessage handleArgumentException(final ArgumentException ex) {
+    public ErrorMessage handleIllegalArgumentException(final IllegalArgumentException ex) {
         return new ErrorMessage(ex.getMessage());
     }
 
