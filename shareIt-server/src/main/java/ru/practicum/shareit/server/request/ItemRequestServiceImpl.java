@@ -1,20 +1,21 @@
-package ru.practicum.shareit.request;
+package ru.practicum.shareit.server.request;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.practicum.shareit.exception.ExceptionConstants;
-import ru.practicum.shareit.exception.LogConstants;
-import ru.practicum.shareit.exception.NotFoundException;
-import ru.practicum.shareit.item.ItemRepository;
-import ru.practicum.shareit.item.model.Item;
-import ru.practicum.shareit.request.dto.ItemRequestDto;
-import ru.practicum.shareit.request.dto.ItemRequestShortDto;
-import ru.practicum.shareit.request.mapper.ItemRequestMapper;
-import ru.practicum.shareit.request.model.ItemRequest;
-import ru.practicum.shareit.user.UserRepository;
-import ru.practicum.shareit.user.model.User;
+
+import ru.practicum.shareit.server.exception.ExceptionConstants;
+import ru.practicum.shareit.server.exception.LogConstants;
+import ru.practicum.shareit.server.exception.NotFoundException;
+import ru.practicum.shareit.server.item.ItemRepository;
+import ru.practicum.shareit.server.item.model.Item;
+import ru.practicum.shareit.server.request.dto.ItemRequestDto;
+import ru.practicum.shareit.server.request.dto.ItemRequestShortDto;
+import ru.practicum.shareit.server.request.mapper.ItemRequestMapper;
+import ru.practicum.shareit.server.request.model.ItemRequest;
+import ru.practicum.shareit.server.user.UserRepository;
+import ru.practicum.shareit.server.user.model.User;
 
 import java.util.*;
 import java.util.stream.Collectors;

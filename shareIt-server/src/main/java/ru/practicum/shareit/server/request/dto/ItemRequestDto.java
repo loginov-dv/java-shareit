@@ -1,7 +1,8 @@
-package ru.practicum.shareit.request.dto;
+package ru.practicum.shareit.server.request.dto;
 
 import lombok.Data;
-import ru.practicum.shareit.item.dto.ItemShortDto;
+
+import ru.practicum.shareit.server.item.dto.ItemShortDto;
 
 import java.util.List;
 

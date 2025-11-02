@@ -1,8 +1,8 @@
-package ru.practicum.shareit.request.model;
+package ru.practicum.shareit.server.request.model;
 
 import jakarta.persistence.*;
 import lombok.*;
-import ru.practicum.shareit.user.model.User;
+import ru.practicum.shareit.server.user.model.User;
 
 import java.time.LocalDateTime;
 
