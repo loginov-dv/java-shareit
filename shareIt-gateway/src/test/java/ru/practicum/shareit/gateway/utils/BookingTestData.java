@@ -49,6 +49,10 @@ public final class BookingTestData {
         return bookingDto;
     }
 
+    public static BookingDto createBookingDto(BookingStatus status) {
+        return createBookingDto(createPostBookingRequest(), status);
+    }
+
     // с рандомным id предмета
     public static PostBookingRequest createPostBookingRequest() {
         PostBookingRequest request = new PostBookingRequest();
