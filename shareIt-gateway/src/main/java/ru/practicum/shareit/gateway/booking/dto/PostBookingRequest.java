@@ -1,4 +1,4 @@
-package ru.practicum.shareit.booking.dto;
+package ru.practicum.shareit.gateway.booking.dto;
 
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
