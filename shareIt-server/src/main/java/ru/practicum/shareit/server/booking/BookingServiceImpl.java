@@ -1,20 +1,21 @@
-package ru.practicum.shareit.booking;
+package ru.practicum.shareit.server.booking;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.practicum.shareit.booking.dto.BookingDto;
-import ru.practicum.shareit.booking.dto.PostBookingRequest;
-import ru.practicum.shareit.booking.mapper.BookingMapper;
-import ru.practicum.shareit.booking.model.Booking;
-import ru.practicum.shareit.booking.model.BookingStatus;
-import ru.practicum.shareit.booking.model.BookingState;
-import ru.practicum.shareit.exception.*;
-import ru.practicum.shareit.item.ItemRepository;
-import ru.practicum.shareit.item.model.Item;
-import ru.practicum.shareit.user.UserRepository;
-import ru.practicum.shareit.user.model.User;
+
+import ru.practicum.shareit.server.booking.dto.BookingDto;
+import ru.practicum.shareit.server.booking.dto.PostBookingRequest;
+import ru.practicum.shareit.server.booking.mapper.BookingMapper;
+import ru.practicum.shareit.server.booking.model.Booking;
+import ru.practicum.shareit.server.booking.model.BookingStatus;
+import ru.practicum.shareit.server.booking.model.BookingState;
+import ru.practicum.shareit.server.exception.*;
+import ru.practicum.shareit.server.item.ItemRepository;
+import ru.practicum.shareit.server.item.model.Item;
+import ru.practicum.shareit.server.user.UserRepository;
+import ru.practicum.shareit.server.user.model.User;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -51,8 +52,6 @@ public class BookingServiceImpl implements BookingService {
         }
 
         Booking booking = BookingMapper.toNewBooking(booker, item, request);
-
-        validateBookingDates(booking);
 
         booking = bookingRepository.save(booking);
         log.debug("Добавлено бронирование: {}", booking);
@@ -227,32 +226,6 @@ public class BookingServiceImpl implements BookingService {
         return bookings.stream()
                 .map(BookingMapper::toBookingDto)
                 .toList();
-    }
-
-    private void validateBookingDates(Booking booking) {
-        if (booking.getStart().isAfter(booking.getEnd())) {
-            log.warn("Дата окончания бронирования должна быть после даты начала бронирования");
-            throw new BookingDateException("Дата окончания бронирования должна быть " +
-                    "после даты начала бронирования");
-        }
-
-        if (booking.getStart().equals(booking.getEnd())) {
-            log.warn("Дата окончания бронирования не может совпадать с датой начала бронирования");
-            throw new BookingDateException("Дата окончания бронирования не может " +
-                    "совпадать с датой начала бронирования");
-        }
-
-        if (booking.getStart().isBefore(LocalDateTime.now())) {
-            log.warn("Дата начала бронирования не может быть в прошлом");
-            throw new BookingDateException("Дата начала бронирования не может быть в прошлом");
-        }
-
-        if (booking.getEnd().isBefore(LocalDateTime.now())) {
-            log.warn("Дата окончания бронирования не может быть в прошлом");
-            throw new BookingDateException("Дата окончания бронирования не может быть в прошлом");
-        }
-
-        log.debug("Валидация дат бронирования завершена успешно");
     }
 
     private User findAndGetUser(int userId) {

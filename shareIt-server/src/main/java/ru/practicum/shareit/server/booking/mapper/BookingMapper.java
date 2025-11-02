@@ -1,16 +1,17 @@
-package ru.practicum.shareit.booking.mapper;
+package ru.practicum.shareit.server.booking.mapper;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import ru.practicum.shareit.booking.dto.BookingDto;
-import ru.practicum.shareit.booking.dto.BookingShortDto;
-import ru.practicum.shareit.booking.dto.PostBookingRequest;
-import ru.practicum.shareit.booking.model.Booking;
-import ru.practicum.shareit.item.mapper.ItemMapper;
-import ru.practicum.shareit.item.model.Item;
-import ru.practicum.shareit.user.mapper.UserMapper;
-import ru.practicum.shareit.user.model.User;
+
+import ru.practicum.shareit.server.booking.dto.BookingDto;
+import ru.practicum.shareit.server.booking.dto.BookingShortDto;
+import ru.practicum.shareit.server.booking.dto.PostBookingRequest;
+import ru.practicum.shareit.server.booking.model.Booking;
+import ru.practicum.shareit.server.item.mapper.ItemMapper;
+import ru.practicum.shareit.server.item.model.Item;
+import ru.practicum.shareit.server.user.mapper.UserMapper;
+import ru.practicum.shareit.server.user.model.User;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;

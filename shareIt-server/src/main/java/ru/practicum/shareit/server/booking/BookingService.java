@@ -1,7 +1,7 @@
-package ru.practicum.shareit.booking;
+package ru.practicum.shareit.server.booking;
 
-import ru.practicum.shareit.booking.dto.BookingDto;
-import ru.practicum.shareit.booking.dto.PostBookingRequest;
+import ru.practicum.shareit.server.booking.dto.BookingDto;
+import ru.practicum.shareit.server.booking.dto.PostBookingRequest;
 
 import java.util.List;
 

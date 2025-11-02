@@ -1,8 +1,9 @@
-package ru.practicum.shareit.booking.dto;
+package ru.practicum.shareit.server.booking.dto;
 
 import lombok.Data;
-import ru.practicum.shareit.item.dto.ItemDto;
-import ru.practicum.shareit.user.dto.UserDto;
+
+import ru.practicum.shareit.server.item.dto.ItemDto;
+import ru.practicum.shareit.server.user.dto.UserDto;
 
 @Data
 public class BookingDto {
