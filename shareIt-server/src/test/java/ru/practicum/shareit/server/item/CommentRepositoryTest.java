@@ -1,4 +1,4 @@
-package ru.practicum.shareit.item;
+package ru.practicum.shareit.server.item;
 
 import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.Test;
@@ -8,12 +8,12 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
 
-import ru.practicum.shareit.item.model.Comment;
-import ru.practicum.shareit.item.model.Item;
-import ru.practicum.shareit.user.UserRepository;
-import ru.practicum.shareit.user.model.User;
-import ru.practicum.shareit.utils.ItemTestData;
-import ru.practicum.shareit.utils.UserTestData;
+import ru.practicum.shareit.server.item.model.Comment;
+import ru.practicum.shareit.server.item.model.Item;
+import ru.practicum.shareit.server.user.UserRepository;
+import ru.practicum.shareit.server.user.model.User;
+import ru.practicum.shareit.server.utils.ItemTestData;
+import ru.practicum.shareit.server.utils.UserTestData;
 
 import java.util.List;
 import java.util.Optional;

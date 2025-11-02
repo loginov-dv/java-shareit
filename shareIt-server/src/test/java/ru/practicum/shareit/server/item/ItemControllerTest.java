@@ -1,4 +1,4 @@
-package ru.practicum.shareit.item;
+package ru.practicum.shareit.server.item;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
@@ -12,16 +12,16 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
-import ru.practicum.shareit.exception.ExceptionConstants;
-import ru.practicum.shareit.exception.NoAccessException;
-import ru.practicum.shareit.exception.NotAvailableException;
-import ru.practicum.shareit.exception.NotFoundException;
-import ru.practicum.shareit.item.dto.CommentDto;
-import ru.practicum.shareit.item.dto.ItemDetailedDto;
-import ru.practicum.shareit.item.dto.ItemDto;
-import ru.practicum.shareit.item.dto.PatchItemRequest;
-import ru.practicum.shareit.utils.ItemTestData;
-import ru.practicum.shareit.utils.RandomUtils;
+import ru.practicum.shareit.server.exception.ExceptionConstants;
+import ru.practicum.shareit.server.exception.NoAccessException;
+import ru.practicum.shareit.server.exception.NotAvailableException;
+import ru.practicum.shareit.server.exception.NotFoundException;
+import ru.practicum.shareit.server.item.dto.CommentDto;
+import ru.practicum.shareit.server.item.dto.ItemDetailedDto;
+import ru.practicum.shareit.server.item.dto.ItemDto;
+import ru.practicum.shareit.server.item.dto.PatchItemRequest;
+import ru.practicum.shareit.server.utils.ItemTestData;
+import ru.practicum.shareit.server.utils.RandomUtils;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -85,7 +85,7 @@ class ItemControllerTest {
                 .andExpect(status().isNotFound());
     }
 
-    @ParameterizedTest
+    /*@ParameterizedTest
     @NullAndEmptySource
     void shouldNotCreateItemWithNullOrEmptyName(String name) throws Exception {
         ItemDto newItem = ItemTestData.createNewItemDto();
@@ -96,9 +96,9 @@ class ItemControllerTest {
                         .header("X-Sharer-User-Id", 1)
                         .content(objectMapper.writeValueAsString(newItem)))
                 .andExpect(status().isBadRequest());
-    }
+    }*/
 
-    @ParameterizedTest
+    /*@ParameterizedTest
     @NullAndEmptySource
     void shouldNotCreateItemWithNullOrEmptyDescription(String description) throws Exception {
         ItemDto newItem = ItemTestData.createNewItemDto();
@@ -109,9 +109,9 @@ class ItemControllerTest {
                         .header("X-Sharer-User-Id", 1)
                         .content(objectMapper.writeValueAsString(newItem)))
                 .andExpect(status().isBadRequest());
-    }
+    }*/
 
-    @Test
+    /*@Test
     void shouldNotCreateItemWithNullAvailableField() throws Exception {
         ItemDto newItem = ItemTestData.createNewItemDto();
         newItem.setAvailable(null);
@@ -121,7 +121,7 @@ class ItemControllerTest {
                         .header("X-Sharer-User-Id", 1)
                         .content(objectMapper.writeValueAsString(newItem)))
                 .andExpect(status().isBadRequest());
-    }
+    }*/
 
     @Test
     void shouldGetItemById() throws Exception {
@@ -231,7 +231,7 @@ class ItemControllerTest {
                 .andExpect(status().isForbidden());
     }
 
-    @ParameterizedTest
+    /*@ParameterizedTest
     @ValueSource(strings = {"", " "})
     void shouldNotUpdateItemIfNewNameIsInvalid(String name) throws Exception {
         PatchItemRequest request = ItemTestData.createPatchItemRequest();
@@ -242,7 +242,7 @@ class ItemControllerTest {
                         .header("X-Sharer-User-Id", 1)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest());
-    }
+    }*/
 
     @Test
     void shouldGetItemsBySearchString() throws Exception {
@@ -313,7 +313,7 @@ class ItemControllerTest {
                 .andExpect(status().isBadRequest());
     }
 
-    @Test
+    /*@Test
     void shouldReturnBadRequestIfUserHeaderIsMissing() throws Exception {
         mockMvc.perform(post("/items")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -340,9 +340,9 @@ class ItemControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(ItemTestData.createNewCommentDto())))
                 .andExpect(status().isBadRequest());
-    }
+    }*/
 
-    @ParameterizedTest
+    /*@ParameterizedTest
     @ValueSource(ints = {-1, 0})
     void shouldReturnBadRequestIfUserHeaderIdNotPositive(int id) throws Exception {
         mockMvc.perform(post("/items")
@@ -376,9 +376,9 @@ class ItemControllerTest {
                         .header("X-Sharer-User-Id", id)
                         .content(objectMapper.writeValueAsString(ItemTestData.createNewCommentDto())))
                 .andExpect(status().isBadRequest());
-    }
+    }*/
 
-    @ParameterizedTest
+    /*@ParameterizedTest
     @ValueSource(ints = {-1, 0})
     void shouldReturnBadRequestIfItemIdNotPositive(int id) throws Exception {
         mockMvc.perform(get("/items/" + id)
@@ -397,5 +397,5 @@ class ItemControllerTest {
                         .header("X-Sharer-User-Id", 1)
                         .content(objectMapper.writeValueAsString(ItemTestData.createNewCommentDto())))
                 .andExpect(status().isBadRequest());
-    }
+    }*/
 }
