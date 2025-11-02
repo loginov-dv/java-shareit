@@ -1,22 +1,22 @@
-package ru.practicum.shareit.request;
+package ru.practicum.shareit.server.request;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
-import ru.practicum.shareit.exception.NotFoundException;
-import ru.practicum.shareit.item.ItemRepository;
-import ru.practicum.shareit.item.model.Item;
-import ru.practicum.shareit.request.dto.ItemRequestDto;
-import ru.practicum.shareit.request.dto.ItemRequestShortDto;
-import ru.practicum.shareit.request.model.ItemRequest;
-import ru.practicum.shareit.user.UserRepository;
-import ru.practicum.shareit.user.model.User;
-import ru.practicum.shareit.utils.ItemRequestTestData;
-import ru.practicum.shareit.utils.ItemTestData;
-import ru.practicum.shareit.utils.RandomUtils;
-import ru.practicum.shareit.utils.UserTestData;
+import ru.practicum.shareit.server.exception.NotFoundException;
+import ru.practicum.shareit.server.item.ItemRepository;
+import ru.practicum.shareit.server.item.model.Item;
+import ru.practicum.shareit.server.request.dto.ItemRequestDto;
+import ru.practicum.shareit.server.request.dto.ItemRequestShortDto;
+import ru.practicum.shareit.server.request.model.ItemRequest;
+import ru.practicum.shareit.server.user.UserRepository;
+import ru.practicum.shareit.server.user.model.User;
+import ru.practicum.shareit.server.utils.ItemRequestTestData;
+import ru.practicum.shareit.server.utils.ItemTestData;
+import ru.practicum.shareit.server.utils.RandomUtils;
+import ru.practicum.shareit.server.utils.UserTestData;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
