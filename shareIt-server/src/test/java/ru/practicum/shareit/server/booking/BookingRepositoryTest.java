@@ -1,4 +1,4 @@
-package ru.practicum.shareit.booking;
+package ru.practicum.shareit.server.booking;
 
 import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.Test;
@@ -10,15 +10,15 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
 
-import ru.practicum.shareit.booking.model.Booking;
-import ru.practicum.shareit.booking.model.BookingStatus;
-import ru.practicum.shareit.item.ItemRepository;
-import ru.practicum.shareit.item.model.Item;
-import ru.practicum.shareit.user.UserRepository;
-import ru.practicum.shareit.user.model.User;
-import ru.practicum.shareit.utils.BookingTestData;
-import ru.practicum.shareit.utils.ItemTestData;
-import ru.practicum.shareit.utils.UserTestData;
+import ru.practicum.shareit.server.booking.model.Booking;
+import ru.practicum.shareit.server.booking.model.BookingStatus;
+import ru.practicum.shareit.server.item.ItemRepository;
+import ru.practicum.shareit.server.item.model.Item;
+import ru.practicum.shareit.server.user.UserRepository;
+import ru.practicum.shareit.server.user.model.User;
+import ru.practicum.shareit.server.utils.BookingTestData;
+import ru.practicum.shareit.server.utils.ItemTestData;
+import ru.practicum.shareit.server.utils.UserTestData;
 
 import java.time.LocalDateTime;
 import java.util.List;

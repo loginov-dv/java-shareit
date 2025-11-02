@@ -1,14 +1,14 @@
-package ru.practicum.shareit.utils;
+package ru.practicum.shareit.server.utils;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
-import ru.practicum.shareit.booking.dto.BookingDto;
-import ru.practicum.shareit.booking.dto.PostBookingRequest;
-import ru.practicum.shareit.booking.model.Booking;
-import ru.practicum.shareit.booking.model.BookingStatus;
-import ru.practicum.shareit.item.dto.ItemDto;
-import ru.practicum.shareit.item.model.Item;
-import ru.practicum.shareit.user.model.User;
+import ru.practicum.shareit.server.booking.dto.BookingDto;
+import ru.practicum.shareit.server.booking.dto.PostBookingRequest;
+import ru.practicum.shareit.server.booking.model.Booking;
+import ru.practicum.shareit.server.booking.model.BookingStatus;
+import ru.practicum.shareit.server.item.dto.ItemDto;
+import ru.practicum.shareit.server.item.model.Item;
+import ru.practicum.shareit.server.user.model.User;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
