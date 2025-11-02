@@ -1,4 +1,4 @@
-package ru.practicum.shareit.user.model;
+package ru.practicum.shareit.server.user.model;
 
 import jakarta.persistence.*;
 import lombok.*;
