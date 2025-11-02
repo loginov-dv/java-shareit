@@ -125,7 +125,7 @@ class ItemClientTest {
         String text = "text";
 
         when(restTemplate.exchange(
-                eq("/search?text={" + text + "}"),
+                eq("/search?text={text}"),
                 eq(HttpMethod.GET),
                 any(HttpEntity.class),
                 eq(Object.class),
