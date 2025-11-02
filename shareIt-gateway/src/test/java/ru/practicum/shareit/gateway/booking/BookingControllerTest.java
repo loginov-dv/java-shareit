@@ -116,19 +116,21 @@ class BookingControllerTest {
     }
 
     private static Stream<Arguments> provideInvalidDates() {
+        var now = LocalDateTime.now();
+
         return Stream.of(
                 // start после end
-                Arguments.of(DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(LocalDateTime.now().plusHours(2)),
-                        DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(LocalDateTime.now().plusHours(1))),
+                Arguments.of(DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(now.plusHours(2)),
+                        DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(now.plusHours(1))),
                 // start и end равны
-                Arguments.of(DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(LocalDateTime.now().plusHours(1)),
-                        DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(LocalDateTime.now().plusHours(1))),
+                Arguments.of(DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(now.plusHours(1)),
+                        DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(now.plusHours(1))),
                 // start в прошлом
-                Arguments.of(DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(LocalDateTime.now().minusHours(1)),
-                        DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(LocalDateTime.now().plusHours(1))),
+                Arguments.of(DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(now.minusHours(1)),
+                        DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(now.plusHours(1))),
                 // end в прошлом
-                Arguments.of(DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(LocalDateTime.now().plusHours(1)),
-                        DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(LocalDateTime.now().minusHours(1)))
+                Arguments.of(DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(now.plusHours(1)),
+                        DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(now.minusHours(1)))
         );
     }
 
