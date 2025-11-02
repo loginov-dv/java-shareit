@@ -1,4 +1,4 @@
-package ru.practicum.shareit.user.dto;
+package ru.practicum.shareit.gateway.user.dto;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Pattern;
@@ -11,12 +11,4 @@ public class PatchUserRequest {
     @Pattern(regexp = "^\\S+$", message = "Новая электронная почта не может быть пустой или содержать пробелы")
     @Email(message = "Новая электронная почта не соответствует формату")
     private String email;
-
-    public boolean hasName() {
-        return name != null;
-    }
-
-    public boolean hasEmail() {
-        return email != null;
-    }
 }
