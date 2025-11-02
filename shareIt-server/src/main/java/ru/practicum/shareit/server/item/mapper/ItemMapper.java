@@ -1,16 +1,17 @@
-package ru.practicum.shareit.item.mapper;
+package ru.practicum.shareit.server.item.mapper;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
-import ru.practicum.shareit.booking.mapper.BookingMapper;
-import ru.practicum.shareit.booking.model.Booking;
-import ru.practicum.shareit.item.dto.ItemDetailedDto;
-import ru.practicum.shareit.item.dto.ItemDto;
-import ru.practicum.shareit.item.dto.ItemShortDto;
-import ru.practicum.shareit.item.dto.PatchItemRequest;
-import ru.practicum.shareit.item.model.Comment;
-import ru.practicum.shareit.item.model.Item;
-import ru.practicum.shareit.user.model.User;
+
+import ru.practicum.shareit.server.booking.mapper.BookingMapper;
+import ru.practicum.shareit.server.booking.model.Booking;
+import ru.practicum.shareit.server.item.dto.ItemDetailedDto;
+import ru.practicum.shareit.server.item.dto.ItemDto;
+import ru.practicum.shareit.server.item.dto.ItemShortDto;
+import ru.practicum.shareit.server.item.dto.PatchItemRequest;
+import ru.practicum.shareit.server.item.model.Comment;
+import ru.practicum.shareit.server.item.model.Item;
+import ru.practicum.shareit.server.user.model.User;
 
 import java.util.List;
 

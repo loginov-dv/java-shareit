@@ -1,11 +1,12 @@
-package ru.practicum.shareit.item.mapper;
+package ru.practicum.shareit.server.item.mapper;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
-import ru.practicum.shareit.item.dto.CommentDto;
-import ru.practicum.shareit.item.model.Comment;
-import ru.practicum.shareit.item.model.Item;
-import ru.practicum.shareit.user.model.User;
+
+import ru.practicum.shareit.server.item.dto.CommentDto;
+import ru.practicum.shareit.server.item.model.Comment;
+import ru.practicum.shareit.server.item.model.Item;
+import ru.practicum.shareit.server.user.model.User;
 
 import java.time.format.DateTimeFormatter;
 

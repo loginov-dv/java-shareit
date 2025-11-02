@@ -1,9 +1,9 @@
-package ru.practicum.shareit.item;
+package ru.practicum.shareit.server.item;
 
-import ru.practicum.shareit.item.dto.ItemDetailedDto;
-import ru.practicum.shareit.item.dto.CommentDto;
-import ru.practicum.shareit.item.dto.ItemDto;
-import ru.practicum.shareit.item.dto.PatchItemRequest;
+import ru.practicum.shareit.server.item.dto.ItemDetailedDto;
+import ru.practicum.shareit.server.item.dto.CommentDto;
+import ru.practicum.shareit.server.item.dto.ItemDto;
+import ru.practicum.shareit.server.item.dto.PatchItemRequest;
 
 import java.util.List;
 

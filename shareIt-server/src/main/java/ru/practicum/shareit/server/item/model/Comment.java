@@ -1,11 +1,12 @@
-package ru.practicum.shareit.item.model;
+package ru.practicum.shareit.server.item.model;
 
 import jakarta.persistence.*;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
-import ru.practicum.shareit.user.model.User;
+
+import ru.practicum.shareit.server.user.model.User;
 
 import java.time.LocalDateTime;
 
