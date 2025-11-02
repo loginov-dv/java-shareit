@@ -1,4 +1,4 @@
-package ru.practicum.shareit.utils;
+package ru.practicum.shareit.server.utils;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
