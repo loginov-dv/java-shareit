@@ -1,4 +1,4 @@
-package ru.practicum.shareit.exception;
+package ru.practicum.shareit.server.exception;
 
 public class EmailConflictException extends RuntimeException {
     public EmailConflictException(String message) {
