@@ -13,8 +13,6 @@ import org.springframework.web.util.UriTemplateHandler;
 import ru.practicum.shareit.gateway.item.dto.CommentDto;
 import ru.practicum.shareit.gateway.item.dto.ItemDto;
 import ru.practicum.shareit.gateway.item.dto.PatchItemRequest;
-import ru.practicum.shareit.gateway.user.UserClient;
-import ru.practicum.shareit.gateway.user.dto.PatchUserRequest;
 import ru.practicum.shareit.gateway.user.dto.UserDto;
 import ru.practicum.shareit.gateway.utils.ItemTestData;
 import ru.practicum.shareit.gateway.utils.UserTestData;
