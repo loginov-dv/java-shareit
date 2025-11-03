@@ -141,4 +141,15 @@ public final class BookingTestData {
 
         return request;
     }
+
+    public static NewBookingDto createNewBookingDto(ItemDto itemDto, LocalDateTime start, LocalDateTime end) {
+        NewBookingDto request = new NewBookingDto();
+
+        request.setItemId(itemDto.getId());
+        request.setStart(DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(start));
+        request.setEnd(DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(end));
+
+        return request;
+
+    }
 }
