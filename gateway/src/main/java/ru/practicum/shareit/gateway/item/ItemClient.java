@@ -10,7 +10,7 @@ import org.springframework.web.util.DefaultUriBuilderFactory;
 import ru.practicum.shareit.gateway.client.BaseClient;
 import ru.practicum.shareit.gateway.item.dto.CommentDto;
 import ru.practicum.shareit.gateway.item.dto.ItemDto;
-import ru.practicum.shareit.gateway.item.dto.PatchItemRequest;
+import ru.practicum.shareit.gateway.item.dto.UpdateItemDto;
 
 import java.util.Map;
 
@@ -48,7 +48,7 @@ public class ItemClient extends BaseClient {
         return get("/search?text={text}", userId, params);
     }
 
-    public ResponseEntity<Object> updateItem(int userId, int itemId, PatchItemRequest request) {
+    public ResponseEntity<Object> updateItem(int userId, int itemId, UpdateItemDto request) {
         return patch("/" + itemId, userId, request);
     }
 

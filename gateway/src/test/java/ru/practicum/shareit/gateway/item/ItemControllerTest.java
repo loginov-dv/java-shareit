@@ -16,7 +16,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import ru.practicum.shareit.gateway.item.dto.CommentDto;
 import ru.practicum.shareit.gateway.item.dto.ItemDetailedDto;
 import ru.practicum.shareit.gateway.item.dto.ItemDto;
-import ru.practicum.shareit.gateway.item.dto.PatchItemRequest;
+import ru.practicum.shareit.gateway.item.dto.UpdateItemDto;
 import ru.practicum.shareit.gateway.utils.ItemTestData;
 import ru.practicum.shareit.gateway.utils.RandomUtils;
 
@@ -179,7 +179,7 @@ class ItemControllerTest {
 
     @Test
     void shouldUpdateItem() throws Exception {
-        PatchItemRequest request = ItemTestData.createPatchItemRequest();
+        UpdateItemDto request = ItemTestData.createUpdateItemDto();
 
         ItemDto updatedItem = new ItemDto();
         updatedItem.setOwnerId(random.nextInt(100));
@@ -188,7 +188,7 @@ class ItemControllerTest {
         updatedItem.setAvailable(request.getAvailable());
         updatedItem.setId(random.nextInt(100));
 
-        when(itemClient.updateItem(anyInt(), anyInt(), any(PatchItemRequest.class)))
+        when(itemClient.updateItem(anyInt(), anyInt(), any(UpdateItemDto.class)))
                 .thenReturn(new ResponseEntity<>(updatedItem, HttpStatus.OK));
 
         mockMvc.perform(patch("/items/" + updatedItem.getId())
@@ -205,9 +205,9 @@ class ItemControllerTest {
 
     @Test
     void shouldNotUpdateIfNotFoundItemOrUser() throws Exception {
-        PatchItemRequest request = ItemTestData.createPatchItemRequest();
+        UpdateItemDto request = ItemTestData.createUpdateItemDto();
 
-        when(itemClient.updateItem(anyInt(), anyInt(), any(PatchItemRequest.class)))
+        when(itemClient.updateItem(anyInt(), anyInt(), any(UpdateItemDto.class)))
                 .thenReturn(new ResponseEntity<>(HttpStatus.NOT_FOUND));
 
         mockMvc.perform(patch("/items/" + 1)
@@ -219,9 +219,9 @@ class ItemControllerTest {
 
     @Test
     void shouldNotUpdateSomeoneElsesItem() throws Exception {
-        PatchItemRequest request = ItemTestData.createPatchItemRequest();
+        UpdateItemDto request = ItemTestData.createUpdateItemDto();
 
-        when(itemClient.updateItem(anyInt(), anyInt(), any(PatchItemRequest.class)))
+        when(itemClient.updateItem(anyInt(), anyInt(), any(UpdateItemDto.class)))
                 .thenReturn(new ResponseEntity<>(HttpStatus.FORBIDDEN));
 
         mockMvc.perform(patch("/items/" + 1)
@@ -234,7 +234,7 @@ class ItemControllerTest {
     @ParameterizedTest
     @ValueSource(strings = {"", " "})
     void shouldNotUpdateItemIfNewNameIsInvalid(String name) throws Exception {
-        PatchItemRequest request = ItemTestData.createPatchItemRequest();
+        UpdateItemDto request = ItemTestData.createUpdateItemDto();
         request.setName(name);
 
         mockMvc.perform(patch("/items/" + 1)

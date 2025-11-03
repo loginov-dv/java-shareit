@@ -4,7 +4,7 @@ import jakarta.validation.constraints.Pattern;
 import lombok.Data;
 
 @Data
-public class PatchItemRequest {
+public class UpdateItemDto {
     @Pattern(regexp = "(?!\\s*$).+", message = "Новое имя не может быть пустым или состоять только из пробелов")
     private String name;
     private String description;

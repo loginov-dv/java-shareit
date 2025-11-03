@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
 
 import ru.practicum.shareit.gateway.item.dto.CommentDto;
 import ru.practicum.shareit.gateway.item.dto.ItemDto;
-import ru.practicum.shareit.gateway.item.dto.PatchItemRequest;
+import ru.practicum.shareit.gateway.item.dto.UpdateItemDto;
 
 @Slf4j
 @RestController
@@ -56,7 +56,7 @@ public class ItemController {
     @PatchMapping("/{itemId}")
     public ResponseEntity<Object> update(@RequestHeader("X-Sharer-User-Id") @Positive Integer userId,
                           @PathVariable @Positive int itemId,
-                          @Valid @RequestBody PatchItemRequest request) {
+                          @Valid @RequestBody UpdateItemDto request) {
         log.debug("gateway: PATCH /items/{}", itemId);
         log.debug("gateway: X-Sharer-User-Id = {}", userId);
         return itemClient.updateItem(userId, itemId, request);

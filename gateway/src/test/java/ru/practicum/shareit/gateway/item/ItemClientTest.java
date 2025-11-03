@@ -12,7 +12,7 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriTemplateHandler;
 import ru.practicum.shareit.gateway.item.dto.CommentDto;
 import ru.practicum.shareit.gateway.item.dto.ItemDto;
-import ru.practicum.shareit.gateway.item.dto.PatchItemRequest;
+import ru.practicum.shareit.gateway.item.dto.UpdateItemDto;
 import ru.practicum.shareit.gateway.user.dto.UserDto;
 import ru.practicum.shareit.gateway.utils.ItemTestData;
 import ru.practicum.shareit.gateway.utils.UserTestData;
@@ -141,7 +141,7 @@ class ItemClientTest {
 
     @Test
     void shouldUpdateItem() {
-        PatchItemRequest request = ItemTestData.createPatchItemRequest();
+        UpdateItemDto request = ItemTestData.createUpdateItemDto();
         ItemDto updatedItem = ItemTestData.createItemDto();
         updatedItem.setId(1);
         updatedItem.setName(request.getName());

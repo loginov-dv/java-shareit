@@ -5,7 +5,7 @@ import lombok.NoArgsConstructor;
 import ru.practicum.shareit.gateway.item.dto.CommentDto;
 import ru.practicum.shareit.gateway.item.dto.ItemDetailedDto;
 import ru.practicum.shareit.gateway.item.dto.ItemDto;
-import ru.practicum.shareit.gateway.item.dto.PatchItemRequest;
+import ru.practicum.shareit.gateway.item.dto.UpdateItemDto;
 import ru.practicum.shareit.gateway.user.dto.UserDto;
 
 import java.time.LocalDateTime;
@@ -73,8 +73,8 @@ public final class ItemTestData {
         return dto;
     }
 
-    public static PatchItemRequest createPatchItemRequest() {
-        PatchItemRequest request = new PatchItemRequest();
+    public static UpdateItemDto createUpdateItemDto() {
+        UpdateItemDto request = new UpdateItemDto();
 
         request.setName(RandomUtils.createName());
         request.setDescription(RandomUtils.createName(50));
