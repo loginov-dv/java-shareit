@@ -24,7 +24,6 @@ import ru.practicum.shareit.gateway.booking.model.BookingStatus;
 import ru.practicum.shareit.gateway.utils.BookingTestData;
 
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Random;
 import java.util.stream.Stream;
@@ -102,7 +101,7 @@ class BookingControllerTest {
 
     @ParameterizedTest
     @MethodSource("provideInvalidDates")
-    void shouldNotCreateBookingWithInvalidDates(String start, String end) throws Exception {
+    void shouldNotCreateBookingWithInvalidDates(LocalDateTime start, LocalDateTime end) throws Exception {
 
         PostBookingRequest request = BookingTestData.createPostBookingRequest();
         request.setStart(start);
@@ -120,17 +119,13 @@ class BookingControllerTest {
 
         return Stream.of(
                 // start после end
-                Arguments.of(DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(now.plusHours(2)),
-                        DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(now.plusHours(1))),
+                Arguments.of(now.plusHours(2), now.plusHours(1)),
                 // start и end равны
-                Arguments.of(DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(now.plusHours(1)),
-                        DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(now.plusHours(1))),
+                Arguments.of(now.plusHours(1), now.plusHours(1)),
                 // start в прошлом
-                Arguments.of(DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(now.minusHours(1)),
-                        DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(now.plusHours(1))),
+                Arguments.of(now.minusHours(1), now.plusHours(1)),
                 // end в прошлом
-                Arguments.of(DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(now.plusHours(1)),
-                        DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(now.minusHours(1)))
+                Arguments.of(now.plusHours(1), now.minusHours(1))
         );
     }
 
