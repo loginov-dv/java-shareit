@@ -13,7 +13,6 @@ import ru.practicum.shareit.gateway.booking.dto.PostBookingRequest;
 import ru.practicum.shareit.gateway.booking.model.BookingState;
 
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 
 @Slf4j
 @RestController
@@ -77,8 +76,8 @@ public class BookingController {
     }
 
     private void validateBookingDates(PostBookingRequest request) {
-        LocalDateTime start = LocalDateTime.parse(request.getStart(), DateTimeFormatter.ISO_LOCAL_DATE_TIME);
-        LocalDateTime end = LocalDateTime.parse(request.getEnd(), DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+        LocalDateTime start = request.getStart();
+        LocalDateTime end = request.getEnd();
 
         if (start.isAfter(end)) {
             log.warn("Дата окончания бронирования должна быть после даты начала бронирования");
@@ -90,16 +89,6 @@ public class BookingController {
             log.warn("Дата окончания бронирования не может совпадать с датой начала бронирования");
             throw new IllegalArgumentException("Дата окончания бронирования не может " +
                     "совпадать с датой начала бронирования");
-        }
-
-        if (start.isBefore(LocalDateTime.now())) {
-            log.warn("Дата начала бронирования не может быть в прошлом");
-            throw new IllegalArgumentException("Дата начала бронирования не может быть в прошлом");
-        }
-
-        if (end.isBefore(LocalDateTime.now())) {
-            log.warn("Дата окончания бронирования не может быть в прошлом");
-            throw new IllegalArgumentException("Дата окончания бронирования не может быть в прошлом");
         }
 
         log.debug("gateway: Валидация дат бронирования завершена успешно");
