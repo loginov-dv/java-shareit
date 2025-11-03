@@ -10,7 +10,7 @@ import ru.practicum.shareit.server.exception.ExceptionConstants;
 import ru.practicum.shareit.server.exception.LogConstants;
 import ru.practicum.shareit.server.exception.NotFoundException;
 import ru.practicum.shareit.server.user.dto.PatchUserRequest;
-import ru.practicum.shareit.server.user.dto.PostUserRequest;
+import ru.practicum.shareit.server.user.dto.NewUserDto;
 import ru.practicum.shareit.server.user.dto.UserDto;
 import ru.practicum.shareit.server.user.mapper.UserMapper;
 import ru.practicum.shareit.server.user.model.User;
@@ -25,7 +25,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public UserDto createUser(PostUserRequest request) {
+    public UserDto createUser(NewUserDto request) {
         log.debug("Запрос на создание пользователя: {}", request);
 
         if (userRepository.findByEmail(request.getEmail()).isPresent()) {
@@ -33,7 +33,7 @@ public class UserServiceImpl implements UserService {
             throw new EmailConflictException(ExceptionConstants.EMAIL_CONFLICT);
         }
 
-        User user = userRepository.save(UserMapper.toUser(request));
+        User user = userRepository.save(UserMapper.toNewUser(request));
 
         log.debug("Добавлен пользователь: {}", user);
 

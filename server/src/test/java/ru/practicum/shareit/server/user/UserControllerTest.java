@@ -14,7 +14,7 @@ import ru.practicum.shareit.server.exception.EmailConflictException;
 import ru.practicum.shareit.server.exception.ExceptionConstants;
 import ru.practicum.shareit.server.exception.NotFoundException;
 import ru.practicum.shareit.server.user.dto.PatchUserRequest;
-import ru.practicum.shareit.server.user.dto.PostUserRequest;
+import ru.practicum.shareit.server.user.dto.NewUserDto;
 import ru.practicum.shareit.server.user.dto.UserDto;
 import ru.practicum.shareit.server.utils.UserTestData;
 
@@ -37,10 +37,10 @@ class UserControllerTest {
 
     @Test
     void shouldCreateUser() throws Exception {
-        PostUserRequest newUser = UserTestData.createPostUserRequest();
+        NewUserDto newUser = UserTestData.createNewUserDto();
         UserDto savedUser = UserTestData.createUserDto(newUser);
 
-        when(userService.createUser(any(PostUserRequest.class)))
+        when(userService.createUser(any(NewUserDto.class)))
                 .thenReturn(savedUser);
 
         mockMvc.perform(post("/users")
@@ -54,18 +54,18 @@ class UserControllerTest {
 
     @Test
     void shouldNotCreateUserWithAlreadyExistingEmail() throws Exception {
-        when(userService.createUser(any(PostUserRequest.class)))
+        when(userService.createUser(any(NewUserDto.class)))
                 .thenThrow(new EmailConflictException(ExceptionConstants.EMAIL_CONFLICT));
 
         mockMvc.perform(post("/users")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(UserTestData.createPostUserRequest())))
+                        .content(objectMapper.writeValueAsString(UserTestData.createNewUserDto())))
                 .andExpect(status().isConflict());
     }
 
     @Test
     void shouldGetUserById() throws Exception {
-        UserDto savedUser = UserTestData.createUserDto(UserTestData.createPostUserRequest());
+        UserDto savedUser = UserTestData.createUserDto(UserTestData.createNewUserDto());
 
         when(userService.findById(anyInt()))
                 .thenReturn(savedUser);

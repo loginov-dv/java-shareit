@@ -6,7 +6,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import ru.practicum.shareit.server.user.dto.PatchUserRequest;
-import ru.practicum.shareit.server.user.dto.PostUserRequest;
+import ru.practicum.shareit.server.user.dto.NewUserDto;
 import ru.practicum.shareit.server.user.dto.UserDto;
 
 @Slf4j
@@ -18,7 +18,7 @@ public class UserController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public UserDto createUser(@RequestBody PostUserRequest request) {
+    public UserDto createUser(@RequestBody NewUserDto request) {
         log.debug("server: POST /users");
         return userService.createUser(request);
     }

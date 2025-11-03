@@ -3,7 +3,7 @@ package ru.practicum.shareit.server.user.dto;
 import lombok.Data;
 
 @Data
-public class PostUserRequest {
+public class NewUserDto {
     private String name;
     private String email;
 }

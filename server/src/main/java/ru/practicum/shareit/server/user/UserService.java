@@ -1,11 +1,11 @@
 package ru.practicum.shareit.server.user;
 
 import ru.practicum.shareit.server.user.dto.PatchUserRequest;
-import ru.practicum.shareit.server.user.dto.PostUserRequest;
+import ru.practicum.shareit.server.user.dto.NewUserDto;
 import ru.practicum.shareit.server.user.dto.UserDto;
 
 public interface UserService {
-    UserDto createUser(PostUserRequest request);
+    UserDto createUser(NewUserDto request);
 
     UserDto findById(int userId);
 

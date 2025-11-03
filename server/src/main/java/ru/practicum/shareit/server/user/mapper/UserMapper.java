@@ -4,7 +4,7 @@ import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
 import ru.practicum.shareit.server.user.dto.PatchUserRequest;
-import ru.practicum.shareit.server.user.dto.PostUserRequest;
+import ru.practicum.shareit.server.user.dto.NewUserDto;
 import ru.practicum.shareit.server.user.dto.UserDto;
 import ru.practicum.shareit.server.user.model.User;
 
@@ -20,7 +20,7 @@ public final class UserMapper {
         return userDto;
     }
 
-    public static User toUser(PostUserRequest request) {
+    public static User toNewUser(NewUserDto request) {
         User user = new User();
 
         user.setName(request.getName());

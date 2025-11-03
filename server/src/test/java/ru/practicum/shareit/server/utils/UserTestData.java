@@ -3,7 +3,7 @@ package ru.practicum.shareit.server.utils;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import ru.practicum.shareit.server.user.dto.PatchUserRequest;
-import ru.practicum.shareit.server.user.dto.PostUserRequest;
+import ru.practicum.shareit.server.user.dto.NewUserDto;
 import ru.practicum.shareit.server.user.dto.UserDto;
 import ru.practicum.shareit.server.user.model.User;
 
@@ -34,8 +34,8 @@ public final class UserTestData {
         return user;
     }
 
-    public static PostUserRequest createPostUserRequest() {
-        PostUserRequest request = new PostUserRequest();
+    public static NewUserDto createNewUserDto() {
+        NewUserDto request = new NewUserDto();
 
         request.setName(RandomUtils.createName());
         request.setEmail(request.getName() + "@mail.ru");
@@ -44,7 +44,7 @@ public final class UserTestData {
     }
 
     // с рандомным id
-    public static UserDto createUserDto(PostUserRequest request) {
+    public static UserDto createUserDto(NewUserDto request) {
         UserDto dto = new UserDto();
 
         dto.setId(new Random().nextInt(100));
