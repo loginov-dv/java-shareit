@@ -65,8 +65,8 @@ class BookingControllerTest {
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id").value(savedBooking.getId()))
                 .andExpect(jsonPath("$.status").value(savedBooking.getStatus()))
-                .andExpect(jsonPath("$.start").value(request.getStart()))
-                .andExpect(jsonPath("$.end").value(request.getEnd()))
+                .andExpect(jsonPath("$.start").value(savedBooking.getStart()))
+                .andExpect(jsonPath("$.end").value(savedBooking.getEnd()))
                 .andExpect(jsonPath("$.booker.id").value(savedBooking.getBooker().getId()))
                 .andExpect(jsonPath("$.item.id").value(savedBooking.getItem().getId()));
     }
