@@ -9,7 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import ru.practicum.shareit.gateway.user.dto.PatchUserRequest;
+import ru.practicum.shareit.gateway.user.dto.UpdateUserDto;
 import ru.practicum.shareit.gateway.user.dto.NewUserDto;
 
 @Slf4j
@@ -35,7 +35,7 @@ public class UserController {
 
     @PatchMapping("/{userId}")
     public ResponseEntity<Object> updateUser(@PathVariable @Positive int userId,
-                              @Valid @RequestBody PatchUserRequest request) {
+                              @Valid @RequestBody UpdateUserDto request) {
         log.debug("gateway: PATCH /users/{}", userId);
         return userClient.updateUser(userId, request);
     }

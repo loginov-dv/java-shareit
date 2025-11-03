@@ -13,7 +13,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
-import ru.practicum.shareit.gateway.user.dto.PatchUserRequest;
+import ru.practicum.shareit.gateway.user.dto.UpdateUserDto;
 import ru.practicum.shareit.gateway.user.dto.NewUserDto;
 import ru.practicum.shareit.gateway.user.dto.UserDto;
 import ru.practicum.shareit.gateway.utils.UserTestData;
@@ -125,14 +125,14 @@ class UserControllerTest {
 
     @Test
     void shouldUpdateUser() throws Exception {
-        PatchUserRequest request = UserTestData.createPatchUserRequest();
+        UpdateUserDto request = UserTestData.createUpdateUserDto();
 
         UserDto updatedUser = new UserDto();
         updatedUser.setId(1);
         updatedUser.setName(request.getName());
         updatedUser.setEmail(request.getEmail());
 
-        when(userClient.updateUser(anyInt(), any(PatchUserRequest.class)))
+        when(userClient.updateUser(anyInt(), any(UpdateUserDto.class)))
                 .thenReturn(new ResponseEntity<>(updatedUser, HttpStatus.OK));
 
         mockMvc.perform(patch("/users/" + 1)
@@ -147,7 +147,7 @@ class UserControllerTest {
     @ParameterizedTest
     @ValueSource(strings = {" ", ""})
     void shouldNotUpdateUserIfNewNameIsInvalid(String name) throws Exception {
-        PatchUserRequest request = UserTestData.createPatchUserRequest();
+        UpdateUserDto request = UserTestData.createUpdateUserDto();
         request.setName(name);
 
         mockMvc.perform(patch("/users/" + 1)
@@ -159,7 +159,7 @@ class UserControllerTest {
     @ParameterizedTest
     @ValueSource(strings = {"", " ", "invalid email", "invalid_email"})
     void shouldNotUpdateUserIfNewEmailIsInvalid(String email) throws Exception {
-        PatchUserRequest request = UserTestData.createPatchUserRequest();
+        UpdateUserDto request = UserTestData.createUpdateUserDto();
         request.setEmail(email);
 
         mockMvc.perform(patch("/users/" + 1)
@@ -170,23 +170,23 @@ class UserControllerTest {
 
     @Test
     void shouldNotUpdateUnknownUser() throws Exception {
-        when(userClient.updateUser(anyInt(), any(PatchUserRequest.class)))
+        when(userClient.updateUser(anyInt(), any(UpdateUserDto.class)))
                 .thenReturn(new ResponseEntity<>(HttpStatus.NOT_FOUND));
 
         mockMvc.perform(patch("/users/" + 999)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(UserTestData.createPatchUserRequest())))
+                        .content(objectMapper.writeValueAsString(UserTestData.createUpdateUserDto())))
                 .andExpect(status().isNotFound());
     }
 
     @Test
     void shouldNotUpdateUserIfNewEmailAlreadyExists() throws Exception {
-        when(userClient.updateUser(anyInt(), any(PatchUserRequest.class)))
+        when(userClient.updateUser(anyInt(), any(UpdateUserDto.class)))
                 .thenReturn(new ResponseEntity<>(HttpStatus.CONFLICT));
 
         mockMvc.perform(patch("/users/" + 999)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(UserTestData.createPatchUserRequest())))
+                        .content(objectMapper.writeValueAsString(UserTestData.createUpdateUserDto())))
                 .andExpect(status().isConflict());
     }
 
@@ -203,7 +203,7 @@ class UserControllerTest {
 
         mockMvc.perform(patch("/users/" + id)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(UserTestData.createPatchUserRequest())))
+                        .content(objectMapper.writeValueAsString(UserTestData.createUpdateUserDto())))
                 .andExpect(status().isBadRequest());
     }
 }

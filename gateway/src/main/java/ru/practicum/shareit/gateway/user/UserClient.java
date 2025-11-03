@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.util.DefaultUriBuilderFactory;
 
 import ru.practicum.shareit.gateway.client.BaseClient;
-import ru.practicum.shareit.gateway.user.dto.PatchUserRequest;
+import ru.practicum.shareit.gateway.user.dto.UpdateUserDto;
 import ru.practicum.shareit.gateway.user.dto.NewUserDto;
 
 @Service
@@ -34,7 +34,7 @@ public class UserClient extends BaseClient {
         return get("/" + userId);
     }
 
-    public ResponseEntity<Object> updateUser(int userId, PatchUserRequest request) {
+    public ResponseEntity<Object> updateUser(int userId, UpdateUserDto request) {
         return patch("/" + userId, request);
     }
 

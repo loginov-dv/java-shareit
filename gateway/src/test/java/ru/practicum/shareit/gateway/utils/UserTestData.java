@@ -2,7 +2,7 @@ package ru.practicum.shareit.gateway.utils;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
-import ru.practicum.shareit.gateway.user.dto.PatchUserRequest;
+import ru.practicum.shareit.gateway.user.dto.UpdateUserDto;
 import ru.practicum.shareit.gateway.user.dto.NewUserDto;
 import ru.practicum.shareit.gateway.user.dto.UserDto;
 
@@ -51,8 +51,8 @@ public final class UserTestData {
         return dto;
     }
 
-    public static PatchUserRequest createPatchUserRequest() {
-        PatchUserRequest request = new PatchUserRequest();
+    public static UpdateUserDto createUpdateUserDto() {
+        UpdateUserDto request = new UpdateUserDto();
 
         request.setName(RandomUtils.createName());
         request.setEmail(request.getName() + "@mail.ru");
