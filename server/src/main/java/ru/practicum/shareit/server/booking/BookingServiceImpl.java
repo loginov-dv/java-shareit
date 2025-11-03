@@ -133,18 +133,16 @@ public class BookingServiceImpl implements BookingService {
             throw new NotFoundException(String.format(ExceptionConstants.USER_NOT_FOUND_BY_ID, bookerId));
         }
 
-        BookingState bookingState;
+        Optional<BookingState> maybeBookingState = BookingState.from(state);
 
-        try {
-            bookingState = BookingState.valueOf(state);
-        } catch (IllegalArgumentException ex) {
-            log.warn(LogConstants.INVALID_BOOKING_STATE);
-            throw new ArgumentException(ExceptionConstants.INVALID_BOOKING_STATE);
+        if (maybeBookingState.isEmpty()) {
+            log.warn(LogConstants.INVALID_BOOKING_STATE, state);
+            throw new IllegalArgumentException(String.format(ExceptionConstants.INVALID_BOOKING_STATE, state));
         }
 
         List<Booking> bookings = new ArrayList<>();
 
-        switch (bookingState) {
+        switch (maybeBookingState.get()) {
             case ALL: {
                 bookings = bookingRepository.findByBookerIdOrderByStartDesc(bookerId);
                 break;
@@ -186,18 +184,16 @@ public class BookingServiceImpl implements BookingService {
             throw new NotFoundException(String.format(ExceptionConstants.USER_NOT_FOUND_BY_ID, ownerId));
         }
 
-        BookingState bookingState;
+        Optional<BookingState> maybeBookingState = BookingState.from(state);
 
-        try {
-            bookingState = BookingState.valueOf(state);
-        } catch (IllegalArgumentException ex) {
-            log.warn(LogConstants.INVALID_BOOKING_STATE);
-            throw new ArgumentException(ExceptionConstants.INVALID_BOOKING_STATE);
+        if (maybeBookingState.isEmpty()) {
+            log.warn(LogConstants.INVALID_BOOKING_STATE, state);
+            throw new IllegalArgumentException(String.format(ExceptionConstants.INVALID_BOOKING_STATE, state));
         }
 
         List<Booking> bookings = new ArrayList<>();
 
-        switch (bookingState) {
+        switch (maybeBookingState.get()) {
             case ALL: {
                 bookings = bookingRepository.findByItemOwnerIdOrderByStartDesc(ownerId);
                 break;
