@@ -30,7 +30,7 @@ import static org.mockito.Mockito.when;
 
 @ActiveProfiles("test")
 @SpringBootTest
-class ItemRequestServiceImplTest {
+class ItemRequestServiceImplUnitTest {
     @Autowired
     private ItemRequestService requestService;
     @MockBean
@@ -172,15 +172,4 @@ class ItemRequestServiceImplTest {
         assertEquals(request.getRequestor().getId(), result.getRequestorId());
         assertEquals(items.size(), result.getItems().size());
     }
-
-    /*private ItemRequest createRequest(User requestor) {
-        ItemRequest request = new ItemRequest();
-
-        request.setId(random.nextInt(100));
-        request.setCreated(LocalDateTime.now().minusMinutes(random.nextLong(5, 100)));
-        request.setDescription(RandomUtils.createName(50));
-        request.setRequestor(requestor);
-
-        return request;
-    }*/
 }
