@@ -6,7 +6,7 @@ import jakarta.validation.constraints.Pattern;
 import lombok.Data;
 
 @Data
-public class PostUserRequest {
+public class NewUserDto {
     @NotBlank(message = "Имя не может быть пустым")
     private String name;
     @NotBlank(message = "Электронная почта не может быть пустой")

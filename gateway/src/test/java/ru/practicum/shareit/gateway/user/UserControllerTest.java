@@ -14,7 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import ru.practicum.shareit.gateway.user.dto.PatchUserRequest;
-import ru.practicum.shareit.gateway.user.dto.PostUserRequest;
+import ru.practicum.shareit.gateway.user.dto.NewUserDto;
 import ru.practicum.shareit.gateway.user.dto.UserDto;
 import ru.practicum.shareit.gateway.utils.UserTestData;
 
@@ -37,10 +37,10 @@ class UserControllerTest {
 
     @Test
     void shouldCreateUser() throws Exception {
-        PostUserRequest newUser = UserTestData.createPostUserRequest();
+        NewUserDto newUser = UserTestData.createNewUserDto();
         UserDto savedUser = UserTestData.createUserDto(newUser);
 
-        when(userClient.createUser(any(PostUserRequest.class)))
+        when(userClient.createUser(any(NewUserDto.class)))
                 .thenReturn(new ResponseEntity<>(savedUser, HttpStatus.CREATED));
 
         mockMvc.perform(post("/users")
@@ -56,7 +56,7 @@ class UserControllerTest {
     @NullAndEmptySource
     @ValueSource(strings = {"", " ", "invalid email", "invalid_email"})
     void shouldNotCreateUserWithInvalidEmail(String email) throws Exception {
-        PostUserRequest newUser = UserTestData.createPostUserRequest();
+        NewUserDto newUser = UserTestData.createNewUserDto();
         newUser.setEmail(email);
 
         mockMvc.perform(post("/users")
@@ -68,7 +68,7 @@ class UserControllerTest {
     @ParameterizedTest
     @NullAndEmptySource
     void shouldNotCreateUserWithNullOrEmptyName(String name) throws Exception {
-        PostUserRequest newUser = UserTestData.createPostUserRequest();
+        NewUserDto newUser = UserTestData.createNewUserDto();
         newUser.setName(name);
 
         mockMvc.perform(post("/users")
@@ -79,18 +79,18 @@ class UserControllerTest {
 
     @Test
     void shouldNotCreateUserWithAlreadyExistingEmail() throws Exception {
-        when(userClient.createUser(any(PostUserRequest.class)))
+        when(userClient.createUser(any(NewUserDto.class)))
                 .thenReturn(new ResponseEntity<>(HttpStatus.CONFLICT));
 
         mockMvc.perform(post("/users")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(UserTestData.createPostUserRequest())))
+                        .content(objectMapper.writeValueAsString(UserTestData.createNewUserDto())))
                 .andExpect(status().isConflict());
     }
 
     @Test
     void shouldGetUserById() throws Exception {
-        UserDto savedUser = UserTestData.createUserDto(UserTestData.createPostUserRequest());
+        UserDto savedUser = UserTestData.createUserDto(UserTestData.createNewUserDto());
 
         when(userClient.getUser(anyInt()))
                 .thenReturn(new ResponseEntity<>(savedUser, HttpStatus.OK));

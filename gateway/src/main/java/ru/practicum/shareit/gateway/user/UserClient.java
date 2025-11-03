@@ -10,7 +10,7 @@ import org.springframework.web.util.DefaultUriBuilderFactory;
 
 import ru.practicum.shareit.gateway.client.BaseClient;
 import ru.practicum.shareit.gateway.user.dto.PatchUserRequest;
-import ru.practicum.shareit.gateway.user.dto.PostUserRequest;
+import ru.practicum.shareit.gateway.user.dto.NewUserDto;
 
 @Service
 public class UserClient extends BaseClient {
@@ -26,7 +26,7 @@ public class UserClient extends BaseClient {
         );
     }
 
-    public ResponseEntity<Object> createUser(PostUserRequest request) {
+    public ResponseEntity<Object> createUser(NewUserDto request) {
         return post("", request);
     }
 

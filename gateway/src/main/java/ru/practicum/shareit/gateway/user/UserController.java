@@ -10,7 +10,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import ru.practicum.shareit.gateway.user.dto.PatchUserRequest;
-import ru.practicum.shareit.gateway.user.dto.PostUserRequest;
+import ru.practicum.shareit.gateway.user.dto.NewUserDto;
 
 @Slf4j
 @RestController
@@ -22,7 +22,7 @@ public class UserController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public ResponseEntity<Object> createUser(@Valid @RequestBody PostUserRequest request) {
+    public ResponseEntity<Object> createUser(@Valid @RequestBody NewUserDto request) {
         log.debug("gateway: POST /users");
         return userClient.createUser(request);
     }

@@ -11,7 +11,7 @@ import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriTemplateHandler;
 import ru.practicum.shareit.gateway.user.dto.PatchUserRequest;
-import ru.practicum.shareit.gateway.user.dto.PostUserRequest;
+import ru.practicum.shareit.gateway.user.dto.NewUserDto;
 import ru.practicum.shareit.gateway.user.dto.UserDto;
 import ru.practicum.shareit.gateway.utils.UserTestData;
 
@@ -57,7 +57,7 @@ class UserClientTest {
 
     @Test
     void shouldCreateUser() {
-        PostUserRequest request = UserTestData.createPostUserRequest();
+        NewUserDto request = UserTestData.createNewUserDto();
         UserDto body = UserTestData.createUserDto(request);
 
         when(restTemplate.exchange(
