@@ -19,8 +19,8 @@ public final class BookingTestData {
 
         bookingDto.setId(new Random().nextInt(100));
 
-        bookingDto.setStart(request.getStart());
-        bookingDto.setEnd(request.getEnd());
+        bookingDto.setStart(DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(request.getStart()));
+        bookingDto.setEnd(DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(request.getEnd()));
         bookingDto.setStatus(status.name());
 
         ItemDto itemDto = ItemTestData.createItemDto(request.getItemId());
@@ -37,8 +37,8 @@ public final class BookingTestData {
 
         bookingDto.setId(new Random().nextInt(100));
 
-        bookingDto.setStart(request.getStart());
-        bookingDto.setEnd(request.getEnd());
+        bookingDto.setStart(DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(request.getStart()));
+        bookingDto.setEnd(DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(request.getEnd()));
         bookingDto.setStatus(status.name());
 
         ItemDto itemDto = ItemTestData.createItemDto(request.getItemId());
@@ -58,8 +58,8 @@ public final class BookingTestData {
         PostBookingRequest request = new PostBookingRequest();
 
         request.setItemId(new Random().nextInt(100));
-        request.setStart(DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(LocalDateTime.now().plusHours(1)));
-        request.setEnd(DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(LocalDateTime.now().plusHours(2)));
+        request.setStart(LocalDateTime.now().plusHours(1));
+        request.setEnd(LocalDateTime.now().plusHours(2));
 
         return request;
     }
