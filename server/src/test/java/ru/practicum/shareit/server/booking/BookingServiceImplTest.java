@@ -316,7 +316,7 @@ class BookingServiceImplTest {
         when(userRepository.findById(anyInt()))
                 .thenReturn(Optional.of(booker));
 
-        assertThrows(ArgumentException.class,
+        assertThrows(IllegalArgumentException.class,
                 () -> bookingService.findAllByBookerId(booker.getId(), "invalid"));
     }
 
@@ -364,7 +364,7 @@ class BookingServiceImplTest {
         when(userRepository.findById(anyInt()))
                 .thenReturn(Optional.of(owner));
 
-        assertThrows(ArgumentException.class,
+        assertThrows(IllegalArgumentException.class,
                 () -> bookingService.findAllByOwnerId(owner.getId(), "invalid"));
     }
 }
