@@ -64,6 +64,17 @@ public final class ItemTestData {
         return request;
     }
 
+    public static ItemDto createNewItemDto(int itemRequestId) {
+        ItemDto request = new ItemDto();
+
+        request.setName(RandomUtils.createName());
+        request.setDescription(RandomUtils.createName(50));
+        request.setAvailable(true);
+        request.setRequestId(itemRequestId);
+
+        return request;
+    }
+
     // с рандомными id и id владельца
     public static ItemDto createItemDto() {
         ItemDto item = ItemTestData.createNewItemDto();
