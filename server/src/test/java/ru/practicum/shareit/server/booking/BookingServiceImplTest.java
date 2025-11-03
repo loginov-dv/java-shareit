@@ -10,7 +10,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
 
 import ru.practicum.shareit.server.booking.dto.BookingDto;
-import ru.practicum.shareit.server.booking.dto.PostBookingRequest;
+import ru.practicum.shareit.server.booking.dto.NewBookingDto;
 import ru.practicum.shareit.server.booking.model.Booking;
 import ru.practicum.shareit.server.booking.model.BookingState;
 import ru.practicum.shareit.server.booking.model.BookingStatus;
@@ -49,7 +49,7 @@ class BookingServiceImplTest {
         Item item = ItemTestData.createItem(UserTestData.createUser());
         User booker = UserTestData.createUser();
 
-        PostBookingRequest request = BookingTestData.createPostBookingRequest(item);
+        NewBookingDto request = BookingTestData.createNewBookingDto(item);
 
         when(userRepository.findById(anyInt()))
                 .thenReturn(Optional.of(booker));
@@ -75,7 +75,7 @@ class BookingServiceImplTest {
     void shouldNotCreateBookingForUnknownUser() {
         Item item = ItemTestData.createItem(UserTestData.createUser());
 
-        PostBookingRequest request = BookingTestData.createPostBookingRequest(item);
+        NewBookingDto request = BookingTestData.createNewBookingDto(item);
 
         when(userRepository.findById(anyInt()))
                 .thenReturn(Optional.empty());
@@ -87,7 +87,7 @@ class BookingServiceImplTest {
     void shouldNotCreateBookingOfUnknownItem() {
         User booker = UserTestData.createUser();
 
-        PostBookingRequest request = new PostBookingRequest();
+        NewBookingDto request = new NewBookingDto();
         request.setItemId(999);
         request.setStart(DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(LocalDateTime.now().plusHours(1)));
         request.setEnd(DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(LocalDateTime.now().plusHours(2)));
@@ -107,7 +107,7 @@ class BookingServiceImplTest {
 
         User booker = UserTestData.createUser();
 
-        PostBookingRequest request = BookingTestData.createPostBookingRequest(item);
+        NewBookingDto request = BookingTestData.createNewBookingDto(item);
 
         when(userRepository.findById(anyInt()))
                 .thenReturn(Optional.of(booker));

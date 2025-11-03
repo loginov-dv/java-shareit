@@ -6,7 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import ru.practicum.shareit.server.booking.dto.BookingDto;
 import ru.practicum.shareit.server.booking.dto.BookingShortDto;
-import ru.practicum.shareit.server.booking.dto.PostBookingRequest;
+import ru.practicum.shareit.server.booking.dto.NewBookingDto;
 import ru.practicum.shareit.server.booking.model.Booking;
 import ru.practicum.shareit.server.item.mapper.ItemMapper;
 import ru.practicum.shareit.server.item.model.Item;
@@ -20,7 +20,7 @@ import java.time.format.DateTimeFormatter;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class BookingMapper {
 
-    public static Booking toNewBooking(User booker, Item item, PostBookingRequest request) {
+    public static Booking toNewBooking(User booker, Item item, NewBookingDto request) {
         Booking booking = new Booking();
 
         booking.setBooker(booker);

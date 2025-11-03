@@ -3,7 +3,7 @@ package ru.practicum.shareit.server.utils;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import ru.practicum.shareit.server.booking.dto.BookingDto;
-import ru.practicum.shareit.server.booking.dto.PostBookingRequest;
+import ru.practicum.shareit.server.booking.dto.NewBookingDto;
 import ru.practicum.shareit.server.booking.model.Booking;
 import ru.practicum.shareit.server.booking.model.BookingStatus;
 import ru.practicum.shareit.server.item.dto.ItemDto;
@@ -54,7 +54,7 @@ public final class BookingTestData {
         return booking;
     }
 
-    public static Booking createBooking(Item item, User booker, PostBookingRequest request) {
+    public static Booking createBooking(Item item, User booker, NewBookingDto request) {
         Booking booking = new Booking();
 
         booking.setId(new Random().nextInt(100));
@@ -69,7 +69,7 @@ public final class BookingTestData {
     }
 
     // с рандомным id
-    public static BookingDto createBookingDto(PostBookingRequest request, int bookerId, BookingStatus status) {
+    public static BookingDto createBookingDto(NewBookingDto request, int bookerId, BookingStatus status) {
         BookingDto bookingDto = new BookingDto();
 
         bookingDto.setId(new Random().nextInt(100));
@@ -87,7 +87,7 @@ public final class BookingTestData {
     }
 
     // с рандомным id и id букера
-    public static BookingDto createBookingDto(PostBookingRequest request, BookingStatus status) {
+    public static BookingDto createBookingDto(NewBookingDto request, BookingStatus status) {
         BookingDto bookingDto = new BookingDto();
 
         bookingDto.setId(new Random().nextInt(100));
@@ -105,8 +105,8 @@ public final class BookingTestData {
     }
 
     // с рандомным id предмета
-    public static PostBookingRequest createPostBookingRequest() {
-        PostBookingRequest request = new PostBookingRequest();
+    public static NewBookingDto createNewBookingDto() {
+        NewBookingDto request = new NewBookingDto();
 
         request.setItemId(new Random().nextInt(100));
         request.setStart(DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(LocalDateTime.now().plusHours(1)));
@@ -115,8 +115,8 @@ public final class BookingTestData {
         return request;
     }
 
-    public static PostBookingRequest createPostBookingRequest(Item item) {
-        PostBookingRequest request = new PostBookingRequest();
+    public static NewBookingDto createNewBookingDto(Item item) {
+        NewBookingDto request = new NewBookingDto();
 
         request.setItemId(item.getId());
         request.setStart(DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(LocalDateTime.now().plusHours(1)));

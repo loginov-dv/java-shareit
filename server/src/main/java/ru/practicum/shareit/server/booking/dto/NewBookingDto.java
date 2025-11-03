@@ -3,7 +3,7 @@ package ru.practicum.shareit.server.booking.dto;
 import lombok.Data;
 
 @Data
-public class PostBookingRequest {
+public class NewBookingDto {
     private Integer itemId;
     private String start;
     private String end;

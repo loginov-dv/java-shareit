@@ -6,7 +6,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import ru.practicum.shareit.server.booking.dto.BookingDto;
-import ru.practicum.shareit.server.booking.dto.PostBookingRequest;
+import ru.practicum.shareit.server.booking.dto.NewBookingDto;
 
 import java.util.List;
 
@@ -20,7 +20,7 @@ public class BookingController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public BookingDto createBooking(@RequestHeader("X-Sharer-User-Id") Integer bookerId,
-                                    @RequestBody PostBookingRequest request) {
+                                    @RequestBody NewBookingDto request) {
         log.debug("server: POST /bookings");
         log.debug("server: X-Sharer-User-Id = {}", bookerId);
         return bookingService.createBooking(bookerId, request);

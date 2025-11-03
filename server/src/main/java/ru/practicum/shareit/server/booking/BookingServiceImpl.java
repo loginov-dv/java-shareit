@@ -6,7 +6,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import ru.practicum.shareit.server.booking.dto.BookingDto;
-import ru.practicum.shareit.server.booking.dto.PostBookingRequest;
+import ru.practicum.shareit.server.booking.dto.NewBookingDto;
 import ru.practicum.shareit.server.booking.mapper.BookingMapper;
 import ru.practicum.shareit.server.booking.model.Booking;
 import ru.practicum.shareit.server.booking.model.BookingStatus;
@@ -32,7 +32,7 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     @Transactional
-    public BookingDto createBooking(int bookerId, PostBookingRequest request) {
+    public BookingDto createBooking(int bookerId, NewBookingDto request) {
         log.debug("Запрос на бронирование предмета с id = {} от пользователя с id = {}: {}",
                 bookerId, request.getItemId(), request);
 
