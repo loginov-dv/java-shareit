@@ -8,7 +8,7 @@ import ru.practicum.shareit.server.booking.model.Booking;
 import ru.practicum.shareit.server.item.dto.ItemDetailedDto;
 import ru.practicum.shareit.server.item.dto.ItemDto;
 import ru.practicum.shareit.server.item.dto.ItemShortDto;
-import ru.practicum.shareit.server.item.dto.PatchItemRequest;
+import ru.practicum.shareit.server.item.dto.UpdateItemDto;
 import ru.practicum.shareit.server.item.model.Comment;
 import ru.practicum.shareit.server.item.model.Item;
 import ru.practicum.shareit.server.user.model.User;
@@ -30,16 +30,6 @@ public final class ItemMapper {
         return dto;
     }
 
-    public static ItemDto toItemDto(Item item, List<Comment> comments) {
-        ItemDto dto = toItemDto(item);
-
-        if (comments != null && !comments.isEmpty()) {
-            dto.setComments(comments.stream().map(CommentMapper::toCommentDto).toList());
-        }
-
-        return dto;
-    }
-
     public static Item toNewItem(User user, ItemDto dto) {
         Item item = new Item();
 
@@ -52,17 +42,7 @@ public final class ItemMapper {
         return item;
     }
 
-    public static Item toItem(User user, ItemDto dto) {
-        Item item = toNewItem(user, dto);
-
-        if (dto.getId() != null) {
-            item.setId(dto.getId());
-        }
-
-        return item;
-    }
-
-    public static void updateItemFields(Item item, PatchItemRequest request) {
+    public static void updateItemFields(Item item, UpdateItemDto request) {
         if (request.hasName()) {
             item.setName(request.getName());
         }

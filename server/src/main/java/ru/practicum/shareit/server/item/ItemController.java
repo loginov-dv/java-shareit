@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.server.item.dto.CommentDto;
 import ru.practicum.shareit.server.item.dto.ItemDetailedDto;
 import ru.practicum.shareit.server.item.dto.ItemDto;
-import ru.practicum.shareit.server.item.dto.PatchItemRequest;
+import ru.practicum.shareit.server.item.dto.UpdateItemDto;
 
 import java.util.List;
 
@@ -54,7 +54,7 @@ public class ItemController {
     @PatchMapping("/{itemId}")
     public ItemDto update(@RequestHeader("X-Sharer-User-Id") Integer userId,
                           @PathVariable int itemId,
-                          @RequestBody PatchItemRequest request) {
+                          @RequestBody UpdateItemDto request) {
         log.debug("server: PATCH /items/{}", itemId);
         log.debug("server: X-Sharer-User-Id = {}", userId);
         return itemService.update(userId, itemId, request);

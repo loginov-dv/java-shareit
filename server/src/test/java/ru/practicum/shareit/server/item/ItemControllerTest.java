@@ -16,7 +16,7 @@ import ru.practicum.shareit.server.exception.NotFoundException;
 import ru.practicum.shareit.server.item.dto.CommentDto;
 import ru.practicum.shareit.server.item.dto.ItemDetailedDto;
 import ru.practicum.shareit.server.item.dto.ItemDto;
-import ru.practicum.shareit.server.item.dto.PatchItemRequest;
+import ru.practicum.shareit.server.item.dto.UpdateItemDto;
 import ru.practicum.shareit.server.utils.ItemTestData;
 import ru.practicum.shareit.server.utils.RandomUtils;
 
@@ -138,7 +138,7 @@ class ItemControllerTest {
 
     @Test
     void shouldUpdateItem() throws Exception {
-        PatchItemRequest request = ItemTestData.createPatchItemRequest();
+        UpdateItemDto request = ItemTestData.createUpdateItemDto();
 
         ItemDto updatedItem = new ItemDto();
         updatedItem.setOwnerId(random.nextInt(100));
@@ -147,7 +147,7 @@ class ItemControllerTest {
         updatedItem.setAvailable(request.getAvailable());
         updatedItem.setId(random.nextInt(100));
 
-        when(itemService.update(anyInt(), anyInt(), any(PatchItemRequest.class)))
+        when(itemService.update(anyInt(), anyInt(), any(UpdateItemDto.class)))
                 .thenReturn(updatedItem);
 
         mockMvc.perform(patch("/items/" + updatedItem.getId())
@@ -164,9 +164,9 @@ class ItemControllerTest {
 
     @Test
     void shouldNotUpdateIfNotFoundItemOrUser() throws Exception {
-        PatchItemRequest request = ItemTestData.createPatchItemRequest();
+        UpdateItemDto request = ItemTestData.createUpdateItemDto();
 
-        when(itemService.update(anyInt(), anyInt(), any(PatchItemRequest.class)))
+        when(itemService.update(anyInt(), anyInt(), any(UpdateItemDto.class)))
                 .thenThrow(new NotFoundException("not found"));
 
         mockMvc.perform(patch("/items/" + 1)
@@ -178,9 +178,9 @@ class ItemControllerTest {
 
     @Test
     void shouldNotUpdateSomeoneElsesItem() throws Exception {
-        PatchItemRequest request = ItemTestData.createPatchItemRequest();
+        UpdateItemDto request = ItemTestData.createUpdateItemDto();
 
-        when(itemService.update(anyInt(), anyInt(), any(PatchItemRequest.class)))
+        when(itemService.update(anyInt(), anyInt(), any(UpdateItemDto.class)))
                 .thenThrow(new NoAccessException("Нет доступа на изменение предмета"));
 
         mockMvc.perform(patch("/items/" + 1)

@@ -16,7 +16,7 @@ import ru.practicum.shareit.server.exception.NotFoundException;
 import ru.practicum.shareit.server.item.dto.CommentDto;
 import ru.practicum.shareit.server.item.dto.ItemDetailedDto;
 import ru.practicum.shareit.server.item.dto.ItemDto;
-import ru.practicum.shareit.server.item.dto.PatchItemRequest;
+import ru.practicum.shareit.server.item.dto.UpdateItemDto;
 import ru.practicum.shareit.server.item.model.Comment;
 import ru.practicum.shareit.server.item.model.Item;
 import ru.practicum.shareit.server.user.UserRepository;
@@ -229,7 +229,7 @@ class ItemServiceImplTest {
 
     @Test
     void shouldUpdateItem() {
-        PatchItemRequest request = ItemTestData.createPatchItemRequest();
+        UpdateItemDto request = ItemTestData.createUpdateItemDto();
 
         User owner = UserTestData.createUser();
         Item savedItem = ItemTestData.createItem(owner);
@@ -249,7 +249,7 @@ class ItemServiceImplTest {
 
     @Test
     void shouldNotUpdateItemIfOwnerNotFound() {
-        PatchItemRequest request = ItemTestData.createPatchItemRequest();
+        UpdateItemDto request = ItemTestData.createUpdateItemDto();
 
         when(userRepository.findById(anyInt()))
                 .thenReturn(Optional.empty());
@@ -259,7 +259,7 @@ class ItemServiceImplTest {
 
     @Test
     void shouldNotUpdateItemIfItemNotFound() {
-        PatchItemRequest request = ItemTestData.createPatchItemRequest();
+        UpdateItemDto request = ItemTestData.createUpdateItemDto();
 
         User owner = UserTestData.createUser();
 
@@ -273,7 +273,7 @@ class ItemServiceImplTest {
 
     @Test
     void shouldNotUpdateItemIfNoAccess() {
-        PatchItemRequest request = ItemTestData.createPatchItemRequest();
+        UpdateItemDto request = ItemTestData.createUpdateItemDto();
 
         User owner = UserTestData.createUser();
         Item savedItem = ItemTestData.createItem(owner);

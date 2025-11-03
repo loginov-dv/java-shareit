@@ -5,7 +5,7 @@ import lombok.NoArgsConstructor;
 import ru.practicum.shareit.server.item.dto.CommentDto;
 import ru.practicum.shareit.server.item.dto.ItemDetailedDto;
 import ru.practicum.shareit.server.item.dto.ItemDto;
-import ru.practicum.shareit.server.item.dto.PatchItemRequest;
+import ru.practicum.shareit.server.item.dto.UpdateItemDto;
 import ru.practicum.shareit.server.item.model.Comment;
 import ru.practicum.shareit.server.item.model.Item;
 import ru.practicum.shareit.server.request.model.ItemRequest;
@@ -100,8 +100,8 @@ public final class ItemTestData {
         return dto;
     }
 
-    public static PatchItemRequest createPatchItemRequest() {
-        PatchItemRequest request = new PatchItemRequest();
+    public static UpdateItemDto createUpdateItemDto() {
+        UpdateItemDto request = new UpdateItemDto();
 
         request.setName(RandomUtils.createName());
         request.setDescription(RandomUtils.createName(50));

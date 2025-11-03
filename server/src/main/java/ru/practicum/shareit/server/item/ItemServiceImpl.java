@@ -11,7 +11,7 @@ import ru.practicum.shareit.server.exception.*;
 import ru.practicum.shareit.server.item.dto.ItemDetailedDto;
 import ru.practicum.shareit.server.item.dto.CommentDto;
 import ru.practicum.shareit.server.item.dto.ItemDto;
-import ru.practicum.shareit.server.item.dto.PatchItemRequest;
+import ru.practicum.shareit.server.item.dto.UpdateItemDto;
 import ru.practicum.shareit.server.item.mapper.CommentMapper;
 import ru.practicum.shareit.server.item.mapper.ItemMapper;
 import ru.practicum.shareit.server.item.model.Comment;
@@ -133,7 +133,7 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     @Transactional
-    public ItemDto update(int userId, int itemId, PatchItemRequest request) {
+    public ItemDto update(int userId, int itemId, UpdateItemDto request) {
         log.debug("Запрос на обновление предмета с id = {} от пользователя с id = {}", itemId, userId);
 
         User user = findAndGetUser(userId);
