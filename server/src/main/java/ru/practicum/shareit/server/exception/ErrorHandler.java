@@ -37,12 +37,6 @@ public class ErrorHandler {
         return new ErrorMessage(ex.getMessage());
     }
 
-    @ExceptionHandler(ArgumentException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorMessage handleArgumentException(final ArgumentException ex) {
-        return new ErrorMessage(ex.getMessage());
-    }
-
     @ExceptionHandler
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ErrorMessage handleUnpredictedException(final Throwable ex) {
