@@ -9,7 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import ru.practicum.shareit.gateway.booking.dto.PostBookingRequest;
+import ru.practicum.shareit.gateway.booking.dto.NewBookingDto;
 import ru.practicum.shareit.gateway.booking.model.BookingState;
 
 import java.time.LocalDateTime;
@@ -25,7 +25,7 @@ public class BookingController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public ResponseEntity<Object> createBooking(@RequestHeader("X-Sharer-User-Id") @Positive Integer bookerId,
-                                                @Valid @RequestBody PostBookingRequest request) {
+                                                @Valid @RequestBody NewBookingDto request) {
         log.debug("gateway: POST /bookings");
         log.debug("gateway: X-Sharer-User-Id = {}", bookerId);
 
@@ -75,7 +75,7 @@ public class BookingController {
         return bookingClient.getAllOwnersBookings(userId, state);
     }
 
-    private void validateBookingDates(PostBookingRequest request) {
+    private void validateBookingDates(NewBookingDto request) {
         LocalDateTime start = request.getStart();
         LocalDateTime end = request.getEnd();
 

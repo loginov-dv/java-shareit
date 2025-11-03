@@ -18,7 +18,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
 import ru.practicum.shareit.gateway.booking.dto.BookingDto;
-import ru.practicum.shareit.gateway.booking.dto.PostBookingRequest;
+import ru.practicum.shareit.gateway.booking.dto.NewBookingDto;
 import ru.practicum.shareit.gateway.booking.model.BookingState;
 import ru.practicum.shareit.gateway.booking.model.BookingStatus;
 import ru.practicum.shareit.gateway.utils.BookingTestData;
@@ -52,10 +52,10 @@ class BookingControllerTest {
 
     @Test
     void shouldCreateBooking() throws Exception {
-        PostBookingRequest request = BookingTestData.createPostBookingRequest();
+        NewBookingDto request = BookingTestData.createNewBookingDto();
         BookingDto savedBooking = BookingTestData.createBookingDto(request, BookingStatus.WAITING);
 
-        when(bookingClient.createBooking(anyInt(), any(PostBookingRequest.class)))
+        when(bookingClient.createBooking(anyInt(), any(NewBookingDto.class)))
                 .thenReturn(new ResponseEntity<>(savedBooking, HttpStatus.CREATED));
 
         mockMvc.perform(post("/bookings")
@@ -73,9 +73,9 @@ class BookingControllerTest {
 
     @Test
     void shouldNotCreateBookingOfUnavailableItem() throws Exception {
-        PostBookingRequest request = BookingTestData.createPostBookingRequest();
+        NewBookingDto request = BookingTestData.createNewBookingDto();
 
-        when(bookingClient.createBooking(anyInt(), any(PostBookingRequest.class)))
+        when(bookingClient.createBooking(anyInt(), any(NewBookingDto.class)))
                 .thenReturn(new ResponseEntity<>(HttpStatus.BAD_REQUEST));
 
         mockMvc.perform(post("/bookings")
@@ -87,9 +87,9 @@ class BookingControllerTest {
 
     @Test
     void shouldNotCreateBookingForUnknownUserOrItem() throws Exception {
-        PostBookingRequest request = BookingTestData.createPostBookingRequest();
+        NewBookingDto request = BookingTestData.createNewBookingDto();
 
-        when(bookingClient.createBooking(anyInt(), any(PostBookingRequest.class)))
+        when(bookingClient.createBooking(anyInt(), any(NewBookingDto.class)))
                 .thenReturn(new ResponseEntity<>(HttpStatus.NOT_FOUND));
 
         mockMvc.perform(post("/bookings")
@@ -103,7 +103,7 @@ class BookingControllerTest {
     @MethodSource("provideInvalidDates")
     void shouldNotCreateBookingWithInvalidDates(LocalDateTime start, LocalDateTime end) throws Exception {
 
-        PostBookingRequest request = BookingTestData.createPostBookingRequest();
+        NewBookingDto request = BookingTestData.createNewBookingDto();
         request.setStart(start);
         request.setEnd(end);
 
@@ -132,7 +132,7 @@ class BookingControllerTest {
     @ParameterizedTest
     @ValueSource(booleans = {true, false})
     void shouldChangeBookingStatus(boolean approved) throws Exception {
-        BookingDto bookingDto = BookingTestData.createBookingDto(BookingTestData.createPostBookingRequest(),
+        BookingDto bookingDto = BookingTestData.createBookingDto(BookingTestData.createNewBookingDto(),
                 approved ? BookingStatus.APPROVED : BookingStatus.REJECTED);
 
         when(bookingClient.changeBookingStatus(anyInt(), anyInt(), anyBoolean()))
@@ -158,7 +158,7 @@ class BookingControllerTest {
 
     @Test
     void shouldGetBookingById() throws Exception {
-        BookingDto bookingDto = BookingTestData.createBookingDto(BookingTestData.createPostBookingRequest(),
+        BookingDto bookingDto = BookingTestData.createBookingDto(BookingTestData.createNewBookingDto(),
                 BookingStatus.APPROVED);
 
         when(bookingClient.getBooking(anyInt(), anyInt()))
@@ -201,9 +201,9 @@ class BookingControllerTest {
     @ParameterizedTest
     @EnumSource(BookingState.class)
     void shouldGetAllUsersBookingsWithGivenState(BookingState state) throws Exception {
-        BookingDto booking1 = BookingTestData.createBookingDto(BookingTestData.createPostBookingRequest(), 100,
+        BookingDto booking1 = BookingTestData.createBookingDto(BookingTestData.createNewBookingDto(), 100,
                 BookingStatus.WAITING);
-        BookingDto booking2 = BookingTestData.createBookingDto(BookingTestData.createPostBookingRequest(), 200,
+        BookingDto booking2 = BookingTestData.createBookingDto(BookingTestData.createNewBookingDto(), 200,
                 BookingStatus.APPROVED);
 
         when(bookingClient.getAllBookersBookings(anyInt(), any(BookingState.class)))
@@ -219,9 +219,9 @@ class BookingControllerTest {
 
     @Test
     void shouldGetAllUsersBookingsIfStateWasNotSpecified() throws Exception {
-        BookingDto booking1 = BookingTestData.createBookingDto(BookingTestData.createPostBookingRequest(), 100,
+        BookingDto booking1 = BookingTestData.createBookingDto(BookingTestData.createNewBookingDto(), 100,
                 BookingStatus.WAITING);
-        BookingDto booking2 = BookingTestData.createBookingDto(BookingTestData.createPostBookingRequest(), 200,
+        BookingDto booking2 = BookingTestData.createBookingDto(BookingTestData.createNewBookingDto(), 200,
                 BookingStatus.APPROVED);
 
         when(bookingClient.getAllBookersBookings(anyInt(), any(BookingState.class)))
@@ -251,9 +251,9 @@ class BookingControllerTest {
     @ParameterizedTest
     @EnumSource(BookingState.class)
     void shouldGetAllOwnersBookingsWithGivenState(BookingState state) throws Exception {
-        BookingDto booking1 = BookingTestData.createBookingDto(BookingTestData.createPostBookingRequest(), 100,
+        BookingDto booking1 = BookingTestData.createBookingDto(BookingTestData.createNewBookingDto(), 100,
                 BookingStatus.WAITING);
-        BookingDto booking2 = BookingTestData.createBookingDto(BookingTestData.createPostBookingRequest(), 200,
+        BookingDto booking2 = BookingTestData.createBookingDto(BookingTestData.createNewBookingDto(), 200,
                 BookingStatus.APPROVED);
 
         when(bookingClient.getAllOwnersBookings(anyInt(), any(BookingState.class)))
@@ -269,9 +269,9 @@ class BookingControllerTest {
 
     @Test
     void shouldGetAllOwnersBookingsIfStateWasNotSpecified() throws Exception {
-        BookingDto booking1 = BookingTestData.createBookingDto(BookingTestData.createPostBookingRequest(), 100,
+        BookingDto booking1 = BookingTestData.createBookingDto(BookingTestData.createNewBookingDto(), 100,
                 BookingStatus.WAITING);
-        BookingDto booking2 = BookingTestData.createBookingDto(BookingTestData.createPostBookingRequest(), 200,
+        BookingDto booking2 = BookingTestData.createBookingDto(BookingTestData.createNewBookingDto(), 200,
                 BookingStatus.APPROVED);
 
         when(bookingClient.getAllOwnersBookings(anyInt(), any(BookingState.class)))
@@ -321,7 +321,7 @@ class BookingControllerTest {
     void shouldReturnBadRequestIfUserHeaderIsMissing() throws Exception {
         mockMvc.perform(post("/bookings")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(BookingTestData.createPostBookingRequest())))
+                        .content(objectMapper.writeValueAsString(BookingTestData.createNewBookingDto())))
                 .andExpect(status().isBadRequest());
 
         mockMvc.perform(patch("/bookings/" + 1)
@@ -346,7 +346,7 @@ class BookingControllerTest {
     void shouldReturnBadRequestIfUserHeaderIdNotPositive(int id) throws Exception {
         mockMvc.perform(post("/bookings")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(BookingTestData.createPostBookingRequest()))
+                        .content(objectMapper.writeValueAsString(BookingTestData.createNewBookingDto()))
                         .header("X-Sharer-User-Id", id))
                 .andExpect(status().isBadRequest());
 

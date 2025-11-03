@@ -3,7 +3,7 @@ package ru.practicum.shareit.gateway.utils;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import ru.practicum.shareit.gateway.booking.dto.BookingDto;
-import ru.practicum.shareit.gateway.booking.dto.PostBookingRequest;
+import ru.practicum.shareit.gateway.booking.dto.NewBookingDto;
 import ru.practicum.shareit.gateway.booking.model.BookingStatus;
 import ru.practicum.shareit.gateway.item.dto.ItemDto;
 
@@ -14,7 +14,7 @@ import java.util.Random;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class BookingTestData {
     // с рандомным id
-    public static BookingDto createBookingDto(PostBookingRequest request, int bookerId, BookingStatus status) {
+    public static BookingDto createBookingDto(NewBookingDto request, int bookerId, BookingStatus status) {
         BookingDto bookingDto = new BookingDto();
 
         bookingDto.setId(new Random().nextInt(100));
@@ -32,7 +32,7 @@ public final class BookingTestData {
     }
 
     // с рандомным id и id букера
-    public static BookingDto createBookingDto(PostBookingRequest request, BookingStatus status) {
+    public static BookingDto createBookingDto(NewBookingDto request, BookingStatus status) {
         BookingDto bookingDto = new BookingDto();
 
         bookingDto.setId(new Random().nextInt(100));
@@ -50,12 +50,12 @@ public final class BookingTestData {
     }
 
     public static BookingDto createBookingDto(BookingStatus status) {
-        return createBookingDto(createPostBookingRequest(), status);
+        return createBookingDto(createNewBookingDto(), status);
     }
 
     // с рандомным id предмета
-    public static PostBookingRequest createPostBookingRequest() {
-        PostBookingRequest request = new PostBookingRequest();
+    public static NewBookingDto createNewBookingDto() {
+        NewBookingDto request = new NewBookingDto();
 
         request.setItemId(new Random().nextInt(100));
         request.setStart(LocalDateTime.now().plusHours(1));

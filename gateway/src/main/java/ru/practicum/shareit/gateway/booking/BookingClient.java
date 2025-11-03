@@ -7,7 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.web.util.DefaultUriBuilderFactory;
-import ru.practicum.shareit.gateway.booking.dto.PostBookingRequest;
+import ru.practicum.shareit.gateway.booking.dto.NewBookingDto;
 import ru.practicum.shareit.gateway.booking.model.BookingState;
 import ru.practicum.shareit.gateway.client.BaseClient;
 
@@ -27,7 +27,7 @@ public class BookingClient extends BaseClient {
         );
     }
 
-    public ResponseEntity<Object> createBooking(int bookerId, PostBookingRequest request) {
+    public ResponseEntity<Object> createBooking(int bookerId, NewBookingDto request) {
         return post("", bookerId, request);
     }
 

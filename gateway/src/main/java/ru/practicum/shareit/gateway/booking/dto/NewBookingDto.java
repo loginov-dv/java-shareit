@@ -8,7 +8,7 @@ import lombok.Data;
 import java.time.LocalDateTime;
 
 @Data
-public class PostBookingRequest {
+public class NewBookingDto {
     @NotNull(message = "Id бронируемого предмета не может быть пустым")
     private Integer itemId;
     @NotNull(message = "Дата начала бронирования не может быть пустой")

@@ -17,7 +17,7 @@ import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriTemplateHandler;
 import ru.practicum.shareit.gateway.booking.dto.BookingDto;
-import ru.practicum.shareit.gateway.booking.dto.PostBookingRequest;
+import ru.practicum.shareit.gateway.booking.dto.NewBookingDto;
 import ru.practicum.shareit.gateway.booking.model.BookingState;
 import ru.practicum.shareit.gateway.booking.model.BookingStatus;
 import ru.practicum.shareit.gateway.user.dto.UserDto;
@@ -68,7 +68,7 @@ class BookingClientTest {
 
     @Test
     void shouldCreateBooking() {
-        PostBookingRequest request = BookingTestData.createPostBookingRequest();
+        NewBookingDto request = BookingTestData.createNewBookingDto();
         UserDto booker = UserTestData.createUserDto();
         BookingDto savedBooking = BookingTestData.createBookingDto(request, booker.getId(), BookingStatus.WAITING);
 
