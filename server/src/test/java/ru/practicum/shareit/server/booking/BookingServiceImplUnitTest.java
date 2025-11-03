@@ -34,7 +34,7 @@ import static org.mockito.Mockito.when;
 
 @ActiveProfiles("test")
 @SpringBootTest
-class BookingServiceImplTest {
+class BookingServiceImplUnitTest {
     @Autowired
     private BookingService bookingService;
     @MockBean
