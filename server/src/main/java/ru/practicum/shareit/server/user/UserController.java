@@ -5,7 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
-import ru.practicum.shareit.server.user.dto.PatchUserRequest;
+import ru.practicum.shareit.server.user.dto.UpdateUserDto;
 import ru.practicum.shareit.server.user.dto.NewUserDto;
 import ru.practicum.shareit.server.user.dto.UserDto;
 
@@ -31,7 +31,7 @@ public class UserController {
 
     @PatchMapping("/{userId}")
     public UserDto updateUser(@PathVariable int userId,
-                              @RequestBody PatchUserRequest request) {
+                              @RequestBody UpdateUserDto request) {
         log.debug("server: PATCH /users/{}", userId);
         return userService.update(userId, request);
     }

@@ -3,7 +3,7 @@ package ru.practicum.shareit.server.user.dto;
 import lombok.Data;
 
 @Data
-public class PatchUserRequest {
+public class UpdateUserDto {
     private String name;
     private String email;
 

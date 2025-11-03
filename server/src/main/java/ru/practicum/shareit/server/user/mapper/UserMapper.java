@@ -3,7 +3,7 @@ package ru.practicum.shareit.server.user.mapper;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
-import ru.practicum.shareit.server.user.dto.PatchUserRequest;
+import ru.practicum.shareit.server.user.dto.UpdateUserDto;
 import ru.practicum.shareit.server.user.dto.NewUserDto;
 import ru.practicum.shareit.server.user.dto.UserDto;
 import ru.practicum.shareit.server.user.model.User;
@@ -29,7 +29,7 @@ public final class UserMapper {
         return user;
     }
 
-    public static void updateUserFields(User user, PatchUserRequest request) {
+    public static void updateUserFields(User user, UpdateUserDto request) {
         if (request.hasName()) {
             user.setName(request.getName());
         }

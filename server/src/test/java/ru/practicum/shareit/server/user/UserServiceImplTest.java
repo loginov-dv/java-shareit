@@ -9,7 +9,7 @@ import org.springframework.test.context.ActiveProfiles;
 
 import ru.practicum.shareit.server.exception.EmailConflictException;
 import ru.practicum.shareit.server.exception.NotFoundException;
-import ru.practicum.shareit.server.user.dto.PatchUserRequest;
+import ru.practicum.shareit.server.user.dto.UpdateUserDto;
 import ru.practicum.shareit.server.user.dto.NewUserDto;
 import ru.practicum.shareit.server.user.dto.UserDto;
 import ru.practicum.shareit.server.user.model.User;
@@ -104,7 +104,7 @@ class UserServiceImplTest {
 
     @Test
     void shouldUpdateUser() {
-        PatchUserRequest request = UserTestData.createPatchUserRequest();
+        UpdateUserDto request = UserTestData.createUpdateUserDto();
 
         User existingUser = UserTestData.createUser();
 
@@ -129,7 +129,7 @@ class UserServiceImplTest {
 
     @Test
     void shouldNotUpdateUnknownUser() {
-        PatchUserRequest request = UserTestData.createPatchUserRequest();
+        UpdateUserDto request = UserTestData.createUpdateUserDto();
 
         when(userRepository.findById(anyInt()))
                 .thenReturn(Optional.empty());
@@ -139,7 +139,7 @@ class UserServiceImplTest {
 
     @Test
     void shouldNotUpdateUserIfNewEmailAlreadyExists() {
-        PatchUserRequest request = UserTestData.createPatchUserRequest();
+        UpdateUserDto request = UserTestData.createUpdateUserDto();
 
         User existingUser = UserTestData.createUser();
 

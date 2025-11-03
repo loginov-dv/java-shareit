@@ -9,7 +9,7 @@ import ru.practicum.shareit.server.exception.EmailConflictException;
 import ru.practicum.shareit.server.exception.ExceptionConstants;
 import ru.practicum.shareit.server.exception.LogConstants;
 import ru.practicum.shareit.server.exception.NotFoundException;
-import ru.practicum.shareit.server.user.dto.PatchUserRequest;
+import ru.practicum.shareit.server.user.dto.UpdateUserDto;
 import ru.practicum.shareit.server.user.dto.NewUserDto;
 import ru.practicum.shareit.server.user.dto.UserDto;
 import ru.practicum.shareit.server.user.mapper.UserMapper;
@@ -59,7 +59,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public UserDto update(int userId, PatchUserRequest request) {
+    public UserDto update(int userId, UpdateUserDto request) {
         log.debug("Запрос на обновление пользователя с id = {}", userId);
 
         Optional<User> maybeUser = userRepository.findById(userId);

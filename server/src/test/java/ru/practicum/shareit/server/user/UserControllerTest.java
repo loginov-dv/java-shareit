@@ -13,7 +13,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import ru.practicum.shareit.server.exception.EmailConflictException;
 import ru.practicum.shareit.server.exception.ExceptionConstants;
 import ru.practicum.shareit.server.exception.NotFoundException;
-import ru.practicum.shareit.server.user.dto.PatchUserRequest;
+import ru.practicum.shareit.server.user.dto.UpdateUserDto;
 import ru.practicum.shareit.server.user.dto.NewUserDto;
 import ru.practicum.shareit.server.user.dto.UserDto;
 import ru.practicum.shareit.server.utils.UserTestData;
@@ -101,14 +101,14 @@ class UserControllerTest {
 
     @Test
     void shouldUpdateUser() throws Exception {
-        PatchUserRequest request = UserTestData.createPatchUserRequest();
+        UpdateUserDto request = UserTestData.createUpdateUserDto();
 
         UserDto updatedUser = new UserDto();
         updatedUser.setId(1);
         updatedUser.setName(request.getName());
         updatedUser.setEmail(request.getEmail());
 
-        when(userService.update(anyInt(), any(PatchUserRequest.class)))
+        when(userService.update(anyInt(), any(UpdateUserDto.class)))
                 .thenReturn(updatedUser);
 
         mockMvc.perform(patch("/users/" + 1)
@@ -122,23 +122,23 @@ class UserControllerTest {
 
     @Test
     void shouldNotUpdateUnknownUser() throws Exception {
-        when(userService.update(anyInt(), any(PatchUserRequest.class)))
+        when(userService.update(anyInt(), any(UpdateUserDto.class)))
                 .thenThrow(new NotFoundException(String.format(ExceptionConstants.USER_NOT_FOUND_BY_ID, 999)));
 
         mockMvc.perform(patch("/users/" + 999)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(UserTestData.createPatchUserRequest())))
+                        .content(objectMapper.writeValueAsString(UserTestData.createUpdateUserDto())))
                 .andExpect(status().isNotFound());
     }
 
     @Test
     void shouldNotUpdateUserIfNewEmailAlreadyExists() throws Exception {
-        when(userService.update(anyInt(), any(PatchUserRequest.class)))
+        when(userService.update(anyInt(), any(UpdateUserDto.class)))
                 .thenThrow(new EmailConflictException(ExceptionConstants.EMAIL_CONFLICT));
 
         mockMvc.perform(patch("/users/" + 999)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(UserTestData.createPatchUserRequest())))
+                        .content(objectMapper.writeValueAsString(UserTestData.createUpdateUserDto())))
                 .andExpect(status().isConflict());
     }
 }
