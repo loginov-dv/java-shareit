@@ -76,7 +76,7 @@ class ItemRequestServiceImplIntegrationTest {
     }
 
     @Test
-    void shouldFindAllItemRequestsByUserId() {
+    void shouldFindAllItemRequestsByUserId() throws InterruptedException {
         // добавим двух пользователей
         UserDto requestor1 = userService.createUser(UserTestData.createNewUserDto());
         UserDto requestor2 = userService.createUser(UserTestData.createNewUserDto());
@@ -84,6 +84,7 @@ class ItemRequestServiceImplIntegrationTest {
         // добавим каждому два запроса
         ItemRequestShortDto request11 = requestService.createRequest(requestor1.getId(),
                 ItemRequestTestData.createNewItemRequest());
+        Thread.sleep(1000);
         ItemRequestShortDto request12 = requestService.createRequest(requestor1.getId(),
                 ItemRequestTestData.createNewItemRequest());
         ItemRequestShortDto request21 = requestService.createRequest(requestor2.getId(),
