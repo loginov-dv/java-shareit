@@ -35,7 +35,7 @@ import static org.mockito.Mockito.when;
 
 @ActiveProfiles("test")
 @SpringBootTest
-class ItemServiceImplTest {
+class ItemServiceImplUnitTest {
     @Autowired
     private ItemService itemService;
     @MockBean
