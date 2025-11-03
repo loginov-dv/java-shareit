@@ -124,4 +124,21 @@ public final class BookingTestData {
 
         return request;
     }
+
+    public static NewBookingDto createNewBookingDto(ItemDto itemDto, boolean isCompleted) {
+        NewBookingDto request = new NewBookingDto();
+        Random random = new Random();
+        LocalDateTime now = LocalDateTime.now();
+
+        request.setItemId(itemDto.getId());
+
+        LocalDateTime start = isCompleted
+                ? now.minusHours(random.nextLong(5, 20))
+                : now.plusMinutes(random.nextLong(1, 100));
+
+        request.setStart(DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(start));
+        request.setEnd(DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(start.plusHours(1)));
+
+        return request;
+    }
 }
